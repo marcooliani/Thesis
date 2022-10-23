@@ -1,0 +1,10 @@
+pandas
+ray
+json 
+modbus_tk
+logging
+itertools
+scipy
+glob2
+numpy
+matplotlib

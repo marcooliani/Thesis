@@ -1,0 +1,22 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Reverse Engineering Tool for Industrial Physical
+  Processes
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: 'Youssef '
+    family-names: Driouich
+    email: youssef.driouich@univr.it
+    affiliation: University of Verona
+  - given-names: Marco
+    family-names: Lucchese
+    email: marco.lucchese@univr.it
+    affiliation: University of Verona
+  - given-names: Mariano
+    family-names: Ceccato
+    email: mariano.ceccato@univr.it
+    affiliation: University of Verona
