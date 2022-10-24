@@ -22,9 +22,9 @@ else:
 
 if args.skiprows:
   skiprows = [row for row in range(1, args.skiprows)]
-  #skiprows = args.skiprows
 else:
-  skiprows = 0
+  #skiprows = 0
+  skiprows = ''
 
 #CSV files converted from JSON PLCs readings (convertoCSV.py)
 #filenames = glob.glob("PLC_CSV/*.csv")
