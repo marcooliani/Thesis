@@ -2,15 +2,29 @@ import sys
 import pandas as pd 
 import glob
 import csv
-  
-if len(sys.argv) < 2 :
-  granularity = 30
-elif sys.argv[1] == '-g':
-  granularity = int(sys.argv[2])
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds")
+parser.add_argument('-s', "--skiprows", type=int, help="skip seconds from start")
+parser.add_argument('-n', "--nrows", type=int, help="number of seconds to consider")
+args = parser.parse_args()
+
+if args.granularity:
+  granularity = args.granularity
 else:
-  print("Invalid parameter")
-  exit(0)
-  
+  granularity = 30
+
+if args.nrows:
+  nrows =  args.nrows
+else:
+  nrows = 86400
+
+if args.skiprows:
+  skiprows = [row for row in range(1, args.skiprows)]
+  #skiprows = args.skiprows
+else:
+  skiprows = 0
 
 #CSV files converted from JSON PLCs readings (convertoCSV.py)
 #filenames = glob.glob("PLC_CSV/*.csv")
@@ -40,7 +54,12 @@ cleanNull(filenames)
 df_list_mining = list()
 for f in filenames :
   #Read Dataset files
-  datasetPLC = pd.read_csv(f)
+  #datasetPLC = pd.read_csv(f)
+
+  #nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
+  # usare skiprows=<int>, che skippa n righe da inizio file
+  #datasetPLC = pd.read_csv(f, nrows=20000)
+  datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
   # Concatenate the single PLCs datasets for process mining
   df_list_mining.append(datasetPLC)
 
@@ -61,13 +80,6 @@ print('*************************************************************************
 # drop timestamps is NOT needed in Daikon
 #inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
 inv_datasets = mining_datasets.drop(['Timestamp'], axis=1, errors='ignore')
-
-## Proviamo con granularità 10...
-#i=0
-#while i < inv_datasets.shape[0]:
-#  if i%30 !=  0:
-#    inv_datasets = inv_datasets.drop([i], errors='ignore').reset_index(drop=True)
-#  i += 1
 
 #Enrich the dataset with a partial bounded history of registers
 # Add previous values of registers
