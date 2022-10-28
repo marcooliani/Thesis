@@ -106,11 +106,11 @@ def add_prev(data_set):
 
   for col in val_cols:
     prev_val = list()
+    prev_val.append(0)
     slope = list()
     mean_slope=list()
     max_val=list()
     min_val=list()
-    prev_val.append(0)
     data_var = inv_datasets[col]
 
     for i in range(len(data_var)-1) : 
@@ -122,8 +122,11 @@ def add_prev(data_set):
 
 
     if col in val_cols_slopes:
+      # Valore massimo della colonna selezionata
       max_lev = math.floor(data_set[col].max())
+      # Valore minimo della colonna selezionata
       min_lev = math.ceil(data_set[col].min())
+
       sum_slope=0
       for i in range(len(data_var)):
         if i%granularity != 0:
