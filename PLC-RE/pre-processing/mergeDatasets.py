@@ -61,48 +61,12 @@ def cleanNull(filenames):
         csv_output.writerows(zip(*[c for h, c in data]))
     print(f + 'done')
 
-# Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
-cleanNull(filenames)
-
-df_list_mining = list()
-for f in reversed(filenames) :
-  #Read Dataset files
-  #datasetPLC = pd.read_csv(f)
-
-  #nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
-  # usare skiprows=<int>, che skippa n righe da inizio file
-  #datasetPLC = pd.read_csv(f, nrows=20000)
-  datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
-  # Concatenate the single PLCs datasets for process mining
-  df_list_mining.append(datasetPLC)
-
-
-
-mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
-# Save dataset with the timestamp for the process mining.
-mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
-
-print(mining_datasets)
-
-print('************************************************************************************')
-print ('************* DATASET FOR PROCESS MINING GENERATED SUCCESSFULLY *******************')
-print('************************************************************************************')
-
-
-
-# drop timestamps is NOT needed in Daikon
-#inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
-inv_datasets = mining_datasets.drop(['Timestamp'], axis=1, errors='ignore')
-
-#Enrich the dataset with a partial bounded history of registers
+# Enrich the dataset with a partial bounded history of registers
 # Add previous values of registers
-def add_prev(data_set):
+def enrich_df(data_set):
   #Set registers names that holds measurements and actuations
-  val_cols = inv_datasets.columns[inv_datasets.columns.str.contains(pat = 'LIT|lit|MV|mv|P|p')]
-  val_cols_slopes = inv_datasets.columns[inv_datasets.columns.str.contains(pat = 'LIT|lit')]
-
-  #Banalmente, il numero di righe, avendo una cattura al secondo...
-  #granularity = 60
+  val_cols = data_set.columns[data_set.columns.str.contains(pat = 'LIT|mv[0-9]{3}|p[0-9]{3}', case=False, regex=True)]
+  val_cols_slopes = data_set.columns[data_set.columns.str.contains(pat = 'LIT', case=False, regex=True)]
 
   for col in val_cols:
     prev_val = list()
@@ -111,7 +75,8 @@ def add_prev(data_set):
     mean_slope=list()
     max_val=list()
     min_val=list()
-    data_var = inv_datasets[col]
+    #data_var = inv_datasets[col]
+    data_var = data_set[col]
 
     for i in range(len(data_var)-1) : 
       prev_val.append(data_var[i])
@@ -120,12 +85,11 @@ def add_prev(data_set):
       if col in val_cols_slopes:
         slope.append(data_var[i] - prev_val[i])
 
-
     if col in val_cols_slopes:
       # Valore massimo della colonna selezionata
-      max_lev = math.floor(data_set[col].max())
+      max_lev = math.ceil(data_set[col].max())
       # Valore minimo della colonna selezionata
-      min_lev = math.ceil(data_set[col].min())
+      min_lev = math.floor(data_set[col].min())
 
       sum_slope=0
       for i in range(len(data_var)):
@@ -150,26 +114,53 @@ def add_prev(data_set):
 
     data_set.insert(len(data_set.columns),'prev_'+col, prev_val)
 
-
-    #data_set.to_csv(r'/tmp/BLA.csv', index=True)
-    #data_set.reset_index(drop=True)
-
     if col in val_cols_slopes:
       data_set.insert(len(data_set.columns),'slope_'+col, mean_slope)
       data_set.insert(len(data_set.columns),'max_'+col, max_val)
       data_set.insert(len(data_set.columns),'min_'+col, min_val)
 
 
-# Add previous values of Inputregisters and Coils
-add_prev(inv_datasets)
+# Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
+cleanNull(filenames)
+
+df_list_mining = list()
+df_list_daikon = list()
+
+for f in reversed(filenames) :
+  #Read Dataset files
+  #datasetPLC = pd.read_csv(f)
+
+  #nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
+  # usare skiprows=<int>, che skippa n righe da inizio file
+  #datasetPLC = pd.read_csv(f, nrows=20000)
+  datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
+  datasetPLC_d = datasetPLC.copy() # Altrimenti non mi differenzia le liste, vai a capire perchè...
+  
+  # Concatenate the single PLCs datasets for process mining
+  df_list_mining.append(datasetPLC)
+
+  # Add previous values, slopes and limits to dataframe
+  enrich_df(datasetPLC_d)
+  # Concatenate the single PLCs datasets for Daikon
+  df_list_daikon.append(datasetPLC_d)
 
 
-# Add safety borders : The user can set the safety border by modifying the name of the register and the value of safety
-#inv_datasets.insert(len(inv_datasets.columns),'PLC1_Max_safety', inv_datasets["PLC1_MemoryRegisters_MW1"][1] - 3)
-#inv_datasets.insert(len(inv_datasets.columns),'PLC1_Min_safety', inv_datasets["PLC1_MemoryRegisters_MW0"][1] + 3)
-#inv_datasets.insert(len(inv_datasets.columns),'PLC2_Max_safety', inv_datasets["PLC2_MemoryRegisters_MW2"][1] - 1)
-#inv_datasets.insert(len(inv_datasets.columns),'PLC2_Min_safety', inv_datasets["PLC2_MemoryRegisters_MW1"][1] + 1)
+mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
+daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
 
+# Save dataset with the timestamp for the process mining.
+mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
+
+print(mining_datasets)
+
+print('************************************************************************************')
+print ('************* DATASET FOR PROCESS MINING GENERATED SUCCESSFULLY *******************')
+print('************************************************************************************')
+
+
+# drop timestamps is NOT needed in Daikon
+#inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
+inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
 
 # Add state transient/stable on PLC1_InputRegisters_IW0 
 #PLC1_state = list()
