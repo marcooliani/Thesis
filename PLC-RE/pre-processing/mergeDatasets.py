@@ -1,13 +1,18 @@
+#!/usr/bin/env python3
+
 import sys
 import pandas as pd 
 import glob
 import csv
 import argparse
+import math
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds")
 parser.add_argument('-s', "--skiprows", type=int, help="skip seconds from start")
 parser.add_argument('-n', "--nrows", type=int, help="number of seconds to consider")
+parser.add_argument('-d', "--directory", type=str, help="directory containing CSV files")
+parser.add_argument('-o', "--output", type=str, help="output file")
 args = parser.parse_args()
 
 if args.granularity:
@@ -23,13 +28,24 @@ else:
 if args.skiprows:
   skiprows = [row for row in range(1, args.skiprows)]
 else:
-  #skiprows = 0
   skiprows = ''
+
+if args.directory != None:
+  directory = args.directory
+else:
+  directory = '../../datasets_SWaT'
+
+if args.output != None:
+  if args.output.split('.')[-1] != 'csv':
+    print('Invalid file format (must be .csv). Aborting')
+    exit(1)
+  output_file = args.output
+else:
+  output_file = 'PLC_SWaT_Dataset.csv'
 
 #CSV files converted from JSON PLCs readings (convertoCSV.py)
 #filenames = glob.glob("PLC_CSV/*.csv")
-filenames = glob.glob("../../datasets_SWaT/*.csv")
-
+filenames = glob.glob(f"{directory}/*.csv")
 
 def cleanNull(filenames):
   for f in filenames :
@@ -45,14 +61,11 @@ def cleanNull(filenames):
         csv_output.writerows(zip(*[c for h, c in data]))
     print(f + 'done')
 
-
 # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
 cleanNull(filenames)
 
-
-
 df_list_mining = list()
-for f in filenames :
+for f in reversed(filenames) :
   #Read Dataset files
   #datasetPLC = pd.read_csv(f)
 
@@ -85,7 +98,6 @@ inv_datasets = mining_datasets.drop(['Timestamp'], axis=1, errors='ignore')
 # Add previous values of registers
 def add_prev(data_set):
   #Set registers names that holds measurements and actuations
-  #val_cols = inv_datasets.columns[inv_datasets.columns.str.contains(pat = 'inputregisters|InputRegisters|inputregister|Coils|coils|coil')]
   val_cols = inv_datasets.columns[inv_datasets.columns.str.contains(pat = 'LIT|lit|MV|mv|P|p')]
   val_cols_slopes = inv_datasets.columns[inv_datasets.columns.str.contains(pat = 'LIT|lit')]
 
@@ -96,8 +108,8 @@ def add_prev(data_set):
     prev_val = list()
     slope = list()
     mean_slope=list()
-    #slope.append(0)
-    #prev_val.append("NULL")
+    max_val=list()
+    min_val=list()
     prev_val.append(0)
     data_var = inv_datasets[col]
 
@@ -110,14 +122,28 @@ def add_prev(data_set):
 
 
     if col in val_cols_slopes:
+      max_lev = math.floor(data_set[col].max())
+      min_lev = math.ceil(data_set[col].min())
       sum_slope=0
       for i in range(len(data_var)):
         if i%granularity != 0:
           sum_slope += slope[i]
           mean_slope.append(0)
         else:
-          mean_slope.append(sum_slope/granularity)
+          if sum_slope/granularity > 0:
+            mean_slope.append(1)
+          else:
+            mean_slope.append(-1)
+          if i > 0:
+            for j in range(i-1, (i-granularity), -1):
+              if sum_slope/granularity > 0:
+                mean_slope[j] = 1
+              else:
+                mean_slope[j] = -1
           sum_slope=0
+
+        max_val.append(max_lev)
+        min_val.append(min_lev)
 
     data_set.insert(len(data_set.columns),'prev_'+col, prev_val)
 
@@ -127,8 +153,9 @@ def add_prev(data_set):
 
     if col in val_cols_slopes:
       data_set.insert(len(data_set.columns),'slope_'+col, mean_slope)
+      data_set.insert(len(data_set.columns),'max_'+col, max_val)
+      data_set.insert(len(data_set.columns),'min_'+col, min_val)
 
-  data_set = data_set.iloc[0:data_set.shape[0]:granularity]
 
 # Add previous values of Inputregisters and Coils
 add_prev(inv_datasets)
@@ -152,8 +179,8 @@ add_prev(inv_datasets)
 
 
 # Drop first rows (Daikon does not process missing values)
-### Ma perchè???
-inv_datasets = inv_datasets.iloc[5: , :]
+# Taglio anche le ultime righe, che hanno lo slope = 0
+inv_datasets = inv_datasets.iloc[1:-granularity , :]
 
 print(inv_datasets)
 

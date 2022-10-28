@@ -4,9 +4,10 @@ PPT_NAME aprogram.point:::POINT
 #FIT101 == 0 && LIT101 > 600 && LIT101 < 700
 #LIT101 < 500 && FIT101 == 0
 #LIT101 < 500 && slope_LIT101 < 0
-LIT101 < 450 || LIT101 > 850
-#P101 == 2
-#MV101 == 0
+#LIT101 < 450 || LIT101 > 850
+#MV201 == 2
+#MV101 == 2 && prev_MV101 == 0
 #MV101 == 2 && P101 != 2 
 #MV101 == 2 && P101 == 2 && slope_LIT101 > 0
 #prev_FIT101 < FIT101
+LIT101 > 780 && LIT101 < 820 && slope_LIT101 >= 0 && P101 == 2
