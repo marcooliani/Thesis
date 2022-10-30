@@ -1,0 +1,135 @@
+%% Definisco la classe del documento: va specificato il formato della carta,
+%% le dimensioni del carattere, di cominciare i nuovi capitoli a destra e
+%% fronte-retro
+\documentclass[a4paper,12pt,openright,twoside]{book}
+
+%% Imposto l'italiano
+\usepackage[italian]{babel}
+
+%% Imposto l'encoding dei caratteri. Specificando utf8 posso mettere
+%% direttamente le accentate senza errori
+\usepackage[utf8]{inputenc}
+
+%% Imposto l'indentazione per ogni paragrafo
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+
+%% Questo per aforismi e citazioni
+\usepackage{epigraph}
+
+%% Per inserire gli url all'interno del testo
+\usepackage[hidelinks]{hyperref}
+
+%% Per inserire codici sorgenti
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{light-gray}{gray}{0.80}
+\addto\captionsitalian{\renewcommand{\lstlistingname}{Esempio}}
+
+
+%% Elenchi puntati e affini
+\usepackage{enumitem}
+
+%% Interlinea a 1,5
+\linespread{1.5}
+
+%% Per includere le immagini: package e path dove andare a richiamarle per nome
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+%% Questo serve per includere le immagini dove voglio io e non dove
+%% pare all'editor!
+\usepackage{float}
+
+%% Fa sì che le tabelle possano essere divise tra più pagine
+\usepackage{longtable}
+
+%% Imposto l'interlinea al volo
+\usepackage{setspace}
+
+%% Formattazioni varie
+\pagestyle{fancy}\addtolength{\headwidth}{20pt}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
+\cfoot{}
+
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+
+%% Inizio documento
+\begin{document}
+	
+	%% Prova di frontespizio
+	\begin{titlepage}
+		\begin{center}
+			\thispagestyle{empty}
+			
+			% logo
+			%\includegraphics[width=0.20\textwidth]{logo_univr.png}~\\[0.5cm]
+			
+			% Upper part of the page. The '~' is needed because \\
+			% only works if a paragraph has started.
+			
+			\textsc{\LARGE Università degli Studi di Verona}\\[1.0cm]
+			
+			\textsc{\large Corso di Laurea Magistrale in \\ 
+				INGEGNERIA E SCIENZE INFORMATICHE}\\[2.0cm]
+			
+			% Title
+			
+			{ \Large \bfseries [PROVVISORIO] \\
+				REVERSE ENGINEERING DI CPS \\ 
+				CON APPROCCIO BLACKBOX \\[4.0cm] }
+			
+			% Author and supervisor
+			\begin{minipage}{0.4\textwidth}
+				\begin{flushleft} \large
+					\emph{Relatore:}\\
+					Prof. Massimo \textsc{Merro}
+				\end{flushleft}
+			\end{minipage}
+			\begin{minipage}{0.4\textwidth}
+				\begin{flushright} \large
+					\emph{Laureando:} \\
+					Marco \textsc{Oliani} 
+				\end{flushright}
+			\end{minipage}
+			
+			\vfill
+			
+			% Bottom of the page -> è la data
+			{\large Anno Accademico 2022/2023}
+			
+		\end{center}
+	\end{titlepage}
+
+\thispagestyle{empty}
+
+%% Aforisma
+\begin{titlepage}
+	\thispagestyle{empty}
+	\begin{flushright}
+		\vspace*{40 mm}
+		\small{\emph{``Per fare una cosa ci vuole sempre più tempo di quanto\\
+				si pensi, anche tenendo conto della Legge di Hofstadter''}\\(Legge di Hofstadter)}
+	\end{flushright}
+	
+	\vfill
+\end{titlepage}
+\thispagestyle{empty}
+
+%% Faccio partire la numerazione normale DOPO l'indice: lo stesso indice 
+%% verrà numerato in numeri romani
+\frontmatter
+\tableofcontents
+\mainmatter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       Inizio TESI             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%		Fine TESI				%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
