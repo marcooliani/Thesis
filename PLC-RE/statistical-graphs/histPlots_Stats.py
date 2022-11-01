@@ -1,12 +1,12 @@
+#!/usr/bin/env python3
+
 import pandas as pd
 import sys
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro
 from scipy.stats import chisquare
 
-
 df = pd.read_csv('../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv')
-
 
 print(f"Chi-squared test for uniformity")
 if __name__ == '__main__':
@@ -38,8 +38,13 @@ print(f"Stats of " + str(sys.argv[1]))
 print("Sample mean = %g; Stddev = %g; max = %g; min = %g for %i values" 
       % (mn, sd, max(data), min(data), size))
  
-plt.hist(data,bins='auto',color='#0504aa',
-                            alpha=0.7, rwidth=0.85)
+n, bins, bars = plt.hist(data,bins='auto',color='blue', alpha=0.7, rwidth=0.85)
+
+'''
+for i in range(len(bins)-1):
+  plt.text(bins[i]+4,n[i]+15,str(int(bins[i])))
+'''
+
 plt.xlabel(str(sys.argv[1]))
 plt.ylabel('Frequency')
 plt.show()

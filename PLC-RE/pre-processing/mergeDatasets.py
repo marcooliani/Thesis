@@ -13,6 +13,7 @@ parser.add_argument('-s', "--skiprows", type=int, help="skip seconds from start"
 parser.add_argument('-n', "--nrows", type=int, help="number of seconds to consider")
 parser.add_argument('-d', "--directory", type=str, help="directory containing CSV files")
 parser.add_argument('-o', "--output", type=str, help="output file")
+parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
 args = parser.parse_args()
 
 if args.granularity:
@@ -43,9 +44,17 @@ if args.output != None:
 else:
   output_file = 'PLC_SWaT_Dataset.csv'
 
+if args.plcs != None:
+  plcs = [p for p in args.plcs]
+else:
+  plcs = []
+
 #CSV files converted from JSON PLCs readings (convertoCSV.py)
 #filenames = glob.glob("PLC_CSV/*.csv")
-filenames = glob.glob(f"{directory}/*.csv")
+if plcs != []:
+  filenames = [f'{directory}/' + p for p in plcs ]
+else:
+  filenames = glob.glob(f"{directory}/*.csv")
 
 def cleanNull(filenames):
   for f in filenames :
@@ -87,9 +96,11 @@ def enrich_df(data_set):
 
     if col in val_cols_slopes:
       # Valore massimo della colonna selezionata
-      max_lev = math.ceil(data_set[col].max())
+      max_lev = math.floor(data_set[col].max())
       # Valore minimo della colonna selezionata
-      min_lev = math.floor(data_set[col].min())
+      min_lev = math.ceil(data_set[col].min())
+      # Valore medio della colonna selezionata (secondo me non serve...)
+      #avg_lev = round(data_set[col].mean())
 
       sum_slope=0
       for i in range(len(data_var)):
@@ -126,7 +137,7 @@ cleanNull(filenames)
 df_list_mining = list()
 df_list_daikon = list()
 
-for f in reversed(filenames) :
+for f in filenames:
   #Read Dataset files
   #datasetPLC = pd.read_csv(f)
 

@@ -5,28 +5,41 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import argparse
 
 from matplotlib import gridspec
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', "--filename", type=str, help="CSV file to analyze")
+parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include")
+args = parser.parse_args()
+
+if args.filename != None:
+  filename = args.filename
+else:
+  filename = 'PLC_SWaT_Dataset.csv'
+
+registers = [r for r in args.registers]
 
 colors=["blue", "red", "limegreen", "orange", "cyan", "magenta", "black"]
 ax={}
 line={}
 
 fig = plt.figure()
-gs = gridspec.GridSpec(len(sys.argv)-1, 1)
+gs = gridspec.GridSpec(len(registers), 1)
 
-df = pd.read_csv('../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv')
+df = pd.read_csv(f'../daikon/Daikon_Invariants/{filename}')
 
-for x in range(1,len(sys.argv)):
+for x in range(0,len(registers)):
   if x > 1:
-    ax[x-1] = plt.subplot(gs[x-1], sharex=ax[x-2])
+    ax[x] = plt.subplot(gs[x], sharex=ax[x-1])
   else:
-    ax[x-1] = plt.subplot(gs[x-1])
+    ax[x] = plt.subplot(gs[x])
 
-  line[x-1], = ax[x-1].plot(pd.DataFrame(df,columns=[str(sys.argv[x])]), label=str(sys.argv[x]), color=colors[(x-1) % (len(colors))])
+  line[x], = ax[x].plot(pd.DataFrame(df,columns=[str(registers[x])]), label=str(registers[x]), color=colors[(x) % (len(colors))])
   plt.grid()
 
-  ax[x-1].legend(loc='lower left')
+  ax[x].legend(loc='lower left')
 
 plt.subplots_adjust(hspace=.0)
 plt.xlabel("Time")

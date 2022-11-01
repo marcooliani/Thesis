@@ -10,4 +10,5 @@ PPT_NAME aprogram.point:::POINT
 #MV101 == 2 && P101 != 2 
 #MV101 == 2 && P101 == 2 && slope_LIT101 > 0
 #prev_FIT101 < FIT101
-LIT101 > 780 && LIT101 < max_LIT101 && slope_LIT101 > 0 && P101 == 2
+#LIT101 > 780 && LIT101 < max_LIT101 && slope_LIT101 > 0 && P101 == 2
+LIT101 > 530 && LIT101 <= 535 && P101 == 2 
