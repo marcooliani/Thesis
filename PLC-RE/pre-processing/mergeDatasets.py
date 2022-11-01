@@ -19,7 +19,7 @@ args = parser.parse_args()
 if args.granularity:
   granularity = args.granularity
 else:
-  granularity = 30
+  granularity = 15
 
 if args.nrows:
   nrows =  args.nrows
@@ -96,9 +96,11 @@ def enrich_df(data_set):
 
     if col in val_cols_slopes:
       # Valore massimo della colonna selezionata
-      max_lev = math.floor(data_set[col].max())
+      #max_lev = math.floor(data_set[col].max())
+      max_lev = data_set[col].max()
       # Valore minimo della colonna selezionata
-      min_lev = math.ceil(data_set[col].min())
+      #min_lev = math.ceil(data_set[col].min())
+      min_lev = data_set[col].min()
       # Valore medio della colonna selezionata (secondo me non serve...)
       #avg_lev = round(data_set[col].mean())
 

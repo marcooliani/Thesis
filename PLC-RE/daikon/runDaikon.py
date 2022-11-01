@@ -6,8 +6,9 @@ import subprocess
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-f', "--filename", type=str, help="name of the dataset file")
-parser.add_argument('-o', "--output", type=str, help="txt output file")
+parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+parser.add_argument('-o', "--output", type=str, help="output file (TXT format)")
+parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
 args = parser.parse_args()
 
 if args.filename != None:
@@ -28,7 +29,10 @@ if args.output != None:
 else:
   output_file = "daikon_results_cond.txt"
 
-condition = "Inv_conditions.spinfo"
+if args.conditions != None:
+  conditions = [c for c in args.conditions]
+
+inv_conditions_file = "Inv_conditions.spinfo"
 
 start_dir = os.getcwd()
 
@@ -38,13 +42,19 @@ if os.chdir('Daikon_Invariants/'):
   print("Error generating invariants. Aborting.")
   exit(1)
 
-print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files...")
+print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
 if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {dataset}', shell=True):
   print("Error generating invariants. Aborting.")
   exit(1)
 
-print("Generating invariants with conditions...")
-output = subprocess.check_output(f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace {condition}', shell=True)
+if conditions != None:
+  with open(inv_conditions_file, 'w') as f:
+    f.write('PPT_NAME aprogram.point:::POINT\n')
+    for c in conditions:
+      f.write(c + '\n')
+
+print("Generating invariants with conditions ...")
+output = subprocess.check_output(f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace {inv_conditions_file}', shell=True)
 
 # Visto che l'output è codificato in qualche maniera, riportiamolo allo stato "originario"
 # come stringa
@@ -59,6 +69,7 @@ Qui transitive closure, se sapessi come farla!
 '''
 
 # Scrivo l'output finale su file (bisognerebbe fare la transitive closure, prima)
+print(f'Writing output file {output_file} ...')
 with open(output_file, 'w') as f:
   f.write("\n".join(map(str,output)))
 
