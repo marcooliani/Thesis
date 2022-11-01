@@ -11,7 +11,7 @@ from matplotlib import gridspec
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', "--filename", type=str, help="CSV file to analyze")
-parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include")
+parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include", required=True)
 args = parser.parse_args()
 
 if args.filename != None:
