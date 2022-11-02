@@ -188,7 +188,6 @@ inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
 inv_datasets = inv_datasets.iloc[1:-granularity , :]
-
 print(inv_datasets)
 
 # Daikon can NOT process a csv of more that 64801 lines

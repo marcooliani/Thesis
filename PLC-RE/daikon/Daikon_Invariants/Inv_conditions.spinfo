@@ -1,3 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-slope_LIT301 > 0
-FIT301 > 0
+slope_LIT301 > 0 && FIT301 > 0 && LIT301 < max_LIT301 && LIT301 > (max_LIT301 -100)

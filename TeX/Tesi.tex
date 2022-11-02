@@ -9,6 +9,7 @@
 %% Imposto l'encoding dei caratteri. Specificando utf8 posso mettere
 %% direttamente le accentate senza errori
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 
 \usepackage{fancyhdr}
 
@@ -20,12 +21,12 @@
 %% Font (sceglierne uno)
 %\usepackage{tgpagella} % TeX Gyre Pagella
 %\usepackage{charter} % PSNFSS Font, in every TeX distribution
+\usepackage{mathpazo} % Use the Palatino font by default
 
-\usepackage{lmodern} % monospace font
-\usepackage[T1]{fontenc}
-\renewcommand{\ttdefault}{lmtt} % MONO Latin Modern Font % T1 encoding of cmtt font style  
-\renewcommand{\rmdefault}{lmr} % SERIF Latin Modern Font % T1 encoding of cmr font style
-\renewcommand{\sfdefault}{lmss} % SANS Latin Modern Font % T1 encoding of cmss font style
+%\usepackage{lmodern} % monospace font
+%\renewcommand{\ttdefault}{lmtt} % MONO Latin Modern Font % T1 encoding of cmtt font style  
+%\renewcommand{\rmdefault}{lmr} % SERIF Latin Modern Font % T1 encoding of cmr font style
+%\renewcommand{\sfdefault}{lmss} % SANS Latin Modern Font % T1 encoding of cmss font style
 
 %% Imposto l'indentazione per ogni paragrafo
 \usepackage{indentfirst}
@@ -36,6 +37,7 @@
 %% Interlinea a 1,5
 \usepackage{setspace}
 \onehalfspacing % interlinea 1.5
+%\singlespacing %interlinea 1
 %\doublespacing % interlinea 2
 
 %% Questo per aforismi e citazioni
@@ -55,7 +57,7 @@
 
 %% Per includere le immagini: package e path dove andare a richiamarle per nome
 \usepackage{graphicx}
-\graphicspath{{./images/}}
+\graphicspath{{./figures/}}
 
 %% Questo serve per includere le immagini dove voglio io e non dove
 %% pare all'editor!
@@ -64,14 +66,48 @@
 %% Fa sì che le tabelle possano essere divise tra più pagine
 \usepackage{longtable}
 
+%% Bibliografia
+\usepackage[sorting=none,style=numeric-comp,backend=bibtex]{biblatex}
+\addbibresource{biblio/bibliography.bib} % Database con le citazioni
+
+%%
+%% Titolo della tesi
+%%
+\newcommand{\thesistitle}{Reverse Engineering di CPS con approccio blackbox}
+
 %% Formattazioni varie
 \pagestyle{fancy}\addtolength{\headwidth}{20pt}
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
 \cfoot{}
 
-\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+%%Testatine
+%\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+%\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+
+%Pagine pari
+\fancyhead[RE]{\bfseries\thesistitle}
+\fancyhead[LE]{\bfseries\thepage}
+\fancyhead[CE]{}
+%\fancyfoot[LE]{\bfseries\thepage}
+%\fancyfoot[CE]{}
+%\fancyfoot[LE]{\textit{thesistitle}}
+
+%Pagine dispari
+\fancyhead[LO]{\bfseries\leftmark}
+\fancyhead[RO]{\bfseries\thepage}
+\fancyhead[CO]{}
+%\fancyfoot[LO]{\bfseries\leftmark}
+%\fancyfoot[CO]{}
+%\fancyfoot[RO]{\textit{thesistitle}}
+%\renewcommand{\footrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{%
+	\fancyhf{}
+	\fancyfoot[RO]{}
+	\fancyfoot[LO]{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}}
 
 %% Abstract
 \newcommand{\fncyblank}{\fancyhf{}}
@@ -100,28 +136,36 @@
 		%\textsc{Facolt\`a di Scienze Matematiche, Fisiche e Naturali}\\[1.0cm]
 		\textsc{Dipartimento di Informatica}\\[1.0cm]
 		\textsc{\large Corso di Laurea Magistrale in \\ 
-			INGEGNERIA E SCIENZE INFORMATICHE}\\[2.0cm]
+			INGEGNERIA E SCIENZE INFORMATICHE}\\[1.5cm]
 		
-		\large Tesi di Laurea Magistrale \\[1.5cm]
+		\large Tesi di Laurea Magistrale \\[1.0cm]
 		% Title
 		
-		{ \Large \bfseries [PROVVISORIO] \\
+		\hrulefill
+		
+		{ \Large\bfseries [PROVVISORIO] \\
 			REVERSE ENGINEERING DI CPS \\ 
-			CON APPROCCIO BLACKBOX \\[4.0cm] }
+			CON APPROCCIO BLACKBOX \\ }
+		
+		\hrulefill \\[2.0cm]
 		
 		% Author and supervisor
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushleft} \large
 				\emph{Relatore:}\\
-				Chiar.mo Prof. \\
-				\textbf{Massimo \textsc{Merro}}
+				%Chiar.mo Prof. \\
+				Prof. \textbf{Massimo \textsc{Merro}}
+			\end{flushleft}
+			\begin{flushleft} \large
+				\emph{Correlatore:}\\
+				Prof. \textbf{Severus \textsc{Piton}}
 			\end{flushleft}
 		\end{minipage}
 		\begin{minipage}[t]{0.4\textwidth}\raggedleft
 			\begin{flushright} \large
 				\emph{Laureando:} \\
-				%Matr. VR457249 \\
-				\textbf{Marco \textsc{Oliani}} 
+				\textbf{Marco \textsc{Oliani}} \\
+				Matr. VR457249
 			\end{flushright}
 		\end{minipage}
 		
@@ -150,8 +194,8 @@
 \begin{titlepage}
 	\begin{abstract}
 		Bla bla bla
-		\vfill
 	\end{abstract}
+	\vfill
 \end{titlepage}
 \thispagestyle{empty}
 
@@ -165,21 +209,22 @@
 %       Inizio TESI             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %###### CAPITOLO 1 ######%
-\chapter{Introduzione}
-\lettrine[lines=2]{L}{orem} Bla bla bla. Ma dove metto l'abstract? Prova di interlinea che direi posso anche andare bene, ma bisogna poi vedere il tutto come si incastra alla fine, in modo da ottenere un bel risultato alla vista. Sperando di non esagerare con gli abbellimenti, per evitare che qualcuno leggendo si incazzi e mi faccia riscrivere tutto, che non ne ho minimamente voglia...
+\include{Chapters/intro}
 
 %###### CAPITOLO 2 ######%
 \chapter{Altro Capitolo}
-Ri-bla
+Ri-bla \cite{einstein}
 
+\include{Chapters/test}
 
 %###### BIBLIOGRAFIA ######%
-\begin{thebibliography}{99}
-	\addcontentsline{toc}{chapter}{Bibliografia}
-	
-\end{thebibliography}
+\printbibliography[heading=bibintoc, title=Bibliografia]
+
+%% Vecchia versione
+%\begin{thebibliography}{99}
+%	\addcontentsline{toc}{chapter}{Bibliografia}	
+%\end{thebibliography}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %		Fine TESI				%
