@@ -31,7 +31,7 @@ gs = gridspec.GridSpec(len(registers), 1)
 df = pd.read_csv(f'../daikon/Daikon_Invariants/{filename}')
 
 for x in range(0,len(registers)):
-  if x > 1:
+  if x > 0:
     ax[x] = plt.subplot(gs[x], sharex=ax[x-1])
   else:
     ax[x] = plt.subplot(gs[x])

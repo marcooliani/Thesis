@@ -139,7 +139,7 @@ cleanNull(filenames)
 df_list_mining = list()
 df_list_daikon = list()
 
-for f in filenames:
+for f in sorted(filenames):
   #Read Dataset files
   #datasetPLC = pd.read_csv(f)
 
@@ -162,7 +162,8 @@ mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
 daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
 
 # Save dataset with the timestamp for the process mining.
-mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
+#mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
+mining_datasets.to_csv(f'../process-mining/data/{output_file.split(".")[0]}_TS.csv', index=False)
 
 print(mining_datasets)
 
@@ -194,7 +195,8 @@ print(inv_datasets)
 #inv_datasets.iloc[0:64800].to_csv(r'PLC_Dataset.csv', index=False)
 
 
-inv_datasets.to_csv(r'../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv', index=False)
+#inv_datasets.to_csv(r'../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv', index=False)
+inv_datasets.to_csv(f'../daikon/Daikon_Invariants/{output_file}', index=False)
 
 print('****************************************************************************************')
 print ('************* DATASET FOR INVARIANT ANALYSIS GENERATED SUCCESSFULLY *******************')
