@@ -4,7 +4,7 @@
 \documentclass[a4paper,12pt,openright,twoside,titlepage]{book}
 
 %% Imposto l'italiano
-\usepackage[english,italian]{babel}
+\usepackage[italian,english]{babel}
 
 %% Imposto l'encoding dei caratteri. Specificando utf8 posso mettere
 %% direttamente le accentate senza errori
@@ -106,6 +106,7 @@
 	\fancyhf{}
 	\fancyfoot[RO]{}
 	\fancyfoot[LO]{}
+	\fancyfoot[CO]{\bfseries\thepage}
 	\renewcommand{\headrulewidth}{0pt}
 	\renewcommand{\footrulewidth}{0pt}}
 
@@ -134,36 +135,37 @@
 		
 		\textsc{\LARGE Università degli Studi di Verona}\\
 		%\textsc{Facolt\`a di Scienze Matematiche, Fisiche e Naturali}\\[1.0cm]
-		\textsc{Dipartimento di Informatica}\\[1.0cm]
-		\textsc{\large Corso di Laurea Magistrale in \\ 
-			INGEGNERIA E SCIENZE INFORMATICHE}\\[1.5cm]
+		\textsc{Department of COMPUTER SCIENCE}\\[1.0cm]
+		\textsc{\large Master's Degree in \\ 
+			COMPUTER SCIENCE AND ENGINEERING}\\[1.5cm]
 		
-		\large Tesi di Laurea Magistrale \\[1.0cm]
+		%\large Tesi di Laurea Magistrale \\[1.0cm]
+		\large Master Thesis \\[1.0cm]
 		% Title
 		
 		\hrulefill
 		
 		{ \Large\bfseries [PROVVISORIO] \\
-			REVERSE ENGINEERING DI CPS \\ 
-			CON APPROCCIO BLACKBOX \\ }
+			BLACKBOX APPROACH TO \\ 
+			CPS REVERSE ENGINEERING \\ }
 		
 		\hrulefill \\[2.0cm]
 		
 		% Author and supervisor
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushleft} \large
-				\emph{Relatore:}\\
+				\emph{Supervisor:}\\
 				%Chiar.mo Prof. \\
 				Prof. \textbf{Massimo \textsc{Merro}}
 			\end{flushleft}
 			\begin{flushleft} \large
-				\emph{Correlatore:}\\
+				\emph{Co-supervisor:}\\
 				Prof. \textbf{Severus \textsc{Piton}}
 			\end{flushleft}
 		\end{minipage}
 		\begin{minipage}[t]{0.4\textwidth}\raggedleft
 			\begin{flushright} \large
-				\emph{Laureando:} \\
+				\emph{Candidate:} \\
 				\textbf{Marco \textsc{Oliani}} \\
 				Matr. VR457249
 			\end{flushright}
@@ -172,7 +174,7 @@
 		\vfill
 		
 		% Bottom of the page -> è la data
-		{\large Anno Accademico 2022/2023}
+		{\large Academic Year 2022/2023}
 		
 	\end{center}
 \end{titlepage}

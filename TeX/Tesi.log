@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2022.11.2)  3 NOV 2022 00:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2022.11.6)  6 NOV 2022 00:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -34,6 +34,12 @@ Package: babel 2022/09/17 3.80 The Babel package
 \bbl@readstream=\read2
 \bbl@dirlevel=\count195
 
+(/usr/share/texlive/texmf-dist/tex/generic/babel-italian/italian.ldf
+Language: italian 2022/03/27 v.1.4.07 Italian support for the babel system
+\it@lettering=\count196
+\it@doublequoteactive=\count197
+\it@ISOcompliance=\count198
+)
 (/usr/share/texlive/texmf-dist/tex/generic/babel-english/english.ldf
 Language: english 2017/06/06 v3.3r English support from the babel system
 Package babel Info: Hyphen rules for 'british' set to \l@english
@@ -46,20 +52,14 @@ Package babel Info: Hyphen rules for 'australian' set to \l@english
 (babel)             (\language0). Reported on input line 105.
 Package babel Info: Hyphen rules for 'newzealand' set to \l@english
 (babel)             (\language0). Reported on input line 108.
-)
-(/usr/share/texlive/texmf-dist/tex/generic/babel-italian/italian.ldf
-Language: italian 2022/03/27 v.1.4.07 Italian support for the babel system
-\it@lettering=\count196
-\it@doublequoteactive=\count197
-\it@ISOcompliance=\count198
 ))
-(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/it/babel-italian.tex
-Package babel Info: Importing font and identification data for italian
-(babel)             from babel-it.ini. Reported on input line 11.
-)
 (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
 Package babel Info: Importing font and identification data for english
 (babel)             from babel-en.ini. Reported on input line 11.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/it/babel-italian.tex
+Package babel Info: Importing font and identification data for italian
+(babel)             from babel-it.ini. Reported on input line 11.
 )
 (/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
@@ -670,35 +670,35 @@ Package biblatex Warning: 'babel/polyglossia' detected but 'csquotes' missing.
 \@quotelevel=\count429
 \@quotereset=\count430
 LaTeX Font Info:    Trying to load font information for T1+ppl on input line 12
-2.
+3.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ppl.fd
 File: t1ppl.fd 2001/06/04 font definitions for T1/ppl.
 ) (./Tesi.aux
 (./Chapters/intro.aux) (./Chapters/test.aux))
 \openout1 = `Tesi.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 122.
-LaTeX Font Info:    ... okay on input line 122.
-LaTeX Info: Redefining \it@ocap on input line 122.
-LaTeX Info: Redefining \it@ccap on input line 122.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 123.
+LaTeX Font Info:    ... okay on input line 123.
+LaTeX Info: Redefining \it@ocap on input line 123.
+LaTeX Info: Redefining \it@ccap on input line 123.
 \big@size=\dimen171
-Package hyperref Info: Link coloring OFF on input line 122.
+Package hyperref Info: Link coloring OFF on input line 123.
  (./Tesi.out) (./Tesi.out)
 \@outlinefile=\write4
 \openout4 = `Tesi.out'.
@@ -727,17 +727,17 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package biblatex Info: Trying to load language 'italian'...
-Package biblatex Info: ... file 'italian.lbx' found.
-
-(/usr/share/texlive/texmf-dist/tex/latex/biblatex/lbx/italian.lbx
-File: italian.lbx 2022/07/12 v3.18b biblatex localization (PK/MW)
-)
 Package biblatex Info: Trying to load language 'english'...
 Package biblatex Info: ... file 'english.lbx' found.
 
 (/usr/share/texlive/texmf-dist/tex/latex/biblatex/lbx/english.lbx
 File: english.lbx 2022/07/12 v3.18b biblatex localization (PK/MW)
+)
+Package biblatex Info: Trying to load language 'italian'...
+Package biblatex Info: ... file 'italian.lbx' found.
+
+(/usr/share/texlive/texmf-dist/tex/latex/biblatex/lbx/italian.lbx
+File: italian.lbx 2022/07/12 v3.18b biblatex localization (PK/MW)
 )
 Package biblatex Info: Input encoding 'utf8' detected.
 Package biblatex Info: Automatic encoding selection.
@@ -750,8 +750,8 @@ Package biblatex Info: Data encoding 'utf8' specified.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'Tesi.bbl' found.
  (./Tesi.bbl)
-Package biblatex Info: Reference section=0 on input line 122.
-Package biblatex Info: Reference segment=0 on input line 122.
+Package biblatex Info: Reference section=0 on input line 123.
+Package biblatex Info: Reference segment=0 on input line 123.
 [1
 
 
@@ -762,13 +762,13 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.190 \end{titlepage}
+l.192 \end{titlepage}
                       [1]
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.194 \begin{titlepage}
+l.196 \begin{titlepage}
                         [2
 
 ]
@@ -776,7 +776,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.199 \end{titlepage}
+l.201 \end{titlepage}
                       [1
 
 ]
@@ -784,12 +784,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.204 \frontmatter
+l.206 \frontmatter
                    [2
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+cmss on input line 2
-05.
+07.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
 File: t1cmss.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 ) (./Tesi.toc)
@@ -813,7 +813,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 \openout2 = `Chapters/intro.aux'.
 
  (./Chapters/intro.tex
-Capitolo 1.
+Chapter 1.
 LaTeX Font Info:    Trying to load font information for OT1+phv on input line 1
 .
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1phv.fd
@@ -857,7 +857,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.213 \include{Chapters/intro}
+l.215 \include{Chapters/intro}
                                [2]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -881,7 +881,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 
 ]
-Capitolo 2.
+Chapter 2.
 [5]
 \openout2 = `Chapters/test.aux'.
 
@@ -898,7 +898,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 
 ]
-Capitolo 3.
+Chapter 3.
 ) [7]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -914,43 +914,43 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
-22.
+24.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 2
-22.
+24.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
 )
 LaTeX Font Info:    Trying to load font information for OML+zplm on input line 
-222.
+224.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlzplm.fd
 File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 
-222.
+224.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omszplm.fd
 File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 
-222.
+224.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxzplm.fd
 File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 
-222.
+224.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1zplm.fd
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 )
-Overfull \hbox (4.2182pt too wide) in paragraph at lines 222--222
-[]\T1/ppl/m/n/12 Albert Ein-stein. ``Zur Elek-tro-dy-na-mik beweg-ter Kör-per. 
-(Ger-man) [On
+Overfull \hbox (4.2182pt too wide) in paragraph at lines 224--224
+[]\T1/ppl/m/n/12 Albert Ein-stein. ``Zur Elek-tro-dy-namik be-wegter Kör-per. (
+Ger-man) [On
  []
 
 [9] (./Tesi.aux (./Chapters/intro.aux) (./Chapters/test.aux))
@@ -970,12 +970,12 @@ Package logreq Info: Writing requests to 'Tesi.run.xml'.
  ) 
 Here is how much of TeX's memory you used:
  20742 strings out of 477024
- 358333 string characters out of 5827928
- 931027 words of memory out of 5000000
+ 358394 string characters out of 5827928
+ 922136 words of memory out of 5000000
  41557 multiletter control sequences out of 15000+600000
  507713 words of font info for 83 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 72i,11n,77p,1918b,1396s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 72i,11n,77p,1918b,1785s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texliv
 e/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf/fonts/type1/public/c
 m-super/sfsx1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb
@@ -984,7 +984,7 @@ m-super/sfsx1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb
 mf-dist/fonts/type1/urw/palatino/uplr8a.pfb></usr/share/texlive/texmf-dist/font
 s/type1/urw/palatino/uplri8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /zapfchan/uzcmi8a.pfb>
-Output written on Tesi.pdf (17 pages, 126145 bytes).
+Output written on Tesi.pdf (17 pages, 126611 bytes).
 PDF statistics:
  141 PDF objects out of 1000 (max. 8388607)
  106 compressed objects within 2 object streams

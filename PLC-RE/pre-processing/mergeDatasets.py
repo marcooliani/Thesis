@@ -145,7 +145,6 @@ for f in sorted(filenames):
 
   #nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
   # usare skiprows=<int>, che skippa n righe da inizio file
-  #datasetPLC = pd.read_csv(f, nrows=20000)
   datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
   datasetPLC_d = datasetPLC.copy() # Altrimenti non mi differenzia le liste, vai a capire perchè...
   
@@ -175,15 +174,6 @@ print('*************************************************************************
 # drop timestamps is NOT needed in Daikon
 #inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
 inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
-
-# Add state transient/stable on PLC1_InputRegisters_IW0 
-#PLC1_state = list()
-#for x in datasetPLC1["PLC1_InputRegisters_IW0"] :
-# if (x in [52,53,54,78,79,80]):
-#   PLC1_state.append("stable")
-# else:
-#   PLC1_state.append("transient")  
-#datasetPLC1.insert(len(datasetPLC1.columns),'PLC1_state', PLC1_state)
 
 
 # Drop first rows (Daikon does not process missing values)

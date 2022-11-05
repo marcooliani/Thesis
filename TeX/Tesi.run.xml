@@ -60,8 +60,8 @@
       <file>numeric-comp.bbx</file>
       <file>numeric-comp.cbx</file>
       <file>biblatex.cfg</file>
-      <file>italian.lbx</file>
       <file>english.lbx</file>
+      <file>italian.lbx</file>
     </requires>
   </internal>
   <external package="biblatex" priority="5" active="1">
