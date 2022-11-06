@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2022.11.6)  6 NOV 2022 00:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian) (preloaded format=pdflatex 2022.11.6)  6 NOV 2022 23:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -670,35 +670,35 @@ Package biblatex Warning: 'babel/polyglossia' detected but 'csquotes' missing.
 \@quotelevel=\count429
 \@quotereset=\count430
 LaTeX Font Info:    Trying to load font information for T1+ppl on input line 12
-3.
+0.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ppl.fd
 File: t1ppl.fd 2001/06/04 font definitions for T1/ppl.
 ) (./Tesi.aux
 (./Chapters/intro.aux) (./Chapters/test.aux))
 \openout1 = `Tesi.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 123.
-LaTeX Font Info:    ... okay on input line 123.
-LaTeX Info: Redefining \it@ocap on input line 123.
-LaTeX Info: Redefining \it@ccap on input line 123.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 120.
+LaTeX Font Info:    ... okay on input line 120.
+LaTeX Info: Redefining \it@ocap on input line 120.
+LaTeX Info: Redefining \it@ccap on input line 120.
 \big@size=\dimen171
-Package hyperref Info: Link coloring OFF on input line 123.
+Package hyperref Info: Link coloring OFF on input line 120.
  (./Tesi.out) (./Tesi.out)
 \@outlinefile=\write4
 \openout4 = `Tesi.out'.
@@ -750,8 +750,8 @@ Package biblatex Info: Data encoding 'utf8' specified.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'Tesi.bbl' found.
  (./Tesi.bbl)
-Package biblatex Info: Reference section=0 on input line 123.
-Package biblatex Info: Reference segment=0 on input line 123.
+Package biblatex Info: Reference section=0 on input line 120.
+Package biblatex Info: Reference segment=0 on input line 120.
 [1
 
 
@@ -762,13 +762,13 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.192 \end{titlepage}
+l.189 \end{titlepage}
                       [1]
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.196 \begin{titlepage}
+l.193 \begin{titlepage}
                         [2
 
 ]
@@ -776,7 +776,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.201 \end{titlepage}
+l.198 \end{titlepage}
                       [1
 
 ]
@@ -784,12 +784,12 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.206 \frontmatter
+l.203 \frontmatter
                    [2
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+cmss on input line 2
-07.
+04.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
 File: t1cmss.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 ) (./Tesi.toc)
@@ -857,7 +857,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.215 \include{Chapters/intro}
+l.212 \include{Chapters/intro}
                                [2]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -914,41 +914,41 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
-24.
+21.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 2
-24.
+21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
 )
 LaTeX Font Info:    Trying to load font information for OML+zplm on input line 
-224.
+221.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlzplm.fd
 File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 
-224.
+221.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omszplm.fd
 File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 
-224.
+221.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxzplm.fd
 File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 
-224.
+221.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1zplm.fd
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 )
-Overfull \hbox (4.2182pt too wide) in paragraph at lines 224--224
+Overfull \hbox (4.2182pt too wide) in paragraph at lines 221--221
 []\T1/ppl/m/n/12 Albert Ein-stein. ``Zur Elek-tro-dy-namik be-wegter Kör-per. (
 Ger-man) [On
  []
@@ -958,7 +958,7 @@ Ger-man) [On
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `Tesi.out' has not changed.
-(rerunfilecheck)             Checksum: 9AFE972B7D057A30851EC1247F25065E;429.
+(rerunfilecheck)             Checksum: E057E8CC2895E5F3CCF0B298CAF3BD8F;429.
 
 Package biblatex Warning: Please (re)run BibTeX on the file(s):
 (biblatex)                Tesi
@@ -969,10 +969,10 @@ Package logreq Info: Writing requests to 'Tesi.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 20742 strings out of 477024
- 358394 string characters out of 5827928
- 922136 words of memory out of 5000000
- 41557 multiletter control sequences out of 15000+600000
+ 20746 strings out of 477024
+ 358437 string characters out of 5827928
+ 922247 words of memory out of 5000000
+ 41561 multiletter control sequences out of 15000+600000
  507713 words of font info for 83 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  72i,11n,77p,1918b,1785s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -984,7 +984,7 @@ m-super/sfsx1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb
 mf-dist/fonts/type1/urw/palatino/uplr8a.pfb></usr/share/texlive/texmf-dist/font
 s/type1/urw/palatino/uplri8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /zapfchan/uzcmi8a.pfb>
-Output written on Tesi.pdf (17 pages, 126611 bytes).
+Output written on Tesi.pdf (17 pages, 125972 bytes).
 PDF statistics:
  141 PDF objects out of 1000 (max. 8388607)
  106 compressed objects within 2 object streams

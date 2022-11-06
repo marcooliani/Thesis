@@ -19,14 +19,7 @@
 \ChTitleVar{\centering\Large\sffamily\bfseries}
 
 %% Font (sceglierne uno)
-%\usepackage{tgpagella} % TeX Gyre Pagella
-%\usepackage{charter} % PSNFSS Font, in every TeX distribution
 \usepackage{mathpazo} % Use the Palatino font by default
-
-%\usepackage{lmodern} % monospace font
-%\renewcommand{\ttdefault}{lmtt} % MONO Latin Modern Font % T1 encoding of cmtt font style  
-%\renewcommand{\rmdefault}{lmr} % SERIF Latin Modern Font % T1 encoding of cmr font style
-%\renewcommand{\sfdefault}{lmss} % SANS Latin Modern Font % T1 encoding of cmss font style
 
 %% Imposto l'indentazione per ogni paragrafo
 \usepackage{indentfirst}
@@ -70,11 +63,6 @@
 \usepackage[sorting=none,style=numeric-comp,backend=bibtex]{biblatex}
 \addbibresource{biblio/bibliography.bib} % Database con le citazioni
 
-%%
-%% Titolo della tesi
-%%
-\newcommand{\thesistitle}{Reverse Engineering di CPS con approccio blackbox}
-
 %% Formattazioni varie
 \pagestyle{fancy}\addtolength{\headwidth}{20pt}
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
@@ -109,6 +97,15 @@
 	\fancyfoot[CO]{\bfseries\thepage}
 	\renewcommand{\headrulewidth}{0pt}
 	\renewcommand{\footrulewidth}{0pt}}
+
+%%
+%% Titolo della tesi, relatori et similia
+%%
+\newcommand{\thesistitle}{Blackbox Approach to CPS Reverse Engineering}
+\newcommand{\supervisor}{Prof. \textbf{Massimo \textsc{Merro}}}
+\newcommand{\cosupervisor}{Prof. \textbf{Severus \textsc{Piton}}}
+\newcommand{\candidate}{\textbf{Marco \textsc{Oliani}}\\ Matr. VR457249}
+\newcommand{\academicyear}{\large Academic Year 2022/2023}
 
 %% Abstract
 \newcommand{\fncyblank}{\fancyhf{}}
@@ -145,9 +142,11 @@
 		
 		\hrulefill
 		
-		{ \Large\bfseries [PROVVISORIO] \\
-			BLACKBOX APPROACH TO \\ 
-			CPS REVERSE ENGINEERING \\ }
+		%{ \Large\bfseries [PROVVISORIO] \\
+		%	BLACKBOX APPROACH TO \\ 
+		%	CPS REVERSE ENGINEERING \\ }
+
+		{ \Large\bfseries\MakeUppercase{\thesistitle}}
 		
 		\hrulefill \\[2.0cm]
 		
@@ -155,26 +154,24 @@
 		\begin{minipage}[t]{0.4\textwidth}
 			\begin{flushleft} \large
 				\emph{Supervisor:}\\
-				%Chiar.mo Prof. \\
-				Prof. \textbf{Massimo \textsc{Merro}}
+				\supervisor 
 			\end{flushleft}
 			\begin{flushleft} \large
 				\emph{Co-supervisor:}\\
-				Prof. \textbf{Severus \textsc{Piton}}
+				\cosupervisor
 			\end{flushleft}
 		\end{minipage}
 		\begin{minipage}[t]{0.4\textwidth}\raggedleft
 			\begin{flushright} \large
 				\emph{Candidate:} \\
-				\textbf{Marco \textsc{Oliani}} \\
-				Matr. VR457249
+				\candidate
 			\end{flushright}
 		\end{minipage}
 		
 		\vfill
 		
 		% Bottom of the page -> è la data
-		{\large Academic Year 2022/2023}
+		\academicyear
 		
 	\end{center}
 \end{titlepage}
@@ -221,7 +218,7 @@ Ri-bla \cite{einstein}
 \include{Chapters/test}
 
 %###### BIBLIOGRAFIA ######%
-\printbibliography[heading=bibintoc, title=Bibliografia]
+\printbibliography[heading=bibintoc, title=Bibliography]
 
 %% Vecchia versione
 %\begin{thebibliography}{99}
