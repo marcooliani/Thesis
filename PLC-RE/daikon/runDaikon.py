@@ -79,27 +79,29 @@ for n in dataset_col:
     continue
   else:
     G.add_node(n)
-# G.add_nodes_from(dataset_col)
-
 
 invs = output.copy()
 
-edges_ab = list()
-edges_ba = list()
-edges_same = list()
+edges_ge = list()
+edges_le = list()
+edges_eq = list()
 
 for inv in invs:
   # 'Sta roba devo cavarla per forza...
-  if inv.find('aprogram.point:::POINT') != -1 or \
+  # Ah, find() mi sa che trova l'indice della stringa cercata: se non la trova,
+  # allora -1
+  if (inv.find('aprogram.point:::POINT') != -1 and inv.find('not') == -1) or \
       inv.find('=========') != -1 or \
       inv.find('==>') != -1 or \
       inv.find('one of') != -1 or \
       inv.find('!=') != -1 or \
-      inv.find('%') != -1 or \
       inv.find('prev') != -1: 
     continue
+  elif inv.find('aprogram.point:::POINT') != -1 and \
+      inv.find('not') != -1:
+      break
   else:
-    a,rel,b = inv.split(' ')
+    a,rel,b = inv.split(' ')[:3]
     if b.isdigit():
       G.add_node(b)
     elif b.find('prev') != -1:
@@ -107,32 +109,45 @@ for inv in invs:
     if rel == '>=' or rel == '>':
       pass
       #G.add_edge(a, b)
-      #edges_ab.append((a,b))
+      #edges_ge.append((a,b))
     elif rel == '<=' or rel == '<':
       pass
       #G.add_edge(b, a)
-      #edges_ba.append((b,a))
+      #edges_le.append((b,a))
     elif rel == '==':
       G.add_edge(a, b)
-      edges_same.append((a,b))
+      edges_eq.append((a,b))
+
+    ## Questa fa solo casino, lasciamola perdere per ora...
+    #elif rel == '%':
+    #  G.add_edge(a,b)
+    #  edges_eq.append((a,b))
 
 for g in list(G.nodes()):
   if G.degree(g) == 0:
     G.remove_node(g)
 
-#closure = list(nx.dfs_edges(G, source='P203'))
+invariants = list()
 
 visited = list()
 for v in list(G.nodes()):
   if v not in visited:
+    temp = []
     closure = list(nx.dfs_edges(G, source=v))
-    print(closure)
     for a,b in closure:
+      #print((a,b))
       if a not in visited:
+        temp.append(a)
         visited.append(a)
       if b not in visited:
         visited.append(b)
-    
+        temp.append(b)
+    invariants.append(temp)
+
+for i in invariants:
+  print(' = '.join(map(str,i)))
+
+
 ## Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 ## il brodo alla tesi...
 #pos = nx.spring_layout(G)

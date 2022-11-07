@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-MV201 == 2
+slope_LIT101 > 0 && LIT101 < 700 && LIT101 > 650
