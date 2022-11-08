@@ -73,7 +73,7 @@ Qui transitive closure, se sapessi come farla!
 datasetPLC = pd.read_csv(dataset)
 dataset_col = list(datasetPLC.columns)
 
-G = nx.DiGraph()
+G = nx.MultiDiGraph()
 for n in dataset_col:
   if n.find('prev') != -1:
     continue
@@ -116,7 +116,9 @@ for inv in invs:
       #edges_le.append((b,a))
     elif rel == '==':
       G.add_edge(a, b)
+      G.add_edge(b, a)
       edges_eq.append((a,b))
+      edges_eq.append((b,a))
 
     ## Questa fa solo casino, lasciamola perdere per ora...
     #elif rel == '%':
@@ -145,28 +147,28 @@ for v in list(G.nodes()):
     invariants.append(temp)
 
 for i in invariants:
-  print(' = '.join(map(str,i)))
+  print(' = '.join(map(str,reversed(sorted(i)))))
 
 
 ## Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 ## il brodo alla tesi...
 #pos = nx.spring_layout(G)
+#pos = nx.planar_layout(G)
 #pos = nx.circular_layout(G)
 #nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1000,width=2,with_labels=True)
-#nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,edgelist=edges_ab,width=2,with_labels=True)
+#nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,edgelist=edges_eq,width=2,with_labels=True)
 
 #nx.draw_networkx_nodes(G,pos,node_color='#00b4d9',node_size=1000,cmap=plt.get_cmap('jet'))
 #nx.draw_networkx_labels(G, pos)
 #nx.draw_networkx_edges(G, pos, edgelist=edges_ab, edge_color='r')
 #nx.draw_networkx_edges(G, pos, edgelist=edges_ba, edge_color='b', arrows=True)
-#nx.draw_networkx_edges(G, pos, edgelist=edges_same, arrows=True)
+#nx.draw_networkx_edges(G, pos, edgelist=edges_eq, arrows=False)
 
 #ax = plt.gca()
 #ax.set_title('Graph')
-#ax.set_title(rel)
+#ax.set_title('')
 #ax.margins(0.20)
 #plt.axis("off")
-
 #plt.show()
 
 '''

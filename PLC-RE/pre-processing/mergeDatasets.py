@@ -90,18 +90,21 @@ def enrich_df(data_set):
     for i in range(len(data_var)-1) : 
       prev_val.append(data_var[i])
 
+    '''
     for i in range(len(data_var)):
       if col in val_cols_slopes:
         slope.append(data_var[i] - prev_val[i])
+    '''
 
     if col in val_cols_slopes:
       # Valore massimo della colonna selezionata
-      max_lev = math.ceil(data_set[col].max())
+      max_lvl = math.ceil(data_set[col].max())
       # Valore minimo della colonna selezionata
-      min_lev = math.floor(data_set[col].min())
+      min_lvl = math.floor(data_set[col].min())
       # Valore medio della colonna selezionata (secondo me non serve...)
-      #avg_lev = round(data_set[col].mean())
+      #avg_lvl = round(data_set[col].mean())
 
+      '''
       sum_slope=0
       for i in range(len(data_var)):
         if i%granularity != 0:
@@ -119,9 +122,23 @@ def enrich_df(data_set):
               else:
                 mean_slope[j] = -1
           sum_slope=0
+      '''
+      prev_lvl = data_var[0]
 
-        max_val.append(max_lev)
-        min_val.append(min_lev)
+      for i in range(len(data_var)):
+        if i%granularity != 0:
+          mean_slope.append(0)
+        else:
+          slope = round((data_var[i] - prev_lvl))
+          mean_slope.append(slope)
+          prev_lvl = data_var[i]
+
+          if i > 0:
+            for j in range(i-1, (i-granularity), -1):
+              mean_slope[j] = slope
+
+        max_val.append(max_lvl)
+        min_val.append(min_lvl)
 
     data_set.insert(len(data_set.columns),'prev_'+col, prev_val)
 
