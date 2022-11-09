@@ -74,78 +74,55 @@ def cleanNull(filenames):
 # Add previous values of registers
 def enrich_df(data_set):
   #Set registers names that holds measurements and actuations
-  val_cols = data_set.columns[data_set.columns.str.contains(pat = 'LIT|mv[0-9]{3}|p[0-9]{3}', case=False, regex=True)]
+  val_cols = data_set.columns[data_set.columns.str.contains(pat = 'mv[0-9]{3}|p[0-9]{3}', case=False, regex=True)]
   val_cols_slopes = data_set.columns[data_set.columns.str.contains(pat = 'LIT', case=False, regex=True)]
 
+  ## Genero e aggiungo le colonne prev_
   for col in val_cols:
     prev_val = list()
     prev_val.append(0)
-    slope = list()
-    mean_slope=list()
-    max_val=list()
-    min_val=list()
     #data_var = inv_datasets[col]
     data_var = data_set[col]
 
     for i in range(len(data_var)-1) : 
       prev_val.append(data_var[i])
 
-    '''
-    for i in range(len(data_var)):
-      if col in val_cols_slopes:
-        slope.append(data_var[i] - prev_val[i])
-    '''
-
-    if col in val_cols_slopes:
-      # Valore massimo della colonna selezionata
-      max_lvl = math.ceil(data_set[col].max())
-      # Valore minimo della colonna selezionata
-      min_lvl = math.floor(data_set[col].min())
-      # Valore medio della colonna selezionata (secondo me non serve...)
-      #avg_lvl = round(data_set[col].mean())
-
-      '''
-      sum_slope=0
-      for i in range(len(data_var)):
-        if i%granularity != 0:
-          sum_slope += slope[i]
-          mean_slope.append(0)
-        else:
-          if sum_slope/granularity > 0:
-            mean_slope.append(1)
-          else:
-            mean_slope.append(-1)
-          if i > 0:
-            for j in range(i-1, (i-granularity), -1):
-              if sum_slope/granularity > 0:
-                mean_slope[j] = 1
-              else:
-                mean_slope[j] = -1
-          sum_slope=0
-      '''
-      prev_lvl = data_var[0]
-
-      for i in range(len(data_var)):
-        if i%granularity != 0:
-          mean_slope.append(0)
-        else:
-          slope = round((data_var[i] - prev_lvl))
-          mean_slope.append(slope)
-          prev_lvl = data_var[i]
-
-          if i > 0:
-            for j in range(i-1, (i-granularity), -1):
-              mean_slope[j] = slope
-
-        max_val.append(max_lvl)
-        min_val.append(min_lvl)
-
     data_set.insert(len(data_set.columns),'prev_'+col, prev_val)
 
-    if col in val_cols_slopes:
-      data_set.insert(len(data_set.columns),'slope_'+col, mean_slope)
-      data_set.insert(len(data_set.columns),'max_'+col, max_val)
-      data_set.insert(len(data_set.columns),'min_'+col, min_val)
+  ## Genero e aggiungo le colonne slope_
+  for col in val_cols_slopes:
+    mean_slope=list()
+    max_val=list()
+    min_val=list()
+    data_var = data_set[col]
+
+    # Valore massimo della colonna selezionata
+    max_lvl = math.ceil(data_set[col].max())
+    # Valore minimo della colonna selezionata
+    min_lvl = math.floor(data_set[col].min())
+    # Valore medio della colonna selezionata (secondo me non serve...)
+    #avg_lvl = round(data_set[col].mean())
+
+    prev_lvl = data_var[0]
+
+    for i in range(len(data_var)):
+      if i%granularity != 0:
+        mean_slope.append(0)
+      else:
+        slope = round((data_var[i] - prev_lvl)/granularity, 1)
+        mean_slope.append(slope)
+        prev_lvl = data_var[i]
+
+        if i > 0:
+          for j in range(i-1, (i-granularity), -1):
+            mean_slope[j] = slope
+
+      max_val.append(max_lvl)
+      min_val.append(min_lvl)
+
+    data_set.insert(len(data_set.columns),'slope_'+col, mean_slope)
+    data_set.insert(len(data_set.columns),'max_'+col, max_val)
+    data_set.insert(len(data_set.columns),'min_'+col, min_val)
 
 
 # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
@@ -156,8 +133,6 @@ df_list_daikon = list()
 
 for f in sorted(filenames):
   #Read Dataset files
-  #datasetPLC = pd.read_csv(f)
-
   #nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
   # usare skiprows=<int>, che skippa n righe da inizio file
   datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
@@ -170,7 +145,6 @@ for f in sorted(filenames):
   enrich_df(datasetPLC_d)
   # Concatenate the single PLCs datasets for Daikon
   df_list_daikon.append(datasetPLC_d)
-
 
 mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
 daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
@@ -185,20 +159,14 @@ print('*************************************************************************
 print ('************* DATASET FOR PROCESS MINING GENERATED SUCCESSFULLY *******************')
 print('************************************************************************************')
 
-
 # drop timestamps is NOT needed in Daikon
 #inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
 inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
-
 
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
 inv_datasets = inv_datasets.iloc[1:-granularity , :]
 print(inv_datasets)
-
-# Daikon can NOT process a csv of more that 64801 lines
-#inv_datasets.iloc[0:64800].to_csv(r'PLC_Dataset.csv', index=False)
-
 
 #inv_datasets.to_csv(r'../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv', index=False)
 inv_datasets.to_csv(f'../daikon/Daikon_Invariants/{output_file}', index=False)

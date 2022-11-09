@@ -70,19 +70,27 @@ output=output.split('\n')[7:-2]
 '''
 Qui transitive closure, se sapessi come farla!
 '''
-datasetPLC = pd.read_csv(dataset)
-dataset_col = list(datasetPLC.columns)
+#datasetPLC = pd.read_csv(dataset)
+#dataset_col = list(datasetPLC.columns)
 
-G = nx.MultiDiGraph()
-for n in dataset_col:
-  if n.find('prev') != -1:
-    continue
-  else:
-    G.add_node(n)
+#for n in dataset_col[:]:
+#  if n.find('prev') != -1:
+#    dataset_col.remove(n)
 
+# Creo il grafo delle invarianti. I nodi sono le colonne
+# del dataset
+#G = nx.MultiDiGraph()
+#G.add_nodes_from(dataset_col)
+
+# Copia dell'output di Daikon
 invs = output.copy()
 
+# Dizionario che contiene la lista delle invarianti divise per
+# relazione (in questo caso, gli archi del grafo)
+edges = dict()
+edges_gt = list()
 edges_ge = list()
+edges_lt = list()
 edges_le = list()
 edges_eq = list()
 
@@ -95,8 +103,10 @@ for inv in invs:
       inv.find('==>') != -1 or \
       inv.find('one of') != -1 or \
       inv.find('!=') != -1 or \
+      inv.find('%') != -1 or \
       inv.find('prev') != -1: 
     continue
+  # Via la condizione negata
   elif inv.find('aprogram.point:::POINT') != -1 and \
       inv.find('not') != -1:
       break
@@ -104,58 +114,73 @@ for inv in invs:
     a,rel,b = inv.split(' ')[:3]
     if b.isdigit():
       G.add_node(b)
-    elif b.find('prev') != -1:
+    elif b.find('prev') != -1 or a.find('prev') != -1:
       continue
-    if rel == '>=' or rel == '>':
-      pass
-      #G.add_edge(a, b)
-      #edges_ge.append((a,b))
-    elif rel == '<=' or rel == '<':
-      pass
-      #G.add_edge(b, a)
-      #edges_le.append((b,a))
+    # Le condizioni vanno trattate separatamente, altrimenti
+    # non riesco a ricostruire correttamente il tutto
+    if rel == '>':
+      edges_gt.append((a,b))
+    elif rel == '>=':
+      edges_ge.append((a,b))
+    elif rel == '<':
+      edges_lt.append((b,a))
+    elif rel == '<=':
+      edges_le.append((b,a))
     elif rel == '==':
-      G.add_edge(a, b)
-      G.add_edge(b, a)
       edges_eq.append((a,b))
       edges_eq.append((b,a))
 
-    ## Questa fa solo casino, lasciamola perdere per ora...
-    #elif rel == '%':
-    #  G.add_edge(a,b)
-    #  edges_eq.append((a,b))
+edges['=='] = edges_eq
+edges['>'] = edges_gt
+edges['>='] = edges_ge
+edges['<'] = edges_lt
+edges['<='] = edges_le
 
-for g in list(G.nodes()):
-  if G.degree(g) == 0:
-    G.remove_node(g)
+#G.add_edges_from(edges_ge, label='>=')
 
-invariants = list()
+for key, edge_list in edges.items():
+  invariants = list()
+  visited = list()
 
-visited = list()
-for v in list(G.nodes()):
-  if v not in visited:
-    temp = []
-    closure = list(nx.dfs_edges(G, source=v))
-    for a,b in closure:
-      #print((a,b))
-      if a not in visited:
-        temp.append(a)
-        visited.append(a)
-      if b not in visited:
-        visited.append(b)
-        temp.append(b)
-    invariants.append(temp)
+  G = nx.MultiDiGraph()
+  G.add_edges_from(edge_list)
 
-for i in invariants:
-  print(' = '.join(map(str,reversed(sorted(i)))))
+  for g in list(G.nodes())[:]:
+    if G.degree(g) == 0:
+      G.remove_node(g)
 
+  for v in list(G.nodes()):
+    if v not in visited:
+      temp = []
+      # Faccio una DFS per trovare le chiusure transitive
+      closure = list(nx.dfs_edges(G, source=v))
+      if key == '==':
+        for a,b in closure:
+          if a not in visited:
+            temp.append(a)
+            visited.append(a)
+          if b not in visited or b.isdigit():
+            visited.append(b)
+            temp.append(b)
+        invariants.append(temp) ## Questo va un tab indietro, alla fine...
+      else:
+        for a,b in closure:
+          if a.find('max') != -1 or b.find('max') != -1 or a.find('min') != -1 or b.find('min') != -1:
+            continue
+          else:
+            invariants.append((a,b))
+
+  for i in invariants:
+    if key == '==':
+      print(f' {key} '.join(map(str,reversed(sorted(i)))))
+    else:
+      print(f'{i[0]} {key} {i[1]}')
 
 ## Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 ## il brodo alla tesi...
 #pos = nx.spring_layout(G)
 #pos = nx.planar_layout(G)
 #pos = nx.circular_layout(G)
-#nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1000,width=2,with_labels=True)
 #nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,edgelist=edges_eq,width=2,with_labels=True)
 
 #nx.draw_networkx_nodes(G,pos,node_color='#00b4d9',node_size=1000,cmap=plt.get_cmap('jet'))
