@@ -64,10 +64,10 @@ output = output.decode("utf-8")
 
 # taglio le prime righe dell'output di Daikon, che non servono,
 # così come l'ultima
-output=output.split('\n')[7:-2]
+output = output.split('\n')[7:-2]
 
 '''
-Qui transitive closure, se sapessi come farla!
+Qui transitive closure!
 '''
 # Copia dell'output di Daikon
 invs = output.copy()
@@ -80,6 +80,7 @@ edges_ge = list()
 edges_lt = list()
 edges_le = list()
 edges_eq = list()
+one_of = list()
 
 for inv in invs:
   # 'Sta roba devo cavarla per forza...
@@ -88,7 +89,6 @@ for inv in invs:
   if (inv.find('aprogram.point:::POINT') != -1 and inv.find('not') == -1) or \
       inv.find('=========') != -1 or \
       inv.find('==>') != -1 or \
-      inv.find('one of') != -1 or \
       inv.find('!=') != -1 or \
       inv.find('%') != -1 or \
       inv.find('prev') != -1: 
@@ -97,6 +97,8 @@ for inv in invs:
   elif inv.find('aprogram.point:::POINT') != -1 and \
       inv.find('not') != -1:
       break
+  elif inv.find('one of') != -1:
+    one_of.append(inv)
   else:
     a,rel,b = inv.split(' ')[:3]
     if b.isdigit():
@@ -117,13 +119,17 @@ for inv in invs:
       edges_eq.append((a,b))
       edges_eq.append((b,a))
 
+## Stampo le condizioni "one of" in testa
+for of in one_of:
+  print(of)
+print('===================')
+
+## Archi del grafo divisi per segno della relazione
 edges['=='] = edges_eq
 edges['>'] = edges_gt
 edges['>='] = edges_ge
 edges['<'] = edges_lt
 edges['<='] = edges_le
-
-#G.add_edges_from(edges_ge, label='>=')
 
 for key, edge_list in edges.items():
   invariants = list()
@@ -135,38 +141,57 @@ for key, edge_list in edges.items():
     if G.degree(g) == 0:
       G.remove_node(g)
 
+  ## Ricavo le uguaglianze con una dfs sul grafo.
+  ## Per come ho scritto il codice, una bfs produce
+  ## lo stesso identico output...
   if key == '==':
     visited = list()
     for v in list(G.nodes()):
-      if key == '==' and v not in visited:
+      if v not in visited:
         temp = []
-        if key == '==':
-          closure_dfs = list(nx.dfs_edges(G, source=v))
-          for a,b in closure_dfs:
-            if a not in visited:
-              temp.append(a)
-              visited.append(a)
-            if b not in visited or b.isdigit():
-              visited.append(b)
-              temp.append(b)
-          invariants.append(temp) ## Questo va un tab indietro, alla fine...
-  else:
-    path_list=list()
-    roots = []
-    leaves = []
+        # DFS
+        closure_dfs = list(nx.dfs_edges(G, source=v))
 
-    for node in G.nodes :
+        # "Concateno" di fatto le tuple che fanno parte
+        # della DFS
+        for a,b in closure_dfs:
+          if a not in visited:
+            temp.append(a)
+            visited.append(a)
+          if b not in visited or b.isdigit():
+            visited.append(b)
+            temp.append(b)
+
+        # Inserisco la lista di nodi nel listone delle invarianti
+        invariants.append(temp)
+
+  ## Per le disugualianze, la dfs risulta incasinata da trattare poi.
+  ## Ergo, sfrutto i gradi in entrata e in uscita dai nodi: se 
+  ## in_degree(nodo) = 0 allora ho una radice, se out_degree(g) = 0
+  ## allora ho una foglia. Tutti gli altri sono nodi intermedi.
+  ## Da lì ricostruisco i singoli path radice-foglia.
+  else:
+    path_list = list() # lista path
+    roots = [] # lista radici
+    leaves = [] # lista foglie
+
+    for node in G.nodes() :
+      # tolgo max e min da root e foglie - sarebbe meglio solo da
+      # root, forse...
       if node.find('max') == -1 and node.find('min') == -1:
         if G.in_degree(node) == 0 : # it's a root
           roots.append(node)
         elif G.out_degree(node) == 0 : # it's a leaf
           leaves.append(node)
 
+    # Calcolo i path radice-foglia e li appendo alla lista
     for root in roots :
       for leaf in leaves :
         for path in nx.all_simple_paths(G, root, leaf) :
           path_list.append(path)
 
+    # Ripulisco la lista dei path eliminando quelli che sono
+    # inclusi in un altro path
     for i in path_list[:]:
       for j in path_list[:]:
         if j != i:
@@ -176,18 +201,20 @@ for key, edge_list in edges.items():
     for p in path_list:
       invariants.append(p)
 
+  ## Stampo le invarianti
   for val in invariants:
     if key == '==':
       print(f' {key} '.join(map(str,reversed(sorted(val))))) 
-    else:
+    elif key == '>' or key == '>=':
       print(f' {key} '.join(map(str,val)))
+    else:
+      print(f' {key} '.join(map(str,reversed(val))))
   print('===================')
 
 ## Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 ## il brodo alla tesi...
-'''
 G = nx.MultiDiGraph() ## Debug
-G.add_edges_from(edges_gt) ## Debug
+G.add_edges_from(edges_lt) ## Debug
 for g in list(G.nodes())[:]:
   if g.find('min') != -1 or g.find('max') != -1:
     G.remove_node(g)
@@ -209,7 +236,6 @@ nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,width=2,with_labels=T
 #ax.margins(0.20)
 #plt.axis("off")
 plt.show()
-'''
 
 '''
 fine test grafo
