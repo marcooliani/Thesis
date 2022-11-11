@@ -3,7 +3,6 @@
 import sys
 import os
 import subprocess
-import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import argparse
@@ -70,18 +69,6 @@ output=output.split('\n')[7:-2]
 '''
 Qui transitive closure, se sapessi come farla!
 '''
-#datasetPLC = pd.read_csv(dataset)
-#dataset_col = list(datasetPLC.columns)
-
-#for n in dataset_col[:]:
-#  if n.find('prev') != -1:
-#    dataset_col.remove(n)
-
-# Creo il grafo delle invarianti. I nodi sono le colonne
-# del dataset
-#G = nx.MultiDiGraph()
-#G.add_nodes_from(dataset_col)
-
 # Copia dell'output di Daikon
 invs = output.copy()
 
@@ -140,7 +127,6 @@ edges['<='] = edges_le
 
 for key, edge_list in edges.items():
   invariants = list()
-  visited = list()
 
   G = nx.MultiDiGraph()
   G.add_edges_from(edge_list)
@@ -149,39 +135,67 @@ for key, edge_list in edges.items():
     if G.degree(g) == 0:
       G.remove_node(g)
 
-  for v in list(G.nodes()):
-    if v not in visited:
-      temp = []
-      # Faccio una DFS per trovare le chiusure transitive
-      closure = list(nx.dfs_edges(G, source=v))
-      if key == '==':
-        for a,b in closure:
-          if a not in visited:
-            temp.append(a)
-            visited.append(a)
-          if b not in visited or b.isdigit():
-            visited.append(b)
-            temp.append(b)
-        invariants.append(temp) ## Questo va un tab indietro, alla fine...
-      else:
-        for a,b in closure:
-          if a.find('max') != -1 or b.find('max') != -1 or a.find('min') != -1 or b.find('min') != -1:
-            continue
-          else:
-            invariants.append((a,b))
+  if key == '==':
+    visited = list()
+    for v in list(G.nodes()):
+      if key == '==' and v not in visited:
+        temp = []
+        if key == '==':
+          closure_dfs = list(nx.dfs_edges(G, source=v))
+          for a,b in closure_dfs:
+            if a not in visited:
+              temp.append(a)
+              visited.append(a)
+            if b not in visited or b.isdigit():
+              visited.append(b)
+              temp.append(b)
+          invariants.append(temp) ## Questo va un tab indietro, alla fine...
+  else:
+    path_list=list()
+    roots = []
+    leaves = []
 
-  for i in invariants:
+    for node in G.nodes :
+      if node.find('max') == -1 and node.find('min') == -1:
+        if G.in_degree(node) == 0 : # it's a root
+          roots.append(node)
+        elif G.out_degree(node) == 0 : # it's a leaf
+          leaves.append(node)
+
+    for root in roots :
+      for leaf in leaves :
+        for path in nx.all_simple_paths(G, root, leaf) :
+          path_list.append(path)
+
+    for i in path_list[:]:
+      for j in path_list[:]:
+        if j != i:
+          if all(item in i for item in j):
+            path_list.remove(j)
+      
+    for p in path_list:
+      invariants.append(p)
+
+  for val in invariants:
     if key == '==':
-      print(f' {key} '.join(map(str,reversed(sorted(i)))))
+      print(f' {key} '.join(map(str,reversed(sorted(val))))) 
     else:
-      print(f'{i[0]} {key} {i[1]}')
+      print(f' {key} '.join(map(str,val)))
+  print('===================')
 
 ## Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 ## il brodo alla tesi...
+'''
+G = nx.MultiDiGraph() ## Debug
+G.add_edges_from(edges_gt) ## Debug
+for g in list(G.nodes())[:]:
+  if g.find('min') != -1 or g.find('max') != -1:
+    G.remove_node(g)
+
 #pos = nx.spring_layout(G)
 #pos = nx.planar_layout(G)
-#pos = nx.circular_layout(G)
-#nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,edgelist=edges_eq,width=2,with_labels=True)
+pos = nx.circular_layout(G)
+nx.draw_networkx(G,pos,node_color='#00b4d9',node_size=1200,width=2,with_labels=True)
 
 #nx.draw_networkx_nodes(G,pos,node_color='#00b4d9',node_size=1000,cmap=plt.get_cmap('jet'))
 #nx.draw_networkx_labels(G, pos)
@@ -194,7 +208,8 @@ for key, edge_list in edges.items():
 #ax.set_title('')
 #ax.margins(0.20)
 #plt.axis("off")
-#plt.show()
+plt.show()
+'''
 
 '''
 fine test grafo
