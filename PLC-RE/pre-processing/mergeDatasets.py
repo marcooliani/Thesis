@@ -30,9 +30,11 @@ else:
     nrows = int(config['DEFAULTS']['number_of_rows'])
 
 if args.skiprows:
+    # Skip di tutte le prime row righe tranne l'header
     skiprows = [row for row in range(1, args.skiprows)]
 else:
-    skiprows = config['DEFAULTS']['skip_rows']
+    # skiprows = 0
+    skiprows = [row for row in range(1, int(config['DEFAULTS']['skip_rows']))]
 
 if args.directory is not None:
     directory = args.directory
@@ -166,8 +168,8 @@ print('************* DATASET FOR PROCESS MINING GENERATED SUCCESSFULLY *********
 print('************************************************************************************')
 
 # drop timestamps is NOT needed in Daikon
-# inv_datasets = mining_datasets.drop(['TimeStamp'], axis=1, errors='ignore')
-inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
+# inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
+inv_datasets = daikon_datasets.drop(config['DATASET']['timestamp_col'], axis=1, errors='ignore')
 
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
