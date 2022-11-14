@@ -27,7 +27,7 @@ else:
 if args.nrows:
     nrows = args.nrows
 else:
-    nrows = config['DEFAULTS']['number_of_rows']
+    nrows = int(config['DEFAULTS']['number_of_rows'])
 
 if args.skiprows:
     skiprows = [row for row in range(1, args.skiprows)]
