@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from array import array
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
+import configparser
 
 from matplotlib import gridspec
 
@@ -13,10 +13,13 @@ parser.add_argument('-f', "--filename", type=str, help="CSV file to analyze")
 parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include", required=True)
 args = parser.parse_args()
 
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
 if args.filename is not None:
     filename = args.filename
 else:
-    filename = 'PLC_SWaT_Dataset.csv'
+    filename = config['DEFAULTS']['dataset_file']
 
 registers = [r for r in args.registers]
 

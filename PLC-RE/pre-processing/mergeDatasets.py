@@ -4,6 +4,7 @@ import pandas as pd
 import glob
 import csv
 import argparse
+import configparser
 import math
 
 parser = argparse.ArgumentParser()
@@ -15,25 +16,29 @@ parser.add_argument('-o', "--output", type=str, help="output file")
 parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
 args = parser.parse_args()
 
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
 if args.granularity:
     granularity = args.granularity
 else:
-    granularity = 15
+    granularity = int(config['DEFAULTS']['granularity'])
 
 if args.nrows:
     nrows = args.nrows
 else:
-    nrows = 86400
+    nrows = config['DEFAULTS']['number_of_rows']
 
 if args.skiprows:
     skiprows = [row for row in range(1, args.skiprows)]
 else:
-    skiprows = ''
+    skiprows = config['DEFAULTS']['skip_rows']
 
 if args.directory is not None:
     directory = args.directory
 else:
-    directory = '../../datasets_SWaT'
+    # Da rivedere...
+    directory = config['PATHS']['input_dataset_directory']
 
 if args.output is not None:
     if args.output.split('.')[-1] != 'csv':
@@ -41,7 +46,7 @@ if args.output is not None:
         exit(1)
     output_file = args.output
 else:
-    output_file = 'PLC_SWaT_Dataset.csv'
+    output_file = config['DEFAULTS']['dataset_file']
 
 if args.plcs is not None:
     plcs = [p for p in args.plcs]
@@ -50,7 +55,7 @@ else:
 
 # CSV files converted from JSON PLCs readings (convertoCSV.py)
 # filenames = glob.glob("PLC_CSV/*.csv")
-if plcs != []:
+if plcs:
     filenames = [f'{directory}/' + p for p in plcs]
 else:
     filenames = glob.glob(f"{directory}/*.csv")
@@ -75,8 +80,8 @@ def cleanNull(filenames):
 # Add previous values of registers
 def enrich_df(data_set):
     # Set registers names that holds measurements and actuations
-    val_cols = data_set.columns[data_set.columns.str.contains(pat='mv[0-9]{3}|p[0-9]{3}', case=False, regex=True)]
-    val_cols_slopes = data_set.columns[data_set.columns.str.contains(pat='LIT', case=False, regex=True)]
+    val_cols = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['prev_cols_list'], case=False, regex=True)]
+    val_cols_slopes = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['slope_cols_list'], case=False, regex=True)]
 
     # Genero e aggiungo le colonne prev_
     for col in val_cols:
@@ -88,9 +93,9 @@ def enrich_df(data_set):
         for i in range(len(data_var) - 1):
             prev_val.append(data_var[i])
 
-        data_set.insert(len(data_set.columns), 'prev_' + col, prev_val)
+        data_set.insert(len(data_set.columns), config['DATASET']['prev_cols_prefix'] + col, prev_val)
 
-    ## Genero e aggiungo le colonne slope_
+    # Genero e aggiungo le colonne slope_
     for col in val_cols_slopes:
         mean_slope = list()
         max_val = list()
@@ -121,9 +126,9 @@ def enrich_df(data_set):
             max_val.append(max_lvl)
             min_val.append(min_lvl)
 
-        data_set.insert(len(data_set.columns), 'slope_' + col, mean_slope)
-        data_set.insert(len(data_set.columns), 'max_' + col, max_val)
-        data_set.insert(len(data_set.columns), 'min_' + col, min_val)
+        data_set.insert(len(data_set.columns), config['DATASET']['slope_cols_prefix'] + col, mean_slope)
+        data_set.insert(len(data_set.columns), config['DATASET']['max_prefix'] + col, max_val)
+        data_set.insert(len(data_set.columns), config['DATASET']['min_prefix'] + col, min_val)
 
 
 # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)

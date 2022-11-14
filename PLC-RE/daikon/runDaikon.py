@@ -5,6 +5,7 @@ import subprocess
 import networkx as nx
 import matplotlib.pyplot as plt
 import argparse
+import configparser
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
@@ -12,13 +13,16 @@ parser.add_argument('-o', "--output", type=str, help="output file (TXT format)")
 parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
 args = parser.parse_args()
 
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
 if args.filename is not None:
     if args.filename.split('.')[-1] != "csv":
         print("Invalid file format (must be .csv). Aborting")
         exit(1)
     dataset = args.filename
 else:
-    dataset = 'PLC_SWaT_Dataset.csv'
+    dataset = config['DEFAULTS']['dataset_file']
 
 dataset_name = dataset.split('.')[0]
 
@@ -28,14 +32,14 @@ if args.output is not None:
         exit(1)
     output_file = args.output
 else:
-    output_file = "daikon_results_cond.txt"
+    output_file = config['DAIKON']['daikon_output_file']
 
 if args.conditions is not None:
     conditions = [c for c in args.conditions]
 else:
     conditions = None
 
-inv_conditions_file = "Inv_conditions.spinfo"
+inv_conditions_file = config['DAIKON']['inv_conditions_file']
 
 start_dir = os.getcwd()
 
@@ -108,7 +112,8 @@ for inv in invs:
     else:
         a, rel, b = inv.split(' ')[:3]
 
-        if b.find('prev') != -1 or a.find('prev') != -1:
+        if b.find(config['DATASET']['prev_cols_prefix']) != -1 or \
+                a.find(config['DATASET']['prev_cols_prefix']) != -1:
             continue
         # Le condizioni vanno trattate separatamente, altrimenti
         # non riesco a ricostruire correttamente il tutto
@@ -188,7 +193,8 @@ for key, edge_list in edges.items():
         for node in G.nodes():
             # tolgo max e min da root e foglie - sarebbe meglio solo da
             # root, forse...
-            if node.find('max') != -1 or node.find('min') != -1:
+            if node.find(config['DATASET']['max_prefix']) != -1 or \
+                    node.find(config['DATASET']['min_prefix']) != -1:
                 continue
             else:
                 if G.in_degree(node) == 0:  # it's a root

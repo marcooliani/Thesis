@@ -2,11 +2,15 @@
 
 import pandas as pd
 import sys
+import configparser
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro
 from scipy.stats import chisquare
 
-df = pd.read_csv('../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv')
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
+df = pd.read_csv('../daikon/Daikon_Invariants/' + config['DEFAULTS']['dataset_file'])
 
 print(f"Chi-squared test for uniformity")
 if __name__ == '__main__':
@@ -38,7 +42,7 @@ print(f"Stats of " + str(sys.argv[1]))
 print("Sample mean = %g; Stddev = %g; max = %g; min = %g for %i values" 
       % (mn, sd, max(data), min(data), size))
  
-n, bins, bars = plt.hist(data,bins='auto',color='blue', alpha=0.7, rwidth=0.85)
+n, bins, bars = plt.hist(data, bins='auto', color='blue', alpha=0.7, rwidth=0.85)
 
 '''
 for i in range(len(bins)-1):
