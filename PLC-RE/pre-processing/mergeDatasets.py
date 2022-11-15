@@ -118,6 +118,7 @@ def enrich_df(data_set):
                 mean_slope.append(0)
             else:
                 slope = round((data_var[i] - prev_lvl) / granularity, 1)
+                # slope = round((data_var[i] - prev_lvl), 1)
                 mean_slope.append(slope)
                 prev_lvl = data_var[i]
 
