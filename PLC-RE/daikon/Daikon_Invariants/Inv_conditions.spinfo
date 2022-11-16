@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-slope_LIT101 > 0
+P101 == 2 && prev_P101 == 1

@@ -93,18 +93,28 @@ for sec in sections:
     edges_le = list()
     edges_eq = list()
     one_of = list()
+    not_equal = dict()
     implications = list()
 
     for inv in sec:
         # 'Sta roba devo cavarla per forza...
         # Ah, find() mi sa che trova l'indice della stringa cercata: se non la trova,
         # allora -1
-        if inv.find('one of') != -1:
-            one_of.append(inv)
-        elif inv.find('<==>') != -1 or inv.find(' ==>') != -1:
+        if inv.find('<==>') != -1 or inv.find(' ==>') != -1:
             inv = inv.replace('(', '').replace(')', '')
             implications.append(inv)
-        elif inv.find('!=') != -1 or inv.find('%') != -1 or inv.find('prev') != -1 or inv == '':
+        elif inv.find('one of') != -1:
+            one_of.append(inv)
+        elif inv.find('!=') != -1 and inv.find('prev') == -1:
+            a, b = inv.split(' != ')
+            if a not in not_equal:
+                not_equal[a] = []
+            if a in not_equal:
+                not_equal[a].append(b)
+            if b in not_equal:
+                not_equal[b].append(a)
+
+        elif inv.find('%') != -1 or inv.find('prev') != -1 or inv == '':
             continue
         else:
             a, rel, b = inv.split(' ')[:3]
@@ -132,8 +142,14 @@ for sec in sections:
     print('----------------------')
 
     # Stampo le implicazioni
-    for imp in implications:
-        print(imp)
+    if implications:
+        for imp in implications:
+            print(imp)
+        print('----------------------')
+
+    for k, l in not_equal.items():
+        print(f'{k} != {", ".join(map(str, l))}')
+    print('----------------------')
 
     # Archi del grafo divisi per segno della relazione
     edges['=='] = edges_eq
@@ -219,8 +235,10 @@ for sec in sections:
         for val in invariants:
             if key == '==':
                 print(f' {key} '.join(map(str, reversed(sorted(val)))))
-            else:
+            elif key == '>' or key == '>=':
                 print(f' {key} '.join(map(str, val)))
+            elif key == '<' or key == '<=':
+                print(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
         if invariants:
             print('----------------------')
 
