@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-P101 == 2 && prev_P101 == 1
+MV101 == 2

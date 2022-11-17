@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 import argparse
 import configparser
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-parser.add_argument('-o', "--output", type=str, help="output file (TXT format)")
-parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
-args = parser.parse_args()
-
 config = configparser.ConfigParser()
 config.read('../config.ini')
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+parser.add_argument('-d', "--directory", type=str, help="directory where save output files")
+parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
+args = parser.parse_args()
 
 if args.filename is not None:
     if args.filename.split('.')[-1] != "csv":
@@ -25,15 +25,15 @@ if args.filename is not None:
 else:
     dataset = config['DEFAULTS']['dataset_file']
 
-dataset_name = dataset.split('.')[0]
+dataset_name = dataset.split('/')[-1].split('.')[0]
 
-if args.output is not None:
+if args.directory is not None:
     if args.output.split('.')[-1] != 'txt':
         print("Invalid file format (must be .txt). Aborting")
         exit(1)
-    output_file = args.output
+    output_dir = args.directory
 else:
-    output_file = config['DAIKON']['daikon_output_file']
+    output_dir = config['DAIKON']['daikon_output_dir']
 
 if args.conditions is not None:
     conditions = [c for c in args.conditions]
@@ -41,6 +41,10 @@ else:
     conditions = None
 
 inv_conditions_file = config['DAIKON']['inv_conditions_file']
+
+daikon_output_files = [config['DAIKON']['daikon_results_general_file'],
+                       config['DAIKON']['daikon_results_condition_file']]
+daikon_output_files_index = 0
 
 start_dir = os.getcwd()
 
@@ -80,12 +84,11 @@ output = output.split('\n')[8:-2]
 '''
 Qui transitive closure!
 '''
-# Copia dell'output di Daikon
-# invs = output.copy()
 
-# for inv in invs:
 for sec in sections:
     print('====================')
+    sec_out = list() # output finale della sezione (che poi va scritto su file)
+
     edges = dict()
     edges_gt = list()
     edges_ge = list()
@@ -103,8 +106,10 @@ for sec in sections:
         if inv.find('<==>') != -1 or inv.find(' ==>') != -1:
             inv = inv.replace('(', '').replace(')', '')
             implications.append(inv)
+            sec_out.append(inv)
         elif inv.find('one of') != -1:
             one_of.append(inv)
+            sec_out.append(inv)
         elif inv.find('!=') != -1 and inv.find('prev') == -1:
             a, b = inv.split(' != ')
             if a not in not_equal:
@@ -149,6 +154,7 @@ for sec in sections:
 
     for k, l in not_equal.items():
         print(f'{k} != {", ".join(map(str, l))}')
+        sec_out.append(f'{k} != {", ".join(map(str, l))}')
     print('----------------------')
 
     # Archi del grafo divisi per segno della relazione
@@ -235,12 +241,20 @@ for sec in sections:
         for val in invariants:
             if key == '==':
                 print(f' {key} '.join(map(str, reversed(sorted(val)))))
+                sec_out.append(f' {key} '.join(map(str, reversed(sorted(val)))))
             elif key == '>' or key == '>=':
                 print(f' {key} '.join(map(str, val)))
+                sec_out.append(f' {key} '.join(map(str, val)))
             elif key == '<' or key == '<=':
                 print(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
+                sec_out.append(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
         if invariants:
             print('----------------------')
+
+    # Scrivo il risultato finale sui file
+    with open(daikon_output_files[daikon_output_files_index], 'w') as of:
+        of.write('\n'.join(map(str, sec_out)))
+    daikon_output_files_index += 1
 
 # Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
 # il brodo alla tesi...
@@ -274,8 +288,8 @@ fine test grafo
 '''
 
 # Scrivo l'output finale su file (bisognerebbe fare la transitive closure, prima)
-print(f'Writing output file {output_file} ...')
-with open(output_file, 'w') as f:
+print(f'Writing output file {config["DAIKON"]["daikon_results_file_original"]} ...')
+with open(config['DAIKON']['daikon_results_file_original'], 'w') as f:
     f.write("\n".join(map(str, output)))
 
 print("Invariants generated successfully")
