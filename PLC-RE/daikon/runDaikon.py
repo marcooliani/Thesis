@@ -13,7 +13,6 @@ config.read('../config.ini')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-parser.add_argument('-d', "--directory", type=str, help="directory where save output files")
 parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
 args = parser.parse_args()
 
@@ -27,23 +26,12 @@ else:
 
 dataset_name = dataset.split('/')[-1].split('.')[0]
 
-if args.directory is not None:
-    if args.output.split('.')[-1] != 'txt':
-        print("Invalid file format (must be .txt). Aborting")
-        exit(1)
-    output_dir = args.directory
-else:
-    output_dir = config['DAIKON']['daikon_output_dir']
-
 if args.conditions is not None:
     conditions = [c for c in args.conditions]
 else:
     conditions = None
 
 inv_conditions_file = config['DAIKON']['inv_conditions_file']
-
-daikon_output_files = [config['DAIKON']['daikon_results_general_file'],
-                       config['DAIKON']['daikon_results_condition_file']]
 daikon_output_files_index = 0
 
 start_dir = os.getcwd()
@@ -59,27 +47,34 @@ if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {dataset}', shell=Tru
     print("Error generating invariants. Aborting.")
     exit(1)
 
+print("Generating invariants with conditions ...")
 if conditions is not None:
     with open(inv_conditions_file, 'w') as f:
         f.write('PPT_NAME aprogram.point:::POINT\n')
         for c in conditions:
             f.write(c + '\n')
+    conditions.insert(0, f'General_{" ".join(map(str, conditions))}')
 
-print("Generating invariants with conditions ...")
-output = subprocess.check_output(
-    f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace {inv_conditions_file}',
-    shell=True)
+    output = subprocess.check_output(
+        f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace '
+        f'{inv_conditions_file}', shell=True)
+else:
+    output = subprocess.check_output(
+        f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
+        shell=True)
 
 # Visto che l'output è codificato in qualche maniera, riportiamolo allo stato "originario"
 # come stringa
 output = output.decode("utf-8")
 
 output = re.sub('[=]{6,}', 'SPLIT_HERE', output)
-sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
+# sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
+sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[1:] for sec in
+                                                                output.split('SPLIT_HERE\n')][2::2]
 
 # taglio le prime righe dell'output di Daikon, che non servono,
 # così come l'ultima
-output = output.split('\n')[8:-2]
+# output = output.split('\n')[8:-2]
 
 '''
 Qui transitive closure!
@@ -87,7 +82,7 @@ Qui transitive closure!
 
 for sec in sections:
     print('====================')
-    sec_out = list() # output finale della sezione (che poi va scritto su file)
+    sec_out = list()  # output finale della sezione (che poi va scritto su file)
 
     edges = dict()
     edges_gt = list()
@@ -119,7 +114,7 @@ for sec in sections:
             if b in not_equal:
                 not_equal[b].append(a)
 
-        elif inv.find('%') != -1 or inv.find('prev') != -1 or inv == '':
+        elif inv.find('%') != -1 or inv.find('prev') != -1 or inv == '' or inv.find('Exiting') != -1:
             continue
         else:
             a, rel, b = inv.split(' ')[:3]
@@ -252,7 +247,12 @@ for sec in sections:
             print('----------------------')
 
     # Scrivo il risultato finale sui file
-    with open(daikon_output_files[daikon_output_files_index], 'w') as of:
+    print(f'Writing output file daikon_results_{conditions[daikon_output_files_index].replace(" ", "_")}.txt ...')
+    with open(
+            f'{config["DAIKON"]["daikon_results_dir"]}/daikon_results_{conditions[daikon_output_files_index].replace(" ", "_")}.txt',
+            'w') as of:
+        of.write(conditions[daikon_output_files_index] + '\n')
+        of.write('===========================\n')
         of.write('\n'.join(map(str, sec_out)))
     daikon_output_files_index += 1
 
@@ -288,9 +288,9 @@ fine test grafo
 '''
 
 # Scrivo l'output finale su file (bisognerebbe fare la transitive closure, prima)
-print(f'Writing output file {config["DAIKON"]["daikon_results_file_original"]} ...')
-with open(config['DAIKON']['daikon_results_file_original'], 'w') as f:
-    f.write("\n".join(map(str, output)))
+# print(f'Writing output file {config["DAIKON"]["daikon_results_file_original"]} ...')
+# with open(config['DAIKON']['daikon_results_file_original'], 'w') as f:
+#    f.write("\n".join(map(str, output)))
 
 print("Invariants generated successfully")
 os.chdir(start_dir)
