@@ -79,9 +79,7 @@ sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[
 '''
 Qui transitive closure!
 '''
-
 for sec in sections:
-    print('====================')
     sec_out = list()  # output finale della sezione (che poi va scritto su file)
 
     edges = dict()
@@ -95,8 +93,7 @@ for sec in sections:
     implications = list()
 
     for inv in sec:
-        # 'Sta roba devo cavarla per forza...
-        # Ah, find() mi sa che trova l'indice della stringa cercata: se non la trova,
+        # find() trova l'indice della stringa cercata: se non la trova,
         # allora -1
         if inv.find('<==>') != -1 or inv.find(' ==>') != -1:
             inv = inv.replace('(', '').replace(')', '')
@@ -136,21 +133,8 @@ for sec in sections:
                 edges_eq.append((a, b))
                 edges_eq.append((b, a))
 
-    # Stampo le condizioni "one of" in testa
-    for of in one_of:
-        print(of)
-    print('----------------------')
-
-    # Stampo le implicazioni
-    if implications:
-        for imp in implications:
-            print(imp)
-        print('----------------------')
-
     for k, l in not_equal.items():
-        print(f'{k} != {", ".join(map(str, l))}')
         sec_out.append(f'{k} != {", ".join(map(str, l))}')
-    print('----------------------')
 
     # Archi del grafo divisi per segno della relazione
     edges['=='] = edges_eq
@@ -235,16 +219,11 @@ for sec in sections:
         # Stampo le invarianti
         for val in invariants:
             if key == '==':
-                print(f' {key} '.join(map(str, reversed(sorted(val)))))
                 sec_out.append(f' {key} '.join(map(str, reversed(sorted(val)))))
             elif key == '>' or key == '>=':
-                print(f' {key} '.join(map(str, val)))
                 sec_out.append(f' {key} '.join(map(str, val)))
             elif key == '<' or key == '<=':
-                print(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
                 sec_out.append(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
-        if invariants:
-            print('----------------------')
 
     # Scrivo il risultato finale sui file
     print(f'Writing output file daikon_results_{conditions[daikon_output_files_index].replace(" ", "_")}.txt ...')
