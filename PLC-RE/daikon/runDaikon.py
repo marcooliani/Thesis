@@ -4,148 +4,140 @@ import os
 import re
 import subprocess
 import networkx as nx
-import matplotlib.pyplot as plt
 import argparse
 import configparser
 
-config = configparser.ConfigParser()
-config.read('../config.ini')
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
-args = parser.parse_args()
+class RunDaikon:
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+        self.config.read('../config.ini')
 
-if args.filename is not None:
-    if args.filename.split('.')[-1] != "csv":
-        print("Invalid file format (must be .csv). Aborting")
-        exit(1)
-    dataset = args.filename
-else:
-    dataset = config['DEFAULTS']['dataset_file']
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+        parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
+        self.args = parser.parse_args()
 
-dataset_name = dataset.split('/')[-1].split('.')[0]
+        self.dataset = None
+        self.conditions = None
 
-if args.conditions is not None:
-    conditions = [c for c in args.conditions]
-else:
-    conditions = None
-
-inv_conditions_file = config['DAIKON']['inv_conditions_file']
-daikon_output_files_index = 0
-
-start_dir = os.getcwd()
-
-print("Process start")
-
-if os.chdir('Daikon_Invariants/'):
-    print("Error generating invariants. Aborting.")
-    exit(1)
-
-print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
-if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {dataset}', shell=True):
-    print("Error generating invariants. Aborting.")
-    exit(1)
-
-print("Generating invariants with conditions ...")
-if conditions is not None:
-    with open(inv_conditions_file, 'w') as f:
-        f.write('PPT_NAME aprogram.point:::POINT\n')
-        for c in conditions:
-            f.write(c + '\n')
-    conditions.insert(0, f'General_{" ".join(map(str, conditions))}')
-
-    output = subprocess.check_output(
-        f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace '
-        f'{inv_conditions_file}', shell=True)
-else:
-    output = subprocess.check_output(
-        f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
-        shell=True)
-
-# Visto che l'output è codificato in qualche maniera, riportiamolo allo stato "originario"
-# come stringa
-output = output.decode("utf-8")
-
-output = re.sub('[=]{6,}', 'SPLIT_HERE', output)
-# sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
-sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[1:] for sec in
-                                                                output.split('SPLIT_HERE\n')][2::2]
-
-# taglio le prime righe dell'output di Daikon, che non servono,
-# così come l'ultima
-# output = output.split('\n')[8:-2]
-
-'''
-Qui transitive closure!
-'''
-for sec in sections:
-    sec_out = list()  # output finale della sezione (che poi va scritto su file)
-
-    edges = dict()
-    edges_gt = list()
-    edges_ge = list()
-    edges_lt = list()
-    edges_le = list()
-    edges_eq = list()
-    one_of = list()
-    not_equal = dict()
-    implications = list()
-
-    for inv in sec:
-        # find() trova l'indice della stringa cercata: se non la trova,
-        # allora -1
-        if inv.find('<==>') != -1 or inv.find(' ==>') != -1:
-            inv = inv.replace('(', '').replace(')', '')
-            implications.append(inv)
-            sec_out.append(inv)
-        elif inv.find('one of') != -1:
-            one_of.append(inv)
-            sec_out.append(inv)
-        elif inv.find('!=') != -1 and inv.find('prev') == -1:
-            a, b = inv.split(' != ')
-            if a not in not_equal:
-                not_equal[a] = []
-            if a in not_equal:
-                not_equal[a].append(b)
-            if b in not_equal:
-                not_equal[b].append(a)
-
-        elif inv.find('%') != -1 or inv.find('prev') != -1 or inv == '' or inv.find('Exiting') != -1:
-            continue
+    def check_args(self):
+        if self.args.filename is not None:
+            if self.args.filename.split('.')[-1] != "csv":
+                print("Invalid file format (must be .csv). Aborting")
+                exit(1)
+            self.dataset = self.args.filename
         else:
-            a, rel, b = inv.split(' ')[:3]
+            self.dataset = self.config['DEFAULTS']['dataset_file']
 
-            if b.find(config['DATASET']['prev_cols_prefix']) != -1 or \
-                    a.find(config['DATASET']['prev_cols_prefix']) != -1:
+        if self.args.conditions is not None:
+            self.conditions = [c for c in self.args.conditions]
+        else:
+            self.conditions = None
+
+    def call_daikon(self):
+        dataset_name = self.dataset.split('/')[-1].split('.')[0]
+
+        print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
+        if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):
+            print("Error generating invariants. Aborting.")
+            exit(1)
+
+        if self.conditions is not None:
+            inv_conditions_file = self.config['DAIKON']['inv_conditions_file']
+
+            print("Generating invariants with conditions ...")
+            with open(inv_conditions_file, 'w') as f:
+                f.write('PPT_NAME aprogram.point:::POINT\n')
+                for c in self.conditions:
+                    f.write(c + '\n')
+            self.conditions.insert(0, f'General_{" ".join(map(str, self.conditions))}')
+
+            output = subprocess.check_output(
+                f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace '
+                f'{inv_conditions_file}', shell=True)
+        else:
+            print("Generating invariants with no conditions ...")
+            output = subprocess.check_output(
+                f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
+                shell=True)
+
+        return output
+
+    @staticmethod
+    def split_daikon(output):
+        # Visto che l'output è codificato in qualche maniera, riportiamolo allo stato "originario"
+        # come stringa
+        output = output.decode("utf-8")
+
+        output = re.sub('[=]{6,}', 'SPLIT_HERE', output)
+        # sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
+        sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[1:] for sec in
+                                                                        output.split('SPLIT_HERE\n')][2::2]
+        return sections
+
+    def parse_daikon(self, section, section_output):
+        not_equal = dict()
+        edges = dict()
+        edges_gt = list()
+        edges_ge = list()
+        edges_lt = list()
+        edges_le = list()
+        edges_eq = list()
+
+        for invariant in section:
+            # find() trova l'indice della stringa cercata: se non la trova,
+            # allora -1
+            if invariant.find('<==>') != -1 or invariant.find(' ==>') != -1:
+                invariant = invariant.replace('(', '').replace(')', '')
+                section_output.append(invariant)
+            elif invariant.find('one of') != -1:
+                section_output.append(invariant)
+            elif invariant.find('!=') != -1 and invariant.find('prev') == -1:
+                a, b = invariant.split(' != ')
+                if a not in not_equal:
+                    not_equal[a] = []
+                if a in not_equal:
+                    not_equal[a].append(b)
+                if b in not_equal:
+                    not_equal[b].append(a)
+
+            elif invariant.find('%') != -1 or invariant.find('prev') != -1 or invariant == '' or invariant.find('Exiting') != -1:
                 continue
-            # Le condizioni vanno trattate separatamente, altrimenti
-            # non riesco a ricostruire correttamente il tutto
-            if rel == '>':
-                edges_gt.append((a, b))
-            elif rel == '>=':
-                edges_ge.append((a, b))
-            elif rel == '<':
-                edges_lt.append((a, b))
-            elif rel == '<=':
-                edges_le.append((a, b))
-            elif rel == '==':
-                edges_eq.append((a, b))
-                edges_eq.append((b, a))
+            else:
+                a, rel, b = invariant.split(' ')[:3]
 
-    for k, l in not_equal.items():
-        sec_out.append(f'{k} != {", ".join(map(str, l))}')
+                if b.find(self.config['DATASET']['prev_cols_prefix']) != -1 or \
+                        a.find(self.config['DATASET']['prev_cols_prefix']) != -1:
+                    continue
+                # Le condizioni vanno trattate separatamente, altrimenti
+                # non riesco a ricostruire correttamente il tutto
+                if rel == '>':
+                    edges_gt.append((a, b))
+                elif rel == '>=':
+                    edges_ge.append((a, b))
+                elif rel == '<':
+                    edges_lt.append((a, b))
+                elif rel == '<=':
+                    edges_le.append((a, b))
+                elif rel == '==':
+                    edges_eq.append((a, b))
+                    edges_eq.append((b, a))
 
-    # Archi del grafo divisi per segno della relazione
-    edges['=='] = edges_eq
-    edges['>'] = edges_gt
-    edges['>='] = edges_ge
-    edges['<'] = edges_lt
-    edges['<='] = edges_le
+        for k, l in not_equal.items():
+            section_output.append(f'{k} != {", ".join(map(str, l))}')
 
-    for key, edge_list in edges.items():
-        invariants = list()
+        # Archi del grafo divisi per segno della relazione
+        edges['=='] = edges_eq
+        edges['>'] = edges_gt
+        edges['>='] = edges_ge
+        edges['<'] = edges_lt
+        edges['<='] = edges_le
 
+        return edges
+
+    @staticmethod
+    def make_graph(edge_list):
         G = nx.MultiDiGraph()
         G.add_edges_from(edge_list)
 
@@ -153,6 +145,9 @@ for sec in sections:
             if G.degree(g) == 0:
                 G.remove_node(g)
 
+        return G
+
+    def make_dfs(self, G, key, invariant_list, section_output):
         # Ricavo le uguaglianze con una dfs sul grafo.
         # Per come ho scritto il codice, una bfs produce
         # lo stesso identico output...
@@ -175,7 +170,7 @@ for sec in sections:
                             temp.append(b)
 
                     # Inserisco la lista di nodi nel listone delle invarianti
-                    invariants.append(temp)
+                    invariant_list.append(temp)
 
         # Per le disugualianze, la dfs risulta incasinata da trattare poi.
         # Ergo, sfrutto i gradi in entrata e in uscita dai nodi: se
@@ -190,8 +185,8 @@ for sec in sections:
             for node in G.nodes():
                 # tolgo max e min da root e foglie - sarebbe meglio solo da
                 # root, forse...
-                if node.find(config['DATASET']['max_prefix']) != -1 or \
-                        node.find(config['DATASET']['min_prefix']) != -1:
+                if node.find(self.config['DATASET']['max_prefix']) != -1 or \
+                        node.find(self.config['DATASET']['min_prefix']) != -1:
                     continue
                 else:
                     if G.in_degree(node) == 0:  # it's a root
@@ -214,62 +209,54 @@ for sec in sections:
                             path_list.remove(j)
 
             for p in path_list:
-                invariants.append(p)
+                invariant_list.append(p)
 
-        # Stampo le invarianti
-        for val in invariants:
+        for val in invariant_list:
             if key == '==':
-                sec_out.append(f' {key} '.join(map(str, reversed(sorted(val)))))
+                section_output.append(f' {key} '.join(map(str, reversed(sorted(val)))))
             elif key == '>' or key == '>=':
-                sec_out.append(f' {key} '.join(map(str, val)))
+                section_output.append(f' {key} '.join(map(str, val)))
             elif key == '<' or key == '<=':
-                sec_out.append(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
+                section_output.append(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
 
-    # Scrivo il risultato finale sui file
-    print(f'Writing output file daikon_results_{conditions[daikon_output_files_index].replace(" ", "_")}.txt ...')
-    with open(
-            f'{config["DAIKON"]["daikon_results_dir"]}/daikon_results_{conditions[daikon_output_files_index].replace(" ", "_")}.txt',
-            'w') as of:
-        of.write(conditions[daikon_output_files_index] + '\n')
-        of.write('===========================\n')
-        of.write('\n'.join(map(str, sec_out)))
-    daikon_output_files_index += 1
+    def write_invariants_to_file(self, section_output, section_index):
+        # Scrivo il risultato finale sui file
+        print(f'Writing output file daikon_results_{self.conditions[section_index].replace(" ", "_")}.txt ...')
+        with open(
+                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{self.conditions[section_index].replace(" ", "_")}.txt',
+                'w') as of:
+            of.write(self.conditions[section_index] + '\n')
+            of.write('===========================\n')
+            of.write('\n'.join(map(str, section_output)))
+        section_index += 1
 
-# Il plot di fatto non mi serve. Magari lo metto come opzione, giusto per allungare
-# il brodo alla tesi...
-'''
-G = nx.MultiDiGraph()  ## Debug
-G.add_edges_from(edges_lt)  ## Debug
-for g in list(G.nodes())[:]:
-    if (g.find('min') != -1 or g.find('max') != -1) and (G.out_degree(g) == 0 or G.in_degree(g) == 0):
-        G.remove_node(g)
 
-# pos = nx.spring_layout(G)
-# pos = nx.planar_layout(G)
-pos = nx.circular_layout(G)
-nx.draw_networkx(G, pos, node_color='#00b4d9', node_size=1200, width=2, with_labels=True)
+def main():
+    rd = RunDaikon()
 
-# nx.draw_networkx_nodes(G,pos,node_color='#00b4d9',node_size=1000,cmap=plt.get_cmap('jet'))
-# nx.draw_networkx_labels(G, pos)
-# nx.draw_networkx_edges(G, pos, edgelist=edges_ab, edge_color='r')
-# nx.draw_networkx_edges(G, pos, edgelist=edges_ba, edge_color='b', arrows=True)
-# nx.draw_networkx_edges(G, pos, edgelist=edges_eq, arrows=False)
+    rd.check_args()
+    start_dir = os.getcwd()
+    print("Process start")
+    if os.chdir('Daikon_Invariants/'):
+        print("Error generating invariants. Aborting.")
+        exit(1)
+    output_daikon = rd.call_daikon()
+    sections = rd.split_daikon(output_daikon)
 
-ax = plt.gca()
-# ax.set_title('Graph')
-ax.set_title(conditions)
-# ax.margins(0.20)
-# plt.axis("off")
-plt.show()
-'''
-'''
-fine test grafo
-'''
+    index = 0
+    for section in sections:
+        section_output = list()
+        edges = rd.parse_daikon(section, section_output)
+        for key, edge_list in edges.items():
+            invariants = list()
+            G = rd.make_graph(edge_list)
+            rd.make_dfs(G, key, invariants, section_output)
+        rd.write_invariants_to_file(section_output, index)
+        index += 1
 
-# Scrivo l'output finale su file (bisognerebbe fare la transitive closure, prima)
-# print(f'Writing output file {config["DAIKON"]["daikon_results_file_original"]} ...')
-# with open(config['DAIKON']['daikon_results_file_original'], 'w') as f:
-#    f.write("\n".join(map(str, output)))
+    print("Invariants generated successfully")
+    os.chdir(start_dir)
 
-print("Invariants generated successfully")
-os.chdir(start_dir)
+
+if __name__ == '__main__':
+    main()
