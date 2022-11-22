@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from statistics import mean
+import numpy as np
 import pandas as pd
 import glob
 import csv
@@ -8,7 +10,7 @@ import configparser
 import math
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds")
+parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds (for slopes)")
 parser.add_argument('-s', "--skiprows", type=int, help="skip seconds from start")
 parser.add_argument('-n', "--nrows", type=int, help="number of seconds to consider")
 parser.add_argument('-d', "--directory", type=str, help="directory containing CSV files")
@@ -99,9 +101,6 @@ def enrich_df(data_set):
 
     # Genero e aggiungo le colonne slope_
     for col in val_cols_slopes:
-        mean_slope = list()
-        max_val = list()
-        min_val = list()
         data_var = data_set[col]
 
         # Valore massimo della colonna selezionata
@@ -111,23 +110,14 @@ def enrich_df(data_set):
         # Valore medio della colonna selezionata (secondo me non serve...)
         # avg_lvl = round(data_set[col].mean())
 
-        prev_lvl = data_var[0]
+        mean_slope = [0 for _ in range(len(data_var))]
+        max_val = [max_lvl for _ in range(len(data_var))]
+        min_val = [min_lvl for _ in range(len(data_var))]
 
         for i in range(len(data_var)):
-            if i % granularity != 0:
-                mean_slope.append(0)
-            else:
-                slope = round((data_var[i] - prev_lvl) / granularity, 1)
-                # slope = round((data_var[i] - prev_lvl), 1)
-                mean_slope.append(slope)
-                prev_lvl = data_var[i]
-
-                if i > 0:
-                    for j in range(i - 1, (i - granularity), -1):
-                        mean_slope[j] = slope
-
-            max_val.append(max_lvl)
-            min_val.append(min_lvl)
+            if i % granularity == 0 and i+granularity <= len(data_var):
+                for j in range(i, (i+granularity)):
+                    mean_slope[j] = round((data_var[i + granularity] - data_var[i]) / granularity, 1)
 
         data_set.insert(len(data_set.columns), config['DATASET']['slope_cols_prefix'] + col, mean_slope)
         data_set.insert(len(data_set.columns), config['DATASET']['max_prefix'] + col, max_val)
@@ -145,18 +135,21 @@ for f in sorted(filenames):
     # nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
     # usare skiprows=<int>, che skippa n righe da inizio file
     datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
-    datasetPLC_d = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
+    datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
 
     # Concatenate the single PLCs datasets for process mining
     df_list_mining.append(datasetPLC)
 
     # Add previous values, slopes and limits to dataframe
-    enrich_df(datasetPLC_d)
+    enrich_df(datasetPLC_daikon)
     # Concatenate the single PLCs datasets for Daikon
-    df_list_daikon.append(datasetPLC_d)
+    df_list_daikon.append(datasetPLC_daikon)
 
 mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
 daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
+
+zero_col = [0 for i in range(daikon_datasets.shape[0])]
+daikon_datasets.insert(len(daikon_datasets.columns), 'zero_col', zero_col)
 
 # Save dataset with the timestamp for the process mining.
 # mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
@@ -171,6 +164,10 @@ print('*************************************************************************
 # drop timestamps is NOT needed in Daikon
 # inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
 inv_datasets = daikon_datasets.drop(config['DATASET']['timestamp_col'], axis=1, errors='ignore')
+
+# Proviamo questo come taglio: prendo ogni n-granularity righe...
+# TENERE!!
+# inv_datasets = inv_datasets.iloc[::granularity, :]
 
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
