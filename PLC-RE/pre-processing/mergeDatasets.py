@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from statistics import mean
 import numpy as np
 import pandas as pd
 import glob
@@ -8,6 +7,8 @@ import csv
 import argparse
 import configparser
 import math
+
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds (for slopes)")
@@ -86,6 +87,13 @@ def enrich_df(data_set):
     # Set registers names that holds measurements and actuations
     val_cols = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['prev_cols_list'], case=False, regex=True)]
     val_cols_slopes = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['slope_cols_list'], case=False, regex=True)]
+    val_cols_trends = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['trend_cols_list'], case=False, regex=True)]
+
+    for col in val_cols_trends:
+        decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=120)
+        col_trend = [x for x in decomposition.trend]
+
+        data_set.insert(len(data_set.columns), config['DATASET']['trend_cols_prefix'] + col, col_trend)
 
     # Genero e aggiungo le colonne prev_
     for col in val_cols:
@@ -101,7 +109,8 @@ def enrich_df(data_set):
 
     # Genero e aggiungo le colonne slope_
     for col in val_cols_slopes:
-        data_var = data_set[col]
+        data_var = data_set[config['DATASET']['trend_cols_prefix'] + col]
+        print(config['DATASET']['trend_cols_prefix'] + col)
 
         # Valore massimo della colonna selezionata
         max_lvl = math.ceil(data_set[col].max())
@@ -117,7 +126,7 @@ def enrich_df(data_set):
         for i in range(len(data_var)):
             if i % granularity == 0 and i+granularity <= len(data_var):
                 for j in range(i, (i+granularity)):
-                    mean_slope[j] = round((data_var[i + granularity] - data_var[i]) / granularity, 1)
+                    mean_slope[j] = round((data_var[i + granularity] - data_var[i]) / granularity, 2)
 
         data_set.insert(len(data_set.columns), config['DATASET']['slope_cols_prefix'] + col, mean_slope)
         data_set.insert(len(data_set.columns), config['DATASET']['max_prefix'] + col, max_val)
@@ -148,8 +157,8 @@ for f in sorted(filenames):
 mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
 daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
 
-zero_col = [0 for i in range(daikon_datasets.shape[0])]
-daikon_datasets.insert(len(daikon_datasets.columns), 'zero_col', zero_col)
+zero_col = [0 for _ in range(daikon_datasets.shape[0])]
+daikon_datasets.insert(len(daikon_datasets.columns), "zero_col", zero_col)
 
 # Save dataset with the timestamp for the process mining.
 # mining_datasets.to_csv(r'../process-mining/data/PLC_SWaT_Dataset_TS.csv', index=False)
@@ -167,11 +176,11 @@ inv_datasets = daikon_datasets.drop(config['DATASET']['timestamp_col'], axis=1, 
 
 # Proviamo questo come taglio: prendo ogni n-granularity righe...
 # TENERE!!
-# inv_datasets = inv_datasets.iloc[::granularity, :]
+inv_datasets = inv_datasets.iloc[::granularity, :]
 
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
-inv_datasets = inv_datasets.iloc[1:-granularity, :]
+#inv_datasets = inv_datasets.iloc[1:-granularity, :]
 print(inv_datasets)
 
 # inv_datasets.to_csv(r'../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv', index=False)

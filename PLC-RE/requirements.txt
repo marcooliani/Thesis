@@ -1,10 +1,9 @@
-pandas~=1.5.1
+pandas==1.5.2
 ray~=2.1.0
 modbus_tk
-
 scipy~=1.9.3
 glob2
 numpy==1.23.5
 matplotlib~=3.6.2
-
 networkx~=2.8.8
+statsmodels~=0.13.5
