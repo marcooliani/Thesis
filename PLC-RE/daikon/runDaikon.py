@@ -102,7 +102,10 @@ class RunDaikon:
                 if b in not_equal:
                     not_equal[b].append(a)
 
-            elif invariant.find('%') != -1 or invariant.find('prev') != -1 or invariant == '' or invariant.find('Exiting') != -1:
+            elif invariant.find('%') != -1 or \
+                    invariant.find('prev') != -1 or \
+                    invariant == '' or invariant.find('Exiting') != -1 or \
+                    invariant.find('trend') != -1:
                 continue
             else:
                 a, rel, b = invariant.split(' ')[:3]

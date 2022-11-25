@@ -8,7 +8,7 @@ import argparse
 import configparser
 import math
 
-from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.seasonal import seasonal_decompose, STL
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds (for slopes)")
@@ -90,7 +90,9 @@ def enrich_df(data_set):
     val_cols_trends = data_set.columns[data_set.columns.str.contains(pat=config['DATASET']['trend_cols_list'], case=False, regex=True)]
 
     for col in val_cols_trends:
-        decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=120)
+        # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=120)
+        stl = STL(data_set[col], period=120, robust=True)
+        decomposition = stl.fit()
         col_trend = [x for x in decomposition.trend]
 
         data_set.insert(len(data_set.columns), config['DATASET']['trend_cols_prefix'] + col, col_trend)
@@ -144,6 +146,7 @@ for f in sorted(filenames):
     # nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
     # usare skiprows=<int>, che skippa n righe da inizio file
     datasetPLC = pd.read_csv(f, skiprows=skiprows, nrows=nrows)
+    # print(datasetPLC.isnull().values.any()) # Debug NaN
     datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
 
     # Concatenate the single PLCs datasets for process mining
@@ -176,11 +179,11 @@ inv_datasets = daikon_datasets.drop(config['DATASET']['timestamp_col'], axis=1, 
 
 # Proviamo questo come taglio: prendo ogni n-granularity righe...
 # TENERE!!
-inv_datasets = inv_datasets.iloc[::granularity, :]
+# inv_datasets = inv_datasets.iloc[::granularity, :]
 
 # Drop first rows (Daikon does not process missing values)
 # Taglio anche le ultime righe, che hanno lo slope = 0
-#inv_datasets = inv_datasets.iloc[1:-granularity, :]
+inv_datasets = inv_datasets.iloc[1:-granularity, :]
 print(inv_datasets)
 
 # inv_datasets.to_csv(r'../daikon/Daikon_Invariants/PLC_SWaT_Dataset.csv', index=False)
