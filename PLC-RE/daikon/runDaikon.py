@@ -18,7 +18,7 @@ class RunDaikon:
         parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
         self.args = parser.parse_args()
 
-        self.dataset = None
+        self.dataset = self.config['DEFAULTS']['dataset_file']
         self.conditions = None
 
     def check_args(self):
@@ -27,13 +27,9 @@ class RunDaikon:
                 print("Invalid file format (must be .csv). Aborting")
                 exit(1)
             self.dataset = self.args.filename
-        else:
-            self.dataset = self.config['DEFAULTS']['dataset_file']
 
         if self.args.conditions is not None:
             self.conditions = [c for c in self.args.conditions]
-        else:
-            self.conditions = None
 
     def call_daikon(self):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
