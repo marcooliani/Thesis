@@ -127,8 +127,13 @@ class MergeDatasets:
             data_set.insert(len(data_set.columns), self.config['DATASET']['min_prefix'] + col, min_val)
 
     @staticmethod
+    def concat_datasets(datasets_list):
+        df = pd.concat(datasets_list, axis=1).reset_index(drop=True)
+        return df
+
+    @staticmethod
     def add_zeros_column(dataframe):
-        print(f'Add zeros column to {dataframe}')
+        print(f'Add zeros column to dataframe')
         zero_col = [0 for _ in range(dataframe.shape[0])]
         dataframe.insert(len(dataframe.columns), "zero_col", zero_col)
 
@@ -148,36 +153,36 @@ def main():
     df_list_mining = list()
     df_list_daikon = list()
 
-    for f in sorted(filenames):
+    for file in sorted(filenames):
         # Read Dataset files
         # nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
         # usare skiprows=<int>, che skippa n righe da inizio file
-        print(f'Reading {f.split("/")[-1]} ...')
-        datasetPLC = pd.read_csv(f, skiprows=mg.skiprows, nrows=mg.nrows)
+        print(f'Reading {file.split("/")[-1]} ...')
+        datasetPLC = pd.read_csv(file, skiprows=mg.skiprows, nrows=mg.nrows)
+        # print(datasetPLC.isnull().values.any()) # Debug NaN
 
         # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
-        mg.clean_null(f)
+        mg.clean_null(file)
 
-        # print(datasetPLC.isnull().values.any()) # Debug NaN
         datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
 
         # Concatenate the single PLCs datasets for process mining
         df_list_mining.append(datasetPLC)
 
         # Add previous values, slopes and limits to dataframe
-        mg.enrich_df(datasetPLC_daikon, f)
+        mg.enrich_df(datasetPLC_daikon, file)
         # Concatenate the single PLCs datasets for Daikon
         df_list_daikon.append(datasetPLC_daikon)
 
     print(f'Generating Process Mining dataset ...')
-    mining_datasets = pd.concat(df_list_mining, axis=1).reset_index(drop=True)
+    mining_datasets = mg.concat_datasets(df_list_mining)
     # Save dataset with the timestamp for the process mining.
     mining_datasets.to_csv(f'../process-mining/data/{mg.output_file.split(".")[0]}_TS.csv', index=False)
     # print(mining_datasets)  # Debug
     print('Process Mining dataset generated successfully')
 
     print(f'Generating Invariants Analysis dataset ...')
-    daikon_datasets = pd.concat(df_list_daikon, axis=1).reset_index(drop=True)
+    daikon_datasets = mg.concat_datasets(df_list_daikon)
     # mg.add_zeros_column(daikon_datasets)  # Maybe not necessary
 
     # drop timestamps is NOT needed in Daikon
@@ -186,7 +191,7 @@ def main():
 
     # Drop first rows (Daikon does not process missing values)
     # Taglio anche le ultime righe, che hanno lo slope = 0
-    # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :]
+    # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :] # Prendo solo le n-granularities righe
     daikon_datasets = daikon_datasets.iloc[1:-mg.granularity, :]
     daikon_datasets.to_csv(f'../daikon/Daikon_Invariants/{mg.output_file}', index=False)
     # print(daikon_datasets)  # Debug

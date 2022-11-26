@@ -47,7 +47,7 @@ class RunDaikon:
                 f.write('PPT_NAME aprogram.point:::POINT\n')
                 for c in self.conditions:
                     f.write(c + '\n')
-            self.conditions.insert(0, f'General_{" ".join(map(str, self.conditions))}')
+            self.conditions.insert(0, f'General')
 
             output = subprocess.check_output(
                 f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace '
@@ -100,8 +100,7 @@ class RunDaikon:
 
             elif invariant.find('%') != -1 or \
                     invariant.find('prev') != -1 or \
-                    invariant == '' or invariant.find('Exiting') != -1 or \
-                    invariant.find('trend') != -1:
+                    invariant == '' or invariant.find('Exiting') != -1:
                 continue
             else:
                 a, rel, b = invariant.split(' ')[:3]
@@ -146,7 +145,9 @@ class RunDaikon:
 
         return G
 
-    def make_dfs(self, G, key, invariant_list, section_output):
+    def make_dfs(self, G, key):
+        section_output = list()
+        invariant_list = list()
         # Ricavo le uguaglianze con una dfs sul grafo.
         # Per come ho scritto il codice, una bfs produce
         # lo stesso identico output...
@@ -218,16 +219,22 @@ class RunDaikon:
             elif key == '<' or key == '<=':
                 section_output.append(f' {">" if key == "<" else ">="} '.join(map(str, reversed(val))))
 
-    def write_invariants_to_file(self, section_output, section_index):
+        return section_output
+
+    def write_invariants_to_file(self, invariants):
         # Scrivo il risultato finale sui file
-        print(f'Writing output file daikon_results_{self.conditions[section_index].replace(" ", "_")}.txt ...')
+        print(f'Writing output file daikon_results_{self.conditions[1].replace(" ", "_")}.txt ...')
         with open(
-                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{self.conditions[section_index].replace(" ", "_")}.txt',
+                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{self.conditions[1].replace(" ", "_")}.txt',
                 'w') as of:
-            of.write(self.conditions[section_index] + '\n')
-            of.write('===========================\n')
-            of.write('\n'.join(map(str, section_output)))
-        section_index += 1
+            i = 0
+            for inv in invariants:
+                of.write('===========================\n')
+                of.write(self.conditions[i] + '\n')
+                of.write('===========================\n')
+                of.write('\n'.join(map(str, inv)))
+                of.write('\n\n')
+                i += 1
 
 
 def main():
@@ -239,19 +246,22 @@ def main():
     if os.chdir('Daikon_Invariants/'):
         print("Error generating invariants. Aborting.")
         exit(1)
+
+    # TODO: per ogni condizione richiamare Daikon! Altrimenti non riesco a generare tutti i file con le condizioni!
     output_daikon = rd.call_daikon()
     sections = rd.split_daikon(output_daikon)
 
-    index = 0
+    invariants_full = list()
+
     for section in sections:
         section_output = list()
         edges = rd.parse_daikon(section, section_output)
         for key, edge_list in edges.items():
-            invariants = list()
             G = rd.make_graph(edge_list)
-            rd.make_dfs(G, key, invariants, section_output)
-        rd.write_invariants_to_file(section_output, index)
-        index += 1
+            section_output.append('\n'.join(map(str, rd.make_dfs(G, key))))
+        invariants_full.append(section_output)
+
+    rd.write_invariants_to_file(invariants_full)
 
     print("Invariants generated successfully")
     os.chdir(start_dir)
