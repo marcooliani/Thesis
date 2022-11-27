@@ -31,7 +31,7 @@ class RunDaikon:
         if self.args.conditions is not None:
             self.conditions = [c for c in self.args.conditions]
 
-    def call_daikon(self):
+    def call_daikon(self, condition=None):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
 
         print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
@@ -39,15 +39,14 @@ class RunDaikon:
             print("Error generating invariants. Aborting.")
             exit(1)
 
-        if self.conditions is not None:
+        # if self.conditions is not None:
+        if condition is not None:
             inv_conditions_file = self.config['DAIKON']['inv_conditions_file']
 
-            print("Generating invariants with conditions ...")
+            print(f'Generating invariants with condition {condition} ...')
             with open(inv_conditions_file, 'w') as f:
                 f.write('PPT_NAME aprogram.point:::POINT\n')
-                for c in self.conditions:
-                    f.write(c + '\n')
-            self.conditions.insert(0, f'General')
+                f.write(condition)
 
             output = subprocess.check_output(
                 f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace '
@@ -221,16 +220,21 @@ class RunDaikon:
 
         return section_output
 
-    def write_invariants_to_file(self, invariants):
+    def write_invariants_to_file(self, invariants, condition):
+        if condition == 'Generic':
+            conditions = [condition]
+        else:
+            conditions = ['Generic', condition]
+
         # Scrivo il risultato finale sui file
-        print(f'Writing output file daikon_results_{self.conditions[1].replace(" ", "_")}.txt ...')
+        print(f'Writing output file daikon_results_{condition.replace(" ", "_")}.txt ...')
         with open(
-                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{self.conditions[1].replace(" ", "_")}.txt',
+                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{condition.replace(" ", "_")}.txt',
                 'w') as of:
             i = 0
             for inv in invariants:
                 of.write('===========================\n')
-                of.write(self.conditions[i] + '\n')
+                of.write(conditions[i] + '\n')
                 of.write('===========================\n')
                 of.write('\n'.join(map(str, inv)))
                 of.write('\n\n')
@@ -247,21 +251,31 @@ def main():
         print("Error generating invariants. Aborting.")
         exit(1)
 
-    # TODO: per ogni condizione richiamare Daikon! Altrimenti non riesco a generare tutti i file con le condizioni!
-    output_daikon = rd.call_daikon()
-    sections = rd.split_daikon(output_daikon)
+    # Bug di Daikon: se specifico condizioni su righe separate nel file .spinfo, dalla seconda condizione
+    # mette assieme anche parte delle invarianti generiche mischiate a quelle specifiche. Quindi meglio richiamare
+    # una condizione alla volta, in modo da avere tutto più pulito...
+    if not rd.conditions:
+        rd.conditions.insert(0, 'Generic')
 
-    invariants_full = list()
+    for condition in rd.conditions:
+        if condition != 'Generic':
+            output_daikon = rd.call_daikon(condition)
+        else:
+            output_daikon = rd.call_daikon()
+        sections = rd.split_daikon(output_daikon)
 
-    for section in sections:
-        section_output = list()
-        edges = rd.parse_daikon(section, section_output)
-        for key, edge_list in edges.items():
-            G = rd.make_graph(edge_list)
-            section_output.append('\n'.join(map(str, rd.make_dfs(G, key))))
-        invariants_full.append(section_output)
+        invariants_full = list()
 
-    rd.write_invariants_to_file(invariants_full)
+        for section in sections:
+            section_output = list()
+            edges = rd.parse_daikon(section, section_output)
+            for key, edge_list in edges.items():
+                if edge_list:
+                    G = rd.make_graph(edge_list)
+                    section_output.append('\n'.join(map(str, rd.make_dfs(G, key))))
+            invariants_full.append(section_output)
+
+        rd.write_invariants_to_file(invariants_full, condition)
 
     print("Invariants generated successfully")
     os.chdir(start_dir)

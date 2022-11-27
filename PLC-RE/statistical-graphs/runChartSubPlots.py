@@ -2,48 +2,63 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 import argparse
 import configparser
 
 from matplotlib import gridspec
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', "--filename", type=str, help="CSV file to analyze")
-parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include", required=True)
-args = parser.parse_args()
 
-config = configparser.ConfigParser()
-config.read('../config.ini')
+class RunChartsSubPlots:
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+        self.config.read('../config.ini')
 
-if args.filename is not None:
-    filename = args.filename
-else:
-    filename = config['DEFAULTS']['dataset_file']
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-f', "--filename", type=str, help="CSV file to analyze")
+        parser.add_argument('-r', "--registers", nargs='+', default=[], help="registers to include", required=True)
+        self.args = parser.parse_args()
 
-registers = [r for r in args.registers]
+        self.filename = self.config['DEFAULTS']['dataset_file']
+        self.registers = [r for r in self.args.registers]
 
-colors = ["blue", "red", "limegreen", "orange", "cyan", "magenta", "black"]
-ax = {}
-line = {}
+        self.colors = ["blue", "red", "limegreen", "orange", "cyan", "magenta", "black"]
 
-fig = plt.figure()
-gs = gridspec.GridSpec(len(registers), 1)
+        self.ax = {}
+        self.line = {}
 
-df = pd.read_csv(f'../daikon/Daikon_Invariants/{filename}')
+    def check_args(self):
+        if self.args.filename is not None:
+            self.filename = self.args.filename
 
-for x in range(0, len(registers)):
-    if x > 0:
-        ax[x] = plt.subplot(gs[x], sharex=ax[x - 1])
-    else:
-        ax[x] = plt.subplot(gs[x])
+    def make_plot(self, dataframe, grdspec, registers, index):
+        if index > 0:
+            self.ax[index] = plt.subplot(grdspec[index], sharex=self.ax[index - 1])
+        else:
+            self.ax[index] = plt.subplot(grdspec[index])
 
-    line[x], = ax[x].plot(pd.DataFrame(df, columns=[str(registers[x])]), label=str(registers[x]),
-                          color=colors[x % (len(colors))])
-    plt.grid()
+        self.line[index], = self.ax[index].plot(pd.DataFrame(dataframe, columns=[str(registers[index])]),
+                                                label=str(registers[index]),
+                                                color=self.colors[index % (len(self.colors))])
+        plt.grid()
 
-    ax[x].legend(loc='lower left')
+        self.ax[index].legend(loc='lower left')
 
-plt.subplots_adjust(hspace=.0)
-plt.xlabel("Time")
-plt.show()
+
+def main():
+    rcsp = RunChartsSubPlots()
+
+    df = pd.read_csv(f'../daikon/Daikon_Invariants/{rcsp.filename}')
+
+    fig = plt.figure()
+    gs = gridspec.GridSpec(len(rcsp.registers), 1)
+
+    for x in range(0, len(rcsp.registers)):
+        rcsp.make_plot(df, gs, rcsp.registers, x)
+
+    plt.subplots_adjust(hspace=.0)
+    plt.xlabel("Time")
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()
