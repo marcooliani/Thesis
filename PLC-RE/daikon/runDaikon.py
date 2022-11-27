@@ -99,6 +99,7 @@ class RunDaikon:
 
             elif invariant.find('%') != -1 or \
                     invariant.find('prev') != -1 or \
+                    invariant.find('trend') != -1 or \
                     invariant == '' or invariant.find('Exiting') != -1:
                 continue
             else:
@@ -227,10 +228,9 @@ class RunDaikon:
             conditions = ['Generic', condition]
 
         # Scrivo il risultato finale sui file
-        print(f'Writing output file daikon_results_{condition.replace(" ", "_")}.txt ...')
-        with open(
-                f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{condition.replace(" ", "_")}.txt',
-                'w') as of:
+        print(f'Writing output file {os.getcwd()}/daikon_results_{condition.replace(" ", "_")}.txt ...')
+        with open(f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{condition.replace(" ", "_")}.txt',
+                  'w') as of:
             i = 0
             for inv in invariants:
                 of.write('===========================\n')
@@ -250,6 +250,10 @@ def main():
     if os.chdir('Daikon_Invariants/'):
         print("Error generating invariants. Aborting.")
         exit(1)
+
+    # Controllo se esiste la directory dove verranno scritti i file con i risultati. Se non esiste la creo
+    if not os.path.exists(rd.config["DAIKON"]["daikon_results_dir"]):
+        os.makedirs(rd.config["DAIKON"]["daikon_results_dir"])
 
     # Bug di Daikon: se specifico condizioni su righe separate nel file .spinfo, dalla seconda condizione
     # mette assieme anche parte delle invarianti generiche mischiate a quelle specifiche. Quindi meglio richiamare
