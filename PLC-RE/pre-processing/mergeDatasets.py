@@ -144,7 +144,6 @@ def main():
     mg.check_args()
 
     # CSV files converted from JSON PLCs readings (convertoCSV.py)
-    # filenames = glob.glob("PLC_CSV/*.csv")
     if mg.plcs:
         filenames = [f'{mg.directory}/' + p for p in mg.plcs]
     else:
@@ -186,7 +185,6 @@ def main():
     # mg.add_zeros_column(daikon_datasets)  # Maybe not necessary
 
     # drop timestamps is NOT needed in Daikon
-    # inv_datasets = daikon_datasets.drop(['Timestamp'], axis=1, errors='ignore')
     daikon_datasets = daikon_datasets.drop(mg.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
 
     # Drop first rows (Daikon does not process missing values)
