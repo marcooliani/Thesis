@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-MV101 == 2 && prev_MV101 == 2 && LIT101 > min_LIT101 + 20 && LIT101 < max_LIT101 -20
+P205 == 2.0

@@ -77,10 +77,6 @@ class FindActuators:
 
                 # Inserisco la lista di nodi nel listone delle invarianti
                 self.constants.append(temp)
-        '''
-        if b.lstrip('-').replace('.', '', 1).isdigit():
-            self.constants.append(invariant)
-        '''
 
     def find_other_actuators(self, actuator, daikon_output):
         equals = list()
@@ -113,8 +109,25 @@ class FindActuators:
 
         self.find_constants(output)
 
-        print(self.actuators)
-        print(self.constants)
+        # print(self.actuators)
+        # print(self.constants)
+
+    def print_info(self):
+        print('### Probable Actuators ### ')
+        print('---------------------------')
+        print('Name\t   Values')
+        print('---------------------------')
+
+        for key, val in self.actuators.items():
+            print(f'{key} \t|  {" - ".join(map(str, val))}')
+
+        print('---------------------------')
+        print()
+
+        print('### Constants ###')
+        print('---------------------------')
+        for i in self.constants:
+            print(' = '.join(map(str, i)))
 
 
 def main():
@@ -134,7 +147,12 @@ def main():
     daikon_output = fa.call_daikon()
     fa.parse_output(daikon_output)
 
+    fa.print_info()
     os.chdir(start_dir)
+
+    for key, val in fa.actuators.items():
+        for v in val:
+            subprocess.call(f'./runDaikon.py -c "{key} == {v}"', shell=True)
 
 
 if __name__ == '__main__':

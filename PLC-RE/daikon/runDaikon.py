@@ -165,7 +165,7 @@ class RunDaikon:
                         if a not in visited:
                             temp.append(a)
                             visited.append(a)
-                        if b not in visited or b.isdigit():
+                        if b not in visited or b.lstrip('-').replace('.', '', 1).isdigit():
                             visited.append(b)
                             temp.append(b)
 
