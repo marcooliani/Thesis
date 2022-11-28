@@ -88,7 +88,7 @@ class RunDaikon:
                 section_output.append(invariant)
             elif invariant.find('one of') != -1:
                 section_output.append(invariant)
-            elif invariant.find('!=') != -1 and invariant.find('prev') == -1:
+            elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') == -1:
                 a, b = invariant.split(' != ')
                 if a not in not_equal:
                     not_equal[a] = []
@@ -98,8 +98,8 @@ class RunDaikon:
                     not_equal[b].append(a)
 
             elif invariant.find('%') != -1 or \
-                    invariant.find('prev') != -1 or \
-                    invariant.find('trend') != -1 or \
+                    invariant.find(self.config['DATASET']['prev_cols_prefix']) != -1 or \
+                    invariant.find(self.config['DATASET']['trend_cols_prefix']) != -1 or \
                     invariant == '' or invariant.find('Exiting') != -1:
                 continue
             else:
