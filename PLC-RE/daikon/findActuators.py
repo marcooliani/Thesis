@@ -150,9 +150,17 @@ def main():
     fa.print_info()
     os.chdir(start_dir)
 
-    for key, val in fa.actuators.items():
-        for v in val:
-            subprocess.call(f'./runDaikon.py -c "{key} == {v}"', shell=True)
+    # TODO: occhio che qui non va bene nulla! Intanto devo recuperare in qualche modo qual è la tanica,
+    # TODO: (non me la dà in automatico Daikon!) e da lì poi calcolare i margini di min e max (che devo
+    # TODO: riotteenere in qualche modo dall'array delle costanti). Il tutto assumendo che magari posso o
+    # TODO: non avere la tanica, o avere proprio un'altra cosa di cui però voglio verificare il livello...
+
+    print('\n')
+    res = input('Perform Daikon analysis? [y/n] ')
+    if res == 'Y' or res == 'y':
+        for key, val in fa.actuators.items():
+            for v in val:
+                subprocess.call(f'./runDaikon.py -c "{key} == {v}"', shell=True)
 
 
 if __name__ == '__main__':
