@@ -115,7 +115,7 @@ class FindActuators:
     def print_info(self):
         print('### Probable Actuators ### ')
         print('---------------------------')
-        print('Name\t   Values')
+        print('Name\t|  Values')
         print('---------------------------')
 
         for key, val in self.actuators.items():
@@ -158,9 +158,14 @@ def main():
     print('\n')
     res = input('Perform Daikon analysis? [y/n] ')
     if res == 'Y' or res == 'y':
+        sensor = input('Insert sensor name: ')
         for key, val in fa.actuators.items():
             for v in val:
-                subprocess.call(f'./runDaikon.py -c "{key} == {v}"', shell=True)
+                subprocess.call(f'./runDaikon.py -c '
+                                f'"{key} == {v} && {sensor} < max_{sensor} -20 && {sensor} > min_{sensor} +20" '
+                                f'-r {key}',
+                                shell=True)
+                print()
 
 
 if __name__ == '__main__':

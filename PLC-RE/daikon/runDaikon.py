@@ -15,10 +15,12 @@ class RunDaikon:
 
         parser = argparse.ArgumentParser()
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+        parser.add_argument('-r', '--register', type=str, help="sensor to make results directory")
         parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
         self.args = parser.parse_args()
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
+        self.register = ''
         self.conditions = None
 
     def check_args(self):
@@ -28,13 +30,16 @@ class RunDaikon:
                 exit(1)
             self.dataset = self.args.filename
 
+        if self.args.register is not None:
+            self.register = self.args.register
+
         if self.args.conditions is not None:
             self.conditions = [c for c in self.args.conditions]
 
     def call_daikon(self, condition=None):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
 
-        print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
+        # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):
             print("Error generating invariants. Aborting.")
             exit(1)
@@ -227,9 +232,12 @@ class RunDaikon:
         else:
             conditions = ['Generic', condition]
 
+        if not os.path.exists(self.config["DAIKON"]["daikon_results_dir"]+'/' + self.register):
+            os.makedirs(self.config["DAIKON"]["daikon_results_dir"]+'/' + self.register)
+
         # Scrivo il risultato finale sui file
         print(f'Writing output file {os.getcwd()}/daikon_results_{condition.replace(" ", "_")}.txt ...')
-        with open(f'{self.config["DAIKON"]["daikon_results_dir"]}/daikon_results_{condition.replace(" ", "_")}.txt',
+        with open(f'{self.config["DAIKON"]["daikon_results_dir"]}/{self.register}/daikon_results_{condition.replace(" ", "_")}.txt',
                   'w') as of:
             i = 0
             for inv in invariants:
@@ -246,7 +254,7 @@ def main():
 
     rd.check_args()
     start_dir = os.getcwd()
-    print("Process start")
+    # print("Process start")
     if os.chdir('Daikon_Invariants/'):
         print("Error generating invariants. Aborting.")
         exit(1)
