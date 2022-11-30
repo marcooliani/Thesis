@@ -112,16 +112,7 @@ class MergeDatasets:
         for col in val_cols_slopes:
             data_var = data_set[self.config['DATASET']['trend_cols_prefix'] + col]
 
-            # Valore massimo della colonna selezionata
-            # max_lvl = math.ceil(data_set[col].max())
-            # Valore minimo della colonna selezionata
-            # min_lvl = math.floor(data_set[col].min())
-            # Valore medio della colonna selezionata (secondo me non serve...)
-            # avg_lvl = round(data_set[col].mean())
-
             mean_slope = [0 for _ in range(len(data_var))]
-            # max_val = [max_lvl for _ in range(len(data_var))]
-            # min_val = [min_lvl for _ in range(len(data_var))]
 
             for i in range(len(data_var)):
                 if i % self.granularity == 0 and i + self.granularity <= len(data_var):
@@ -129,14 +120,11 @@ class MergeDatasets:
                         mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, mean_slope)
-            # data_set.insert(len(data_set.columns), self.config['DATASET']['max_prefix'] + col, max_val)
-            # data_set.insert(len(data_set.columns), self.config['DATASET']['min_prefix'] + col, min_val)
 
         # Genero e aggiungo le colonne prev_
         for col in val_cols_prevs:
             prev_val = list()
             prev_val.append(0)
-            # data_var = inv_datasets[col]
             data_var = data_set[col]
 
             for i in range(len(data_var) - 1):

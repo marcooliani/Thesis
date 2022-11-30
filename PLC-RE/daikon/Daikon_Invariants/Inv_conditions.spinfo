@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-P302 == 2.0 && LIT301 < max_LIT301 -20 && LIT301 > min_LIT301 +20
+P302 == 2.0 && LIT301 < max_LIT301 - 20 && LIT301 > min_LIT301 + 24 

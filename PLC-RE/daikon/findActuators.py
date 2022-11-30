@@ -129,6 +129,32 @@ class FindActuators:
         for i in self.constants:
             print(' = '.join(map(str, i)))
 
+    def find_min_max(self, sensor):
+        str_max = self.config['DATASET']['max_prefix'] + sensor
+        str_min = self.config['DATASET']['min_prefix'] + sensor
+
+        return str_max, str_min
+
+    def make_daikon_analysis(self, str_min, str_max, sensor):
+        daikon_condition = ''
+        for const in self.constants:
+            if str_max in const:
+                max_v = int(float(const[1]))
+                margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
+                daikon_condition += f'&& {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin} '
+            if str_min in const:
+                min_v = int(float(const[1]))
+                margin = round((min_v / 100) * int(self.config['DAIKON']['min_security_pct_margin']))
+                daikon_condition += f'&& {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin} '
+
+        for key, val in self.actuators.items():
+            for v in val:
+                subprocess.call(f'./runDaikon.py -c '
+                                f'"{key} == {v} {daikon_condition}" '
+                                f'-r {key}',
+                                shell=True)
+                print()
+
 
 def main():
     fa = FindActuators()
@@ -150,22 +176,13 @@ def main():
     fa.print_info()
     os.chdir(start_dir)
 
-    # TODO: occhio che qui non va bene nulla! Intanto devo recuperare in qualche modo qual è la tanica,
-    # TODO: (non me la dà in automatico Daikon!) e da lì poi calcolare i margini di min e max (che devo
-    # TODO: riotteenere in qualche modo dall'array delle costanti). Il tutto assumendo che magari posso o
-    # TODO: non avere la tanica, o avere proprio un'altra cosa di cui però voglio verificare il livello...
-
     print('\n')
     res = input('Perform Daikon analysis? [y/n] ')
+
     if res == 'Y' or res == 'y':
         sensor = input('Insert sensor name: ')
-        for key, val in fa.actuators.items():
-            for v in val:
-                subprocess.call(f'./runDaikon.py -c '
-                                f'"{key} == {v} && {sensor} < max_{sensor} -20 && {sensor} > min_{sensor} +20" '
-                                f'-r {key}',
-                                shell=True)
-                print()
+        str_max, str_min = fa.find_min_max(sensor)
+        fa.make_daikon_analysis(str_min, str_max, sensor)
 
 
 if __name__ == '__main__':
