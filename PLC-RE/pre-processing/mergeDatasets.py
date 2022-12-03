@@ -117,7 +117,13 @@ class MergeDatasets:
             for i in range(len(data_var)):
                 if i % self.granularity == 0 and i + self.granularity <= len(data_var):
                     for j in range(i, (i + self.granularity)):
-                        mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
+                        # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
+                        if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
+                            mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                        elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
+                            mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                        else:
+                            mean_slope[j] = 0
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, mean_slope)
 
@@ -131,7 +137,6 @@ class MergeDatasets:
                 prev_val.append(data_var[i])
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['prev_cols_prefix'] + col, prev_val)
-
 
     @staticmethod
     def concat_datasets(datasets_list):

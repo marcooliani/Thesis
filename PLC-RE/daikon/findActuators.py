@@ -20,6 +20,7 @@ class FindActuators:
         self.dataset = self.config['DEFAULTS']['dataset_file']
         self.actuators = dict()
         self.constants = list()
+        self.setpoints = list()
 
     def check_args(self):
         if self.args.filename is not None:
@@ -43,14 +44,8 @@ class FindActuators:
 
         return output
 
-    def find_constants(self, daikon_output):
-        edge_list = list()
-        for invariant in daikon_output:
-            if ' == ' in invariant and self.config['DATASET']['prev_cols_prefix'] not in invariant and '%' not in invariant:
-                a, b = invariant.split(' == ')
-                edge_list.append((a, b))
-                edge_list.append((b, a))
-
+    @staticmethod
+    def make_dfs(edge_list, output_list):
         G = nx.MultiDiGraph()
         G.add_edges_from(edge_list)
 
@@ -76,7 +71,34 @@ class FindActuators:
                         temp.append(b)
 
                 # Inserisco la lista di nodi nel listone delle invarianti
-                self.constants.append(temp)
+                output_list.append(temp)
+
+    def find_setpoints(self, daikon_output):
+        edge_list = list()
+        for invariant in daikon_output:
+            if ' == ' in invariant and \
+                    self.config['DATASET']['prev_cols_prefix'] not in invariant and \
+                    '%' not in invariant and \
+                    (self.config['DATASET']['min_prefix'] in invariant or self.config['DATASET']['max_prefix'] in invariant):
+                a, b = invariant.split(' == ')
+                edge_list.append((a, b))
+                edge_list.append((b, a))
+
+        self.make_dfs(edge_list, self.setpoints)
+
+    def find_constants(self, daikon_output):
+        edge_list = list()
+        for invariant in daikon_output:
+            if ' == ' in invariant and \
+                    self.config['DATASET']['prev_cols_prefix'] not in invariant and\
+                    '%' not in invariant and \
+                    self.config['DATASET']['min_prefix'] not in invariant and \
+                    self.config['DATASET']['max_prefix'] not in invariant:
+                a, b = invariant.split(' == ')
+                edge_list.append((a, b))
+                edge_list.append((b, a))
+
+        self.make_dfs(edge_list, self.constants)
 
     def find_other_actuators(self, actuator, daikon_output):
         equals = list()
@@ -96,7 +118,8 @@ class FindActuators:
         output = output.split('\n')[6:-2]
 
         for inv in output:
-            if 'one of' in inv and self.config['DATASET']['prev_cols_prefix'] not in inv:
+            if 'one of' in inv and self.config['DATASET']['prev_cols_prefix'] not in inv and \
+                    self.config['DATASET']['slope_cols_prefix'] not in inv:
                 a, b = inv.split(' one of ')
                 a.replace('(', '').replace(')', '')
                 b = [float(i) for i in b.replace('{ ', '').replace(' }', '').replace(',', '').split(' ')]
@@ -108,25 +131,28 @@ class FindActuators:
                     self.actuators[act] = b
 
         self.find_constants(output)
-
-        # print(self.actuators)
-        # print(self.constants)
+        self.find_setpoints(output)
 
     def print_info(self):
         print('### Probable Actuators ### ')
         print('---------------------------')
         print('Name\t|  Values')
         print('---------------------------')
-
         for key, val in self.actuators.items():
             print(f'{key} \t|  {" - ".join(map(str, val))}')
-
         print('---------------------------')
         print()
 
         print('### Constants ###')
         print('---------------------------')
         for i in self.constants:
+            print(' = '.join(map(str, i)))
+        print('---------------------------')
+        print()
+
+        print('### Relative Setpoints ###')
+        print('---------------------------')
+        for i in self.setpoints:
             print(' = '.join(map(str, i)))
 
     def find_min_max(self, sensor):
@@ -162,6 +188,7 @@ def main():
     fa.check_args()
     start_dir = os.getcwd()
     print("Process start")
+
     if os.chdir('Daikon_Invariants/'):
         print("Error generating invariants. Aborting.")
         exit(1)
@@ -172,8 +199,8 @@ def main():
 
     daikon_output = fa.call_daikon()
     fa.parse_output(daikon_output)
-
     fa.print_info()
+    
     os.chdir(start_dir)
 
     print('\n')
