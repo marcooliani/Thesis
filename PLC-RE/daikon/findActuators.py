@@ -42,6 +42,10 @@ class FindActuators:
             f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
             shell=True)
 
+        output = output.decode("utf-8")
+        output = re.sub('[=]{6,}', '', output)
+        output = output.split('\n')[6:-2]
+
         return output
 
     @staticmethod
@@ -113,10 +117,6 @@ class FindActuators:
         return equals
 
     def parse_output(self, output):
-        output = output.decode("utf-8")
-        output = re.sub('[=]{6,}', '', output)
-        output = output.split('\n')[6:-2]
-
         for inv in output:
             if 'one of' in inv and self.config['DATASET']['prev_cols_prefix'] not in inv and \
                     self.config['DATASET']['slope_cols_prefix'] not in inv:
