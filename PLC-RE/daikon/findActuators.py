@@ -200,7 +200,7 @@ def main():
     daikon_output = fa.call_daikon()
     fa.parse_output(daikon_output)
     fa.print_info()
-    
+
     os.chdir(start_dir)
 
     print('\n')
