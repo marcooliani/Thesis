@@ -83,16 +83,24 @@ class ActuatorsBehaviour:
 
         return equals
 
-    def open_dataframe(self, file, actuator, sensor):
+    @staticmethod
+    def __open_dataframe(file, actuator, sensor):
         df = pd.read_csv(file, usecols=[actuator, 'prev_' + actuator, sensor])
         # print(df.keys())
         # print(df[(df[actuator] == 2) & (df['prev_'+actuator] != 2)].count())
+        return df
 
+    def actuator_status_change(self, file, actuator, sensor):
+        df = self.__open_dataframe(file, actuator, sensor)
         for key, val in self.actuators.items():
             if key == actuator:
                 for v in val:
                     print(df[df.eval(f'{actuator} == {v} and {self.config["DATASET"]["prev_cols_prefix"]}{actuator} != {v}')])
                     print()
+
+    def actuator_status_period(self, file, actuator, sensor):
+        df = self.__open_dataframe(file, actuator, sensor)
+        print(df[(df[actuator] == 2) & (df['prev_'+actuator] == 2)].count())
 
 
 def main():
@@ -108,7 +116,8 @@ def main():
     output = ab.call_daikon()
     ab.find_actuators(output)
 
-    ab.open_dataframe(ab.dataset, ab.actuator, ab.sensor)
+    ab.actuator_status_change(ab.dataset, ab.actuator, ab.sensor)
+    ab.actuator_status_period(ab.dataset, ab.actuator, ab.sensor)
 
 
 if __name__ == '__main__':
