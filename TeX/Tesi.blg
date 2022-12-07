@@ -3,7 +3,13 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: Tesi.aux
 The style file: biblatex.bst
 A level-1 auxiliary file: Chapters/intro.aux
-A level-1 auxiliary file: Chapters/test.aux
+A level-1 auxiliary file: Chapters/background.aux
+A level-1 auxiliary file: Chapters/relatedwork.aux
+A level-1 auxiliary file: Chapters/stateofart.aux
+A level-1 auxiliary file: Chapters/proposal.aux
+A level-1 auxiliary file: Chapters/casestudy.aux
+A level-1 auxiliary file: Chapters/application.aux
+A level-1 auxiliary file: Chapters/conclusions.aux
 Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=200001) to 20 items from 10.
 Reallocated glb_str_end (elt_size=4) to 20 items from 10.
@@ -26,7 +32,7 @@ Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 You've used 2 entries,
             6399 wiz_defined-function locations,
-            1214 strings with 9214 characters,
+            1220 strings with 9358 characters,
 and the built_in function-call counts, 5688 in all, are:
 = -- 339
 > -- 141

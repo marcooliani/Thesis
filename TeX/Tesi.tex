@@ -103,7 +103,9 @@
 %%
 \newcommand{\thesistitle}{Blackbox Approach to CPS Reverse Engineering}
 \newcommand{\supervisor}{Prof. \textbf{Massimo \textsc{Merro}}}
-\newcommand{\cosupervisor}{Prof. \textbf{Severus \textsc{Piton}}}
+\newcommand{\firstcosupervisor}{Prof. \textbf{Ruggero \textsc{Lanotte}}}
+\newcommand{\secondcosupervisor}{Doc. \textbf{Marco \textsc{Lucchese}}}
+\newcommand{\opponent}{Prof. \textbf{Severus \textsc{Piton}}}
 \newcommand{\candidate}{\textbf{Marco \textsc{Oliani}}\\ Matr. VR457249}
 \newcommand{\academicyear}{\large Academic Year 2022/2023}
 
@@ -111,7 +113,7 @@
 \newcommand{\fncyblank}{\fancyhf{}}
 \newenvironment{abstract}%
 {\cleardoublepage\fncyblank\null\vfill\begin{center}%
-	\bfseries\abstractname\end{center}}%
+	\bfseries\Large\abstractname\end{center}}%
 {\vfill\null}
 
 %######
@@ -131,12 +133,10 @@
 		% only works if a paragraph has started.
 		
 		\textsc{\LARGE Università degli Studi di Verona}\\
-		%\textsc{Facolt\`a di Scienze Matematiche, Fisiche e Naturali}\\[1.0cm]
 		\textsc{Department of COMPUTER SCIENCE}\\[1.0cm]
 		\textsc{\large Master's Degree in \\ 
 			COMPUTER SCIENCE AND ENGINEERING}\\[1.5cm]
 		
-		%\large Tesi di Laurea Magistrale \\[1.0cm]
 		\large Master Thesis \\[1.0cm]
 		% Title
 		
@@ -151,17 +151,18 @@
 		\hrulefill \\[2.0cm]
 		
 		% Author and supervisor
-		\begin{minipage}[t]{0.4\textwidth}
+		\begin{minipage}[t]{0.45\textwidth}
 			\begin{flushleft} \large
 				\emph{Supervisor:}\\
 				\supervisor 
 			\end{flushleft}
 			\begin{flushleft} \large
-				\emph{Co-supervisor:}\\
-				\cosupervisor
+				\emph{Co-supervisors:}\\
+				\firstcosupervisor \\
+				\secondcosupervisor
 			\end{flushleft}
 		\end{minipage}
-		\begin{minipage}[t]{0.4\textwidth}\raggedleft
+		\begin{minipage}[t]{0.45\textwidth}\raggedleft
 			\begin{flushright} \large
 				\emph{Candidate:} \\
 				\candidate
@@ -212,10 +213,25 @@
 \include{Chapters/intro}
 
 %###### CAPITOLO 2 ######%
-\chapter{Altro Capitolo}
-Ri-bla \cite{einstein}
+\include{Chapters/background}
 
-\include{Chapters/test}
+%###### CAPITOLO 3 ######%
+\include{Chapters/relatedwork}
+
+%###### CAPITOLO 4 ######%
+\include{Chapters/stateofart}
+
+%###### CAPITOLO 5 ######%
+\include{Chapters/proposal}
+
+%###### CAPITOLO 6 ######%
+\include{Chapters/casestudy}
+
+%###### CAPITOLO 7 ######%
+\include{Chapters/application}
+
+%###### CAPITOLO 8 ######%
+\include{Chapters/conclusions}
 
 %###### BIBLIOGRAFIA ######%
 \printbibliography[heading=bibintoc, title=Bibliography]
