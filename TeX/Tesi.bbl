@@ -17,30 +17,39 @@
 \endgroup
 
 \datalist[entry]{none/global//global/global}
-  \entry{einstein}{article}{}
-    \name{author}{1}{}{%
-      {{hash=EA}{%
-         family={Einstein},
-         familyi={E\bibinitperiod},
-         given={Albert},
-         giveni={A\bibinitperiod},
+  \entry{ceccato}{inproceedings}{}
+    \name{author}{5}{}{%
+      {{hash=M}{%
+         family={M.Ceccato},
+         familyi={M\bibinitperiod},
+      }}%
+      {{hash=Y}{%
+         family={Y.Driouich},
+         familyi={Y\bibinitperiod},
+      }}%
+      {{hash=R}{%
+         family={R.Lanotte},
+         familyi={R\bibinitperiod},
+      }}%
+      {{hash=M}{%
+         family={M.Lucchese},
+         familyi={M\bibinitperiod},
+      }}%
+      {{hash=M}{%
+         family={M.Merro},
+         familyi={M\bibinitperiod},
       }}%
     }
-    \keyw{physics}
-    \strng{namehash}{EA1}
-    \strng{fullhash}{EA1}
+    \strng{namehash}{M+1}
+    \strng{fullhash}{MYRMM1}
     \field{labelnamesource}{author}
     \field{labeltitlesource}{title}
-    \verb{doi}
-    \verb http://dx.doi.org/10.1002/andp.19053221004
-    \endverb
-    \field{number}{10}
-    \field{pages}{891\bibrangedash 921}
-    \field{title}{{Zur Elektrodynamik bewegter K{\"o}rper}. ({German}) [{On}
-  the electrodynamics of moving bodies]}
-    \field{volume}{322}
-    \field{journaltitle}{Annalen der Physik}
-    \field{year}{1905}
+    \field{eventtitle}{CPS4CIP@ESORICSAt 2022}
+    \field{title}{Towards Reverse Engineering of Industrial Physical Processes}
+    \field{venue}{Copenhagen, Denmark}
+    \field{eventday}{30}
+    \field{eventmonth}{09}
+    \field{eventyear}{2022}
   \endentry
 \enddatalist
 \endinput

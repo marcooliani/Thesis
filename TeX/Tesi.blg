@@ -27,47 +27,53 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: Tesi-blx.bib
 Database file #2: biblio/bibliography.bib
+I was expecting a `,' or a `}'---line 20 of file biblio/bibliography.bib
+ :  
+ :  year =   {2022},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
 Biblatex version: 3.18
 Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 You've used 2 entries,
             6399 wiz_defined-function locations,
-            1220 strings with 9358 characters,
-and the built_in function-call counts, 5688 in all, are:
-= -- 339
-> -- 141
-< -- 18
-+ -- 139
-- -- 51
-* -- 303
-:= -- 762
+            1217 strings with 9340 characters,
+and the built_in function-call counts, 10257 in all, are:
+= -- 665
+> -- 443
+< -- 33
++ -- 516
+- -- 304
+* -- 554
+:= -- 1502
 add.period$ -- 0
 call.type$ -- 2
-change.case$ -- 7
-chr.to.int$ -- 42
+change.case$ -- 6
+chr.to.int$ -- 66
 cite$ -- 2
-duplicate$ -- 500
-empty$ -- 524
-format.name$ -- 44
-if$ -- 1190
+duplicate$ -- 907
+empty$ -- 780
+format.name$ -- 83
+if$ -- 1844
 int.to.chr$ -- 0
 int.to.str$ -- 2
 missing$ -- 0
-newline$ -- 45
+newline$ -- 55
 num.names$ -- 38
-pop$ -- 374
+pop$ -- 423
 preamble$ -- 1
-purify$ -- 10
+purify$ -- 17
 quote$ -- 0
-skip$ -- 222
+skip$ -- 248
 stack$ -- 0
-substring$ -- 554
-swap$ -- 122
-text.length$ -- 38
+substring$ -- 1257
+swap$ -- 160
+text.length$ -- 52
 text.prefix$ -- 0
 top$ -- 1
 type$ -- 56
 warning$ -- 0
-while$ -- 117
+while$ -- 186
 width$ -- 0
-write$ -- 44
+write$ -- 54
+(There was 1 error message)
