@@ -13,4 +13,6 @@
 \contentsline {section}{\numberline {8.1}Discussions}{15}{section.8.1}%
 \contentsline {section}{\numberline {8.2}Guidelines}{15}{section.8.2}%
 \contentsline {section}{\numberline {8.3}Future work}{15}{section.8.3}%
-\contentsline {chapter}{Bibliography}{17}{chapter*.2}%
+\contentsline {chapter}{List of Figures}{17}{section.8.3}%
+\contentsline {chapter}{List of Tables}{19}{chapter*.2}%
+\contentsline {chapter}{References}{21}{chapter*.4}%

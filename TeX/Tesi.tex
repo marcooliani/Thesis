@@ -48,9 +48,12 @@
 %% Elenchi puntati e affini
 \usepackage{enumitem}
 
-%% Per includere le immagini: package e path dove andare a richiamarle per nome
+%% Per includere le immagini e gestione lista figure e tabelle:
+%% package e path dove andare a richiamarle per nome
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
+%\renewcommand{\listfigurename}{List of plots}
+%\renewcommand{\listtablename}{Tables}
 
 %% Questo serve per includere le immagini dove voglio io e non dove
 %% pare all'editor!
@@ -60,7 +63,7 @@
 \usepackage{longtable}
 
 %% Bibliografia
-\usepackage[sorting=none,style=numeric-comp,backend=bibtex]{biblatex}
+\usepackage[sorting=none,style=numeric-comp,backend=bibtex,maxbibnames=99]{biblatex}
 \addbibresource{biblio/bibliography.bib} % Database con le citazioni
 
 %% Formattazioni varie
@@ -233,8 +236,18 @@
 %###### CAPITOLO 8 ######%
 \include{Chapters/conclusions}
 
+%##### LISTA FIGURE #####%
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+%##### LISTA TABELLE #####%
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
 %###### BIBLIOGRAFIA ######%
-\printbibliography[heading=bibintoc, title=Bibliography]
+\printbibliography[heading=bibintoc, title=References]
 
 %% Vecchia versione
 %\begin{thebibliography}{99}
