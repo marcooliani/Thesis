@@ -46,6 +46,7 @@ class RunChartsSubPlots:
 
 def main():
     rcsp = RunChartsSubPlots()
+    rcsp.check_args()
 
     df = pd.read_csv(f'../daikon/Daikon_Invariants/{rcsp.filename}')
 
