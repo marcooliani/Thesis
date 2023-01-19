@@ -14,19 +14,35 @@ class ExportPCAPData:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', "--files", nargs='+', default=[], help="pcap files to include (w/o path)")
+        parser.add_argument('-f', "--file", type=str, help="single pcap file to include (with path")
+        parser.add_argument('-m', "--mergefiles", nargs='+', default=[], help="multiple pcap files to include (w/o path)")
+        parser.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
         self.args = parser.parse_args()
 
-        self.pcap_files = list()
+        self.pcap_file = None
+        self.pcap_multiple = self.args.mergefiles
+        self.pcap_dir = self.config['NETWORK']['pcap_dir']
 
     def check_args(self):
-        self.pcap_files = self.args.files
+        if self.args.file:
+            self.pcap_file = self.args.file
+        elif self.args.mergedir:
+            self.pcap_dir = self.args.mergedir
+            self.pcap_file = self.config['NETWORK']['pcap_merge_file']
+        elif self.args.mergefiles:
+            self.pcap_file = self.config['NETWORK']['pcap_merge_file']
+            self.pcap_multiple = self.args.mergefiles
 
     def merge_pcap(self):
-        pass
+        if not self.pcap_multiple and self.pcap_dir:
+            subprocess.check_output(f'mergecap -w {self.pcap_file} {self.pcap_dir}/*.pcap', shell=True)
 
-    def find_protocols(self, file):
-        cap = pyshark.FileCapture(f'{self.config["NETWORK"]["pcap_dir"]}/{file}', include_raw=True, use_json=True)
+        elif self.pcap_multiple:
+            subprocess.check_output(f'mergecap -w {self.pcap_file} '
+                                    f'{" ".join(map(str, self.pcap_multiple))}', shell=True)
+
+    def find_protocols(self):
+        cap = pyshark.FileCapture(f'{self.pcap_file}', include_raw=True, use_json=True)
 
         found_protocols = list()
 
@@ -34,6 +50,7 @@ class ExportPCAPData:
 
         for proto in protocols:
             pkt_count = 0
+
             for packet in cap:
                 if pkt_count > int(self.config['NETWORK']['packets_limit']):
                     break
@@ -49,7 +66,7 @@ class ExportPCAPData:
 
         return found_protocols
 
-    def export_data(self, file, protocols):
+    def export_data(self, protocols):
         fixed_param = ['frame.number', '_ws.col.Time', 'ip.src', 'ip.dst']  # Lo tengo qui, ma non serve...
         str_protocols = "-Y '"
         str_protocols += ' || '.join(map(str, protocols)).lower()
@@ -61,7 +78,7 @@ class ExportPCAPData:
                 str_columns += f'-e {field} '
 
         ## ud -> UTC date   ad -> absolute date (orario locale)
-        output = subprocess.check_output(f'tshark -r {file} -t ud -T fields -e frame.number '
+        output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields -e frame.number '
                                          f'-e _ws.col.Time -e ip.src -e ip.dst {str_protocols} '
                                          f'-e _ws.col.Protocol {str_columns} '
                                          f'-E header=y -E separator=, -E aggregator=/s', shell=True).decode('utf-8')
@@ -83,8 +100,9 @@ class ExportPCAPData:
 def main():
     epd = ExportPCAPData()
     epd.check_args()
-    prot = epd.find_protocols('Plant1.pcap')
-    epd.export_data(r'/tmp/Plant1.pcap', prot)
+    epd.merge_pcap()
+    prot = epd.find_protocols()
+    epd.export_data(prot)
 
 
 if __name__ == '__main__':
