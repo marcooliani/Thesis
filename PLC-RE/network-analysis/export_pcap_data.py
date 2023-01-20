@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pyshark
-import csv
 import glob
 import argparse
 import configparser
@@ -35,13 +34,18 @@ class ExportPCAPData:
 
     def merge_pcap(self):
         if not self.pcap_multiple and self.pcap_dir:
+            print(f"Merging pcap files from directory {self.pcap_dir} ... ")
             subprocess.check_output(f'mergecap -w {self.pcap_file} {self.pcap_dir}/*.pcap', shell=True)
 
         elif self.pcap_multiple:
+            print(f"Merging selected files ... ")
             subprocess.check_output(f'mergecap -w {self.pcap_file} '
                                     f'{" ".join(map(str, self.pcap_multiple))}', shell=True)
 
+        print("Done")
+
     def find_protocols(self):
+        print("Detecting protocols ... ")
         cap = pyshark.FileCapture(f'{self.pcap_file}', include_raw=True, use_json=True)
 
         found_protocols = list()
@@ -67,6 +71,7 @@ class ExportPCAPData:
         return found_protocols
 
     def export_data(self, protocols):
+        print("Extracting PCAP data ... ")
         fixed_param = ['frame.number', '_ws.col.Time', 'ip.src', 'ip.dst']  # Lo tengo qui, ma non serve...
         str_protocols = "-Y '"
         str_protocols += ' || '.join(map(str, protocols)).lower()
@@ -77,7 +82,8 @@ class ExportPCAPData:
             for field in self.config['NETWORK']['ws_' + p.lower() + '_fields'].split(','):
                 str_columns += f'-e {field} '
 
-        ## ud -> UTC date   ad -> absolute date (orario locale)
+        # ud -> UTC date
+        # ad -> absolute date (orario locale)
         output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields -e frame.number '
                                          f'-e _ws.col.Time -e ip.src -e ip.dst {str_protocols} '
                                          f'-e _ws.col.Protocol {str_columns} '
@@ -93,8 +99,11 @@ class ExportPCAPData:
             output_csv += ','.join(map(str, r))
             output_csv += '\n'
 
-        with open(f'{self.config["NETWORK"]["pcap_dir"]}/{self.config["NETWORK"]["csv_output"]}', 'w') as f:
+        print("Saving CSV export ... ")
+        with open(f'{self.config["NETWORK"]["csv_output"]}', 'w') as f:
             f.write(output_csv)
+
+        print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
 
 
 def main():
