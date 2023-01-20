@@ -16,11 +16,15 @@ class ExportPCAPData:
         parser.add_argument('-f', "--file", type=str, help="single pcap file to include (with path")
         parser.add_argument('-m', "--mergefiles", nargs='+', default=[], help="multiple pcap files to include (w/o path)")
         parser.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
+        parser.add_argument('-t', "--timerange", nargs=2, default=[], help="time range selection (format YYYY-MM_DD HH:MM:SS")
         self.args = parser.parse_args()
 
         self.pcap_file = None
         self.pcap_multiple = self.args.mergefiles
-        self.pcap_dir = self.config['NETWORK']['pcap_dir']
+        self.pcap_dir = None
+        self.pcap_timerange = self.args.timerange
+
+        print(self.pcap_timerange)
 
     def check_args(self):
         if self.args.file:
@@ -95,7 +99,14 @@ class ExportPCAPData:
 
         for r in output[1:]:
             r = r.split(',')
-            r = r[:2] + r[3:]
+            # r = r[:2] + r[3:]
+            newdate = '.'.join(map(lambda x: x, r[1:3]))
+            r[1:3] = [newdate]
+
+            if self.pcap_timerange:
+                if not self.pcap_timerange[0] <= str(r[1]) <= self.pcap_timerange[1]:
+                    continue
+
             output_csv += ','.join(map(str, r))
             output_csv += '\n'
 
