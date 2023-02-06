@@ -16,15 +16,13 @@ class ExportPCAPData:
         parser.add_argument('-f', "--file", type=str, help="single pcap file to include (with path")
         parser.add_argument('-m', "--mergefiles", nargs='+', default=[], help="multiple pcap files to include (w/o path)")
         parser.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
-        parser.add_argument('-t', "--timerange", nargs=2, default=[], help="time range selection (format YYYY-MM_DD HH:MM:SS")
+        parser.add_argument('-t', "--timerange", nargs=2, default=[], help="time range selection (format YYYY-MM-DD HH:MM:SS")
         self.args = parser.parse_args()
 
         self.pcap_file = None
         self.pcap_multiple = self.args.mergefiles
         self.pcap_dir = None
         self.pcap_timerange = self.args.timerange
-
-        print(self.pcap_timerange)
 
     def check_args(self):
         if self.args.file:
@@ -40,13 +38,13 @@ class ExportPCAPData:
         if not self.pcap_multiple and self.pcap_dir:
             print(f"Merging pcap files from directory {self.pcap_dir} ... ")
             subprocess.check_output(f'mergecap -w {self.pcap_file} {self.pcap_dir}/*.pcap', shell=True)
+            print("Done")
 
         elif self.pcap_multiple:
             print(f"Merging selected files ... ")
             subprocess.check_output(f'mergecap -w {self.pcap_file} '
                                     f'{" ".join(map(str, self.pcap_multiple))}', shell=True)
-
-        print("Done")
+            print("Done")
 
     def find_protocols(self):
         print("Detecting protocols ... ")

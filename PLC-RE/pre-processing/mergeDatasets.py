@@ -26,7 +26,8 @@ class MergeDatasets:
         parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
         self.args = parser.parse_args()
 
-        self.granularity = int(self.config['DEFAULTS']['granularity'])
+        #self.granularity = int(self.config['DEFAULTS']['granularity'])
+        self.granularity = None
         self.nrows = int(self.config['DEFAULTS']['number_of_rows'])
         self.skiprows = [row for row in range(1, self.args.skiprows)]
         self.directory = self.config['PATHS']['input_dataset_directory']
@@ -36,6 +37,8 @@ class MergeDatasets:
     def check_args(self):
         if self.args.granularity:
             self.granularity = self.args.granularity
+        else:
+            self.granularity = int(self.config['DEFAULTS']['granularity'])
 
         if self.args.nrows:
             self.nrows = self.args.nrows
@@ -102,7 +105,7 @@ class MergeDatasets:
 
         for col in val_cols_trends:
             # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=120)
-            stl = STL(data_set[col], period=120, robust=True)
+            stl = STL(data_set[col], period=int(self.config['DATASET']['trend_period']), robust=True)
             decomposition = stl.fit()
             col_trend = [x for x in decomposition.trend]
 
@@ -115,13 +118,15 @@ class MergeDatasets:
             mean_slope = [0 for _ in range(len(data_var))]
 
             for i in range(len(data_var)):
-                if i % self.granularity == 0 and i + self.granularity <= len(data_var):
+                if i % self.granularity == 0 and i + self.granularity <= len(data_var)-1:
                     for j in range(i, (i + self.granularity)):
                         # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
                         if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
-                            mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            # mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            mean_slope[j] = 1
                         elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
-                            mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            # mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            mean_slope[j] = -1
                         else:
                             mean_slope[j] = 0
 
@@ -170,6 +175,9 @@ def main():
         # usare skiprows=<int>, che skippa n righe da inizio file
         print(f'Reading {file.split("/")[-1]} ...')
         datasetPLC = pd.read_csv(file, skiprows=mg.skiprows, nrows=mg.nrows)
+        datasetPLC[mg.config['DATASET']['timestamp_col']] = \
+            datasetPLC[mg.config['DATASET']['timestamp_col']].apply(lambda x:
+                                                                    pd.Timestamp(x).strftime('%Y-%m-%d %H:%M:%S.%f'))
         # print(datasetPLC.isnull().values.any()) # Debug NaN
 
         # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
