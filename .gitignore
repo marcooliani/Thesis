@@ -1,4 +1,5 @@
 /*
+!.gitignore
 !README.md
 !/TeX
 /TeX/*.aux
@@ -33,8 +34,10 @@
 /PLC-RE/daikon/Daikon_Invariants/*.COPY
 /PLC-RE/process-mining/data/*.csv
 /PLC-RE/venv/
-/PLC-RE/network-analysis
-!/PLC-RE/network-analysis
+/PLC-RE/network-analysis/*
+!/PLC-RE/network-analysis/
 !/PLC-RE/network-analysis/*.py
 /PLC-RE/network-analysis/sce/
+/PLC-RE/network-analysis/*.csv
+/PLC-RE/network-analysis/*.INVALID
 
