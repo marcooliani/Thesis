@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pyshark
-import glob
 import argparse
 import configparser
 import subprocess
@@ -13,10 +12,13 @@ class ExportPCAPData:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', "--file", type=str, help="single pcap file to include (with path")
-        parser.add_argument('-m', "--mergefiles", nargs='+', default=[], help="multiple pcap files to include (w/o path)")
-        parser.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
-        parser.add_argument('-t', "--timerange", nargs=2, default=[], help="time range selection (format YYYY-MM-DD HH:MM:SS")
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('-f', "--file", type=str, help="single pcap file to include (with path")
+        group.add_argument('-m', "--mergefiles", nargs='+', default=[],
+                           help="multiple pcap files to include (w/o path)")
+        group.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
+        parser.add_argument('-t', "--timerange", nargs=2, default=[],
+                            help="time range selection (format YYYY-MM-DD HH:MM:SS")
         self.args = parser.parse_args()
 
         self.pcap_file = None
@@ -93,7 +95,11 @@ class ExportPCAPData:
 
         output = output.split('\n')
 
-        output_csv = output[0] + '\n'
+        output_csv = output[0].replace('_ws.col.Time', self.config['DATASET']['timestamp_col']) \
+            .replace('ip.src', 'src')\
+            .replace('ip.dst', 'dst')\
+            .replace('_ws.col.Protocol', 'Protocol')\
+            + '\n'
 
         for r in output[1:]:
             r = r.split(',')
