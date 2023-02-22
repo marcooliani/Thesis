@@ -7,6 +7,8 @@ import glob
 import argparse
 import configparser
 import numpy as np
+import binascii
+import struct
 
 
 class SwatCSVExtractor:
@@ -35,18 +37,24 @@ class SwatCSVExtractor:
         if self.args.mergedir:
             self.csv_dir = self.args.mergedir
 
+    @staticmethod
+    def get_cip_data(self, hex_val):
+        dec_val = struct.unpack('<f', binascii.unhexlify(hex_val))[0]
+
+        return dec_val
+
     def import_csv(self):
         if self.csv_file:
             self.df = pd.read_csv(self.csv_file,
                                   usecols=['date', 'time', 'src', 'dst', 'appi_name', 'Modbus_Function_Description',
-                                           'Modbus_Transaction_ID', 'SCADA_Tag', 'Modbus_Value', 'Tag'])
+                                           'Modbus_Transaction_ID', 'SCADA_Tag', 'Modbus_Value'])
 
         if self.csv_multiple:
             self.df = pd.concat(map(lambda file:
                                     pd.read_csv(file,
                                                 usecols=['date', 'time', 'src', 'dst', 'appi_name',
                                                          'Modbus_Function_Description', 'Modbus_Transaction_ID',
-                                                         'SCADA_Tag', 'Modbus_Value', 'Tag'], header=0),
+                                                         'SCADA_Tag', 'Modbus_Value'], header=0),
                                     self.csv_multiple), ignore_index=True)
 
         if self.csv_dir:
@@ -54,7 +62,7 @@ class SwatCSVExtractor:
                                     pd.read_csv(file,
                                                 usecols=['date', 'time', 'src', 'dst', 'appi_name',
                                                          'Modbus_Function_Description', 'Modbus_Transaction_ID',
-                                                         'SCADA_Tag', 'Modbus_Value', 'Tag'], header=0),
+                                                         'SCADA_Tag', 'Modbus_Value'], header=0),
                                     sorted(glob.glob(os.path.join(self.csv_dir, '*.csv')))), ignore_index=True)
 
         self.df[self.config['DATASET']['timestamp_col']] = \
@@ -66,11 +74,17 @@ class SwatCSVExtractor:
         self.df = self.df.drop(['time', 'date'], axis=1, errors='ignore')
         self.df.rename({'Modbus_Function_Description': 'service'}, axis=1, inplace=True)
 
+        if self.csv_timerange:
+            self.df = self.df.loc[self.df[self.config['DATASET']['timestamp_col']].between(self.csv_timerange[0],
+                                                                                           self.csv_timerange[1],
+                                                                                           inclusive="both")]
+
         protocols = self.config['NETWORK']['protocols'].split(',')
-        conditions = [
-            (self.df['appi_name'].str.contains('CIP') == 1),
-            (self.df['appi_name'].str.contains('Modbus') == 1)
-        ]
+
+        conditions = list()
+        for p in protocols:
+            conditions.append((self.df['appi_name'].str.contains(p) == 1))
+
         self.df['Protocol'] = np.select(conditions, protocols)
         col_proto = self.df.pop('Protocol')
         self.df.insert(loc=3, column='Protocol', value=col_proto)
@@ -82,10 +96,8 @@ class SwatCSVExtractor:
         mp = {'src': 'dst', 'dst': 'src'}
         self.df.update(self.df.loc[cond].rename(mp, axis=1))
 
-        if self.csv_timerange:
-            self.df = self.df.loc[self.df[self.config['DATASET']['timestamp_col']].between(self.csv_timerange[0],
-                                                                                           self.csv_timerange[1],
-                                                                                           inclusive="both")]
+        self.df['Modbus_Value'] = self.df['Modbus_Value'].str.split('; ').str[0]
+        self.df['Modbus_Value'] = self.df['Modbus_Value'].str.replace('0x', '').str.replace(' ', '')
 
         # print(self.df)
         sources = sorted(self.df['src'].unique())

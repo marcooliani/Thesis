@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+from io import StringIO
 
 import pyshark
 import argparse
 import configparser
 import subprocess
+import pandas as pd
 
 
 class ExportPCAPData:
@@ -88,11 +90,30 @@ class ExportPCAPData:
 
         # ud -> UTC date
         # ad -> absolute date (orario locale)
-        output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields -e frame.number '
-                                         f'-e _ws.col.Time -e ip.src -e ip.dst {str_protocols} '
-                                         f'-e _ws.col.Protocol {str_columns} '
+        output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields '
+                                         f'-e frame.time_epoch -e ip.src -e ip.dst {str_protocols} '
+                                         f'-e _ws.col.Protocol {str_columns} -e frame.number '
                                          f'-E header=y -E separator=, -E aggregator=/s', shell=True).decode('utf-8')
 
+        df = pd.read_csv(StringIO(output))
+
+        df.rename({'ip.src': 'src'}, axis=1, inplace=True)
+        df.rename({'ip.dst': 'dst'}, axis=1, inplace=True)
+        df.rename({'_ws.col.Protocol': 'Protocol'}, axis=1, inplace=True)
+        df.rename({'frame.time_epoch': self.config['DATASET']['timestamp_col']}, axis=1, inplace=True)
+        df[self.config['DATASET']['timestamp_col']] = pd.to_datetime(df[self.config['DATASET']['timestamp_col']],
+                                                                     unit='s')
+
+        if self.pcap_timerange:
+            df = df.loc[df[self.config['DATASET']['timestamp_col']].between(self.pcap_timerange[0],
+                                                                            self.pcap_timerange[1],
+                                                                            inclusive="both")]
+
+        # print(df)
+        print("Saving CSV export ... ")
+        df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
+
+        '''
         output = output.split('\n')
 
         output_csv = output[0].replace('_ws.col.Time', self.config['DATASET']['timestamp_col']) \
@@ -117,6 +138,7 @@ class ExportPCAPData:
         print("Saving CSV export ... ")
         with open(f'{self.config["NETWORK"]["csv_output"]}', 'w') as f:
             f.write(output_csv)
+        '''
 
         print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
 
