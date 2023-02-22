@@ -109,38 +109,13 @@ class ExportPCAPData:
                                                                             self.pcap_timerange[1],
                                                                             inclusive="both")]
 
-        # print(df)
         print("Saving CSV export ... ")
         df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
 
-        '''
-        output = output.split('\n')
-
-        output_csv = output[0].replace('_ws.col.Time', self.config['DATASET']['timestamp_col']) \
-            .replace('ip.src', 'src')\
-            .replace('ip.dst', 'dst')\
-            .replace('_ws.col.Protocol', 'Protocol')\
-            + '\n'
-
-        for r in output[1:]:
-            r = r.split(',')
-            # r = r[:2] + r[3:]
-            newdate = '.'.join(map(lambda x: x, r[1:3]))
-            r[1:3] = [newdate]
-
-            if self.pcap_timerange:
-                if not self.pcap_timerange[0] <= str(r[1]) <= self.pcap_timerange[1]:
-                    continue
-
-            output_csv += ','.join(map(str, r))
-            output_csv += '\n'
-
-        print("Saving CSV export ... ")
-        with open(f'{self.config["NETWORK"]["csv_output"]}', 'w') as f:
-            f.write(output_csv)
-        '''
-
         print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
+
+        sources = sorted(df['src'].unique())
+        print(sources)
 
 
 def main():
