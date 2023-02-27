@@ -78,7 +78,7 @@ class ExportPCAPData:
 
     def export_data(self, protocols):
         print("Extracting PCAP data ... ")
-        fixed_param = ['frame.number', '_ws.col.Time', 'ip.src', 'ip.dst']  # Lo tengo qui, ma non serve...
+        # fixed_param = ['frame.number', '_ws.col.Time', 'ip.src', 'ip.dst']  # Lo tengo qui, ma non serve...
         str_protocols = "-Y '"
         str_protocols += ' || '.join(map(str, protocols)).lower()
         str_protocols += "'"
@@ -92,7 +92,7 @@ class ExportPCAPData:
         # ad -> absolute date (orario locale)
         output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields '
                                          f'-e frame.time_epoch -e ip.src -e ip.dst {str_protocols} '
-                                         f'-e _ws.col.Protocol {str_columns} -e frame.number '
+                                         f'-e _ws.col.Protocol {str_columns} -e frame.number -e frame.protocols '
                                          f'-E header=y -E separator=, -E aggregator=/s', shell=True).decode('utf-8')
 
         df = pd.read_csv(StringIO(output))
