@@ -19,7 +19,8 @@ class RunDaikon:
         parser.add_argument('-c', "--conditions", nargs='+', default=[], help="Daikon invariants conditions")
         self.args = parser.parse_args()
 
-        self.dataset = self.config['DEFAULTS']['dataset_file']
+        # self.dataset = self.config['DEFAULTS']['dataset_file']
+        self.dataset = None
         self.register = ''
         self.conditions = None
 
@@ -71,9 +72,11 @@ class RunDaikon:
         output = output.decode("utf-8")
 
         output = re.sub('[=]{6,}', 'SPLIT_HERE', output)
+        output = output.replace('"', '')
         # sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
         sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[1:] for sec in
                                                                         output.split('SPLIT_HERE\n')][2::2]
+
         return sections
 
     def parse_daikon(self, section, section_output):
@@ -255,7 +258,7 @@ def main():
     rd.check_args()
     start_dir = os.getcwd()
     # print("Process start")
-    if os.chdir('Daikon_Invariants/'):
+    if os.chdir(rd.config["DAIKON"]["daikon_invariants_dir"]):
         print("Error generating invariants. Aborting.")
         exit(1)
 

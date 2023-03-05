@@ -14,10 +14,13 @@ class ActuatorsBehaviour:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
+        group = parser.add_argument_group()
+
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
         parser.add_argument('-l', "--actuatorslist", default=False, help="print actuators list")
-        parser.add_argument('-a', "--actuator", type=str, required=True, help="actuator's name")
-        parser.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
+        group.add_argument('-a', "--actuator", type=str, required=False, help="actuator's name")
+        group.add_argument('-s', "--sensor", type=str, required=False, help="sensor's name")
+
         self.args = parser.parse_args()
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
@@ -66,6 +69,7 @@ class ActuatorsBehaviour:
                 b = [float(i) for i in b.replace('{ ', '').replace(' }', '').replace(',', '').split(' ')]
 
                 self.actuators[a] = b
+                #self.actuators = {key.replace('"', ''): val for key, val in self.actuators.items()}
 
                 return
 
@@ -82,6 +86,8 @@ class ActuatorsBehaviour:
                 equals = self.__find_other_actuators(a, output)
                 for act in equals:
                     self.actuators[act] = b
+
+        #self.actuators = {key.replace('"', ''): val for key, val in self.actuators.items()}
 
     def __find_other_actuators(self, actuator, daikon_output):
         equals = list()
@@ -101,6 +107,8 @@ class ActuatorsBehaviour:
         for v in self.actuators[actuator]:
             print(df[df.eval(f'{actuator} == {v} and {self.config["DATASET"]["prev_cols_prefix"]}{actuator} != {v}')])
             print()
+
+        # print(df[df.eval(f'P1.MV101 == 0 and P1.P101 == 1')])
 
     def actuator_status_period(self, file, actuator):
         df = pd.read_csv(file, encoding='utf-8', usecols=[actuator])
@@ -143,3 +151,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# Appunti sparsi
+# df[['P1.MV101', 'P1.P101']].drop_duplicates().to_numpy()

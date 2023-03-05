@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-slope_LIT301 == 1.0 && LIT301 < max_LIT301 - 20 && LIT301 > min_LIT301 + 24 
+MV101 == 0 && P101 == 2 && LIT101 < max_LIT101 && LIT101 > min_LIT101

@@ -6,6 +6,8 @@ import subprocess
 import networkx as nx
 import argparse
 import configparser
+import pandas as pd
+import numpy as np
 
 
 class FindActuators:
@@ -15,6 +17,8 @@ class FindActuators:
 
         parser = argparse.ArgumentParser()
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+        parser.add_argument('-s', "--simpleanalysis", type=bool, default=False, help="simple daikon analysis on actuators")
+        parser.add_argument('-c', "--customanalysis", nargs='+', default=[], help="daikon analysis on actuators based on a condition")
         self.args = parser.parse_args()
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
@@ -30,6 +34,11 @@ class FindActuators:
             self.dataset = self.args.filename
 
     def call_daikon(self):
+        start_dir = os.getcwd()
+        if os.chdir(self.config['DAIKON']['daikon_invariants_dir']):
+            print("Error generating invariants. Aborting.")
+            exit(1)
+
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
 
         # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
@@ -41,6 +50,8 @@ class FindActuators:
         output = subprocess.check_output(
             f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
             shell=True)
+
+        os.chdir(start_dir)
 
         output = output.decode("utf-8")
         output = re.sub('[=]{6,}', '', output)
@@ -68,11 +79,11 @@ class FindActuators:
                 # della DFS
                 for a, b in closure_dfs:
                     if a not in visited:
-                        temp.append(a)
+                        temp.append(a.replace('"', ''))
                         visited.append(a)
                     if b not in visited or b.lstrip('-').replace('.', '', 1).isdigit():
                         visited.append(b)
-                        temp.append(b)
+                        temp.append(b.replace('"', ''))
 
                 # Inserisco la lista di nodi nel listone delle invarianti
                 output_list.append(temp)
@@ -130,6 +141,7 @@ class FindActuators:
                 for act in equals:
                     self.actuators[act] = b
 
+        self.actuators = {key.replace('"', ''): val for key, val in self.actuators.items()}
         self.find_constants(output)
         self.find_setpoints(output)
 
@@ -161,9 +173,9 @@ class FindActuators:
 
         return str_max, str_min
 
-    def make_daikon_analysis(self, str_min, str_max, sensor):
+    def make_daikon_simple_analysis(self, str_min, str_max, sensor):
         daikon_condition = ''
-        for const in self.constants:
+        for const in self.setpoints:
             if str_max in const:
                 max_v = int(float(const[1]))
                 margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
@@ -175,11 +187,38 @@ class FindActuators:
 
         for key, val in self.actuators.items():
             for v in val:
-                subprocess.call(f'./runDaikon.py -c '
-                                f'"{key} == {v} {daikon_condition}" '
-                                f'-r {key}',
-                                shell=True)
+                subprocess.call(f'./runDaikon.py -c "{key} == {v} {daikon_condition}" -r {key}', shell=True)
                 print()
+
+    def make_daikon_custom_analysis(self, str_min, str_max, sensor):
+        actuators_list = [key for key, value in self.actuators.items()]
+        df = pd.read_csv(os.path.join(self.config['DAIKON']['daikon_invariants_dir'], self.dataset), usecols=actuators_list)
+
+        statuses = df[actuators_list].drop_duplicates().to_numpy()
+        sensor_condition = ''
+
+        for const in self.setpoints:
+            if str_max in const:
+                max_v = int(float(const[1]))
+                margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
+                # sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin}'
+                sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor}'
+            if str_min in const:
+                min_v = int(float(const[1]))
+                margin = round((min_v / 100) * int(self.config['DAIKON']['min_security_pct_margin']))
+                # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
+                sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
+
+        for status in statuses:
+            daikon_condition = list()
+            for i in range(len(status)):
+                tmp = f'{actuators_list[i]} == {status[i]}'
+                daikon_condition.append(tmp)
+            daikon_condition = ' && '.join(map(str, daikon_condition)) + sensor_condition
+            print(daikon_condition)
+
+            subprocess.call(f'./runDaikon.py -f {self.dataset} -c "{daikon_condition}" -r "Other"', shell=True)
+            print()
 
 
 def main():
@@ -189,9 +228,11 @@ def main():
     start_dir = os.getcwd()
     print("Process start")
 
-    if os.chdir('Daikon_Invariants/'):
+    '''
+    if os.chdir(fa.config['DAIKON']['daikon_invariants_dir']):
         print("Error generating invariants. Aborting.")
         exit(1)
+    '''
 
     # Controllo se esiste la directory dove verranno scritti i file con i risultati. Se non esiste la creo
     if not os.path.exists(fa.config["DAIKON"]["daikon_results_dir"]):
@@ -201,16 +242,25 @@ def main():
     fa.parse_output(daikon_output)
     fa.print_info()
 
-    os.chdir(start_dir)
+    # os.chdir(start_dir)
 
-    print('\n')
-    res = input('Perform Daikon analysis? [y/n] ')
+    sensor = input('Insert sensor name: ')
+    str_max, str_min = fa.find_min_max(sensor)
+    fa.make_daikon_custom_analysis(str_min, str_max, sensor)
 
-    if res == 'Y' or res == 'y':
+    if fa.args.simpleanalysis:
+        # res = input('Perform Daikon analysis? [y/n] ')
+        # if res == 'Y' or res == 'y':
         sensor = input('Insert sensor name: ')
         str_max, str_min = fa.find_min_max(sensor)
-        fa.make_daikon_analysis(str_min, str_max, sensor)
+        fa.make_daikon_simple_analysis(str_min, str_max, sensor)
+
+
+    print('\n')
 
 
 if __name__ == '__main__':
     main()
+
+# Appunti sparsi
+# df[['P1.MV101', 'P1.P101']].drop_duplicates().to_numpy()
