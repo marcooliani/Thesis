@@ -70,9 +70,10 @@ class RunDaikon:
         # Visto che l'output è codificato in qualche maniera, riportiamolo allo stato "originario"
         # come stringa
         output = output.decode("utf-8")
+        output = output.replace('"', '')
 
         output = re.sub('[=]{6,}', 'SPLIT_HERE', output)
-        output = output.replace('"', '')
+
         # sections = [sec.split('\n')[1:] for sec in output.split('SPLIT_HERE\n')][1:-1]
         sections = [output.split('SPLIT_HERE\n')[1].split('\n')[1:]] + [sec.split('\n')[1:] for sec in
                                                                         output.split('SPLIT_HERE\n')][2::2]

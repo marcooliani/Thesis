@@ -26,7 +26,7 @@ class MergeDatasets:
         parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
         self.args = parser.parse_args()
 
-        #self.granularity = int(self.config['DEFAULTS']['granularity'])
+        # self.granularity = int(self.config['DEFAULTS']['granularity'])
         self.granularity = None
         self.nrows = int(self.config['DEFAULTS']['number_of_rows'])
         self.skiprows = [row for row in range(1, self.args.skiprows)]
@@ -175,6 +175,8 @@ def main():
         # usare skiprows=<int>, che skippa n righe da inizio file
         print(f'Reading {file.split("/")[-1]} ...')
         datasetPLC = pd.read_csv(file, skiprows=mg.skiprows, nrows=mg.nrows)
+        # I punti nei nomi delle colonne creano parecchi problemi, quindi vanno sostituiti
+        datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
         datasetPLC[mg.config['DATASET']['timestamp_col']] = \
             datasetPLC[mg.config['DATASET']['timestamp_col']].apply(lambda x:
                                                                     pd.Timestamp(x).strftime('%Y-%m-%d %H:%M:%S.%f'))

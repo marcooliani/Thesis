@@ -201,13 +201,13 @@ class FindActuators:
             if str_max in const:
                 max_v = int(float(const[1]))
                 margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
-                # sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin}'
-                sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor}'
+                sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin}'
+                # sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor}'
             if str_min in const:
                 min_v = int(float(const[1]))
                 margin = round((min_v / 100) * int(self.config['DAIKON']['min_security_pct_margin']))
-                # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
-                sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
+                sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
+                # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
 
         for status in statuses:
             daikon_condition = list()
@@ -215,7 +215,6 @@ class FindActuators:
                 tmp = f'{actuators_list[i]} == {status[i]}'
                 daikon_condition.append(tmp)
             daikon_condition = ' && '.join(map(str, daikon_condition)) + sensor_condition
-            print(daikon_condition)
 
             subprocess.call(f'./runDaikon.py -f {self.dataset} -c "{daikon_condition}" -r "Other"', shell=True)
             print()
@@ -254,7 +253,6 @@ def main():
         sensor = input('Insert sensor name: ')
         str_max, str_min = fa.find_min_max(sensor)
         fa.make_daikon_simple_analysis(str_min, str_max, sensor)
-
 
     print('\n')
 
