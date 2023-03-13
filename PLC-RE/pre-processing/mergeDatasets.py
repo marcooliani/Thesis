@@ -104,7 +104,7 @@ class MergeDatasets:
             data_set.insert(len(data_set.columns), self.config['DATASET']['min_prefix'] + col, min_val)
 
         for col in val_cols_trends:
-            # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=120)
+            # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=int(self.config['DATASET']['trend_period']))
             stl = STL(data_set[col], period=int(self.config['DATASET']['trend_period']), robust=True)
             decomposition = stl.fit()
             col_trend = [x for x in decomposition.trend]
@@ -115,20 +115,32 @@ class MergeDatasets:
         for col in val_cols_slopes:
             data_var = data_set[self.config['DATASET']['trend_cols_prefix'] + col]
 
-            mean_slope = [0 for _ in range(len(data_var))]
+            mean_slope = [None for _ in range(len(data_var))]
 
             for i in range(len(data_var)):
                 if i % self.granularity == 0 and i + self.granularity <= len(data_var)-1:
                     for j in range(i, (i + self.granularity)):
                         # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
                         if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
-                            # mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            mean_slope[j] = 1
+                            mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            # mean_slope[j] = 1
                         elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
-                            # mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            mean_slope[j] = -1
+                            mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            # mean_slope[j] = -1
                         else:
                             mean_slope[j] = 0
+                    '''
+                    if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
+                        mean_slope[i] = math.ceil(
+                            round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                        # mean_slope[j] = 1
+                    elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
+                        mean_slope[i] = math.floor(
+                            round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                        # mean_slope[j] = -1
+                    else:
+                        mean_slope[i] = 0
+                    '''
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, mean_slope)
 

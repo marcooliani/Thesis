@@ -199,15 +199,15 @@ class FindActuators:
 
         for const in self.setpoints:
             if str_max in const:
-                max_v = int(float(const[1]))
-                margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
-                sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin}'
-                # sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor}'
+                # max_v = int(float(const[1]))
+                # margin = round((max_v / 100) * int(self.config['DAIKON']['max_security_pct_margin']))
+                # sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor} - {margin}'
+                sensor_condition += f' && {sensor} < {self.config["DATASET"]["max_prefix"]}{sensor}'
             if str_min in const:
-                min_v = int(float(const[1]))
-                margin = round((min_v / 100) * int(self.config['DAIKON']['min_security_pct_margin']))
-                sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
-                # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
+                # min_v = int(float(const[1]))
+                # margin = round((min_v / 100) * int(self.config['DAIKON']['min_security_pct_margin']))
+                # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
+                sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
 
         for status in statuses:
             daikon_condition = list()
