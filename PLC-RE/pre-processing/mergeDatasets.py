@@ -122,11 +122,11 @@ class MergeDatasets:
                     for j in range(i, (i + self.granularity)):
                         # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
                         if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
-                            mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            # mean_slope[j] = 1
+                            # mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            mean_slope[j] = 1
                         elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
-                            mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            # mean_slope[j] = -1
+                            # mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
+                            mean_slope[j] = -1
                         else:
                             mean_slope[j] = 0
                     '''
