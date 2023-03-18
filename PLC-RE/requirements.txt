@@ -10,3 +10,4 @@ statsmodels~=0.13.5
 sranodec~=0.0.1
 scapy~=2.5.0
 pyshark~=0.5.3
+graphviz~=0.20.1

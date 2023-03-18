@@ -8,6 +8,8 @@ import subprocess
 import re
 import datetime as dt
 
+import graphviz
+
 from collections import defaultdict
 import json
 
@@ -24,6 +26,7 @@ class ProcessMining:
         group.add_argument('-s', "--sensor", type=str, required=False, help="sensor's name")
         group.add_argument('-t', "--tolerance", type=int, default=0, required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
+        group.add_argument('-g', "--graph", type=bool, default=0, required=False, help="generate state graph")
 
         self.args = parser.parse_args()
 
@@ -34,6 +37,7 @@ class ProcessMining:
         self.sensor = None
         self.tolerance = None
         self.offset = None
+        self.graph = None
 
         self.configurations = defaultdict(dict)
 
@@ -47,6 +51,7 @@ class ProcessMining:
         self.sensor = self.args.sensor
         self.tolerance = self.args.tolerance
         self.offset = self.args.offset
+        self.graph = self.args.graph
 
     def call_daikon(self):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
@@ -113,15 +118,14 @@ class ProcessMining:
             trend = "STABLE"
 
         conf = ', '.join(map(str, config))
+        # if conf not in self.configurations:
+        #   self.configurations[conf] = defaultdict(dict)
         self.configurations[conf]['start_value'].append(starting_value)
         self.configurations[conf]['end_value'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
         self.configurations[conf]['trend'].append(trend)
         self.configurations[conf]['slope'].append(slope)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
-
-        # ppp = json.dumps(self.configurations, indent=4)
-        # print(ppp)
 
     def mining(self):
         prev_values = []
@@ -131,7 +135,6 @@ class ProcessMining:
         ending_time = None
 
         actuators_list = [key for key, val in self.actuators.items()]
-        # print(actuators_list)
 
         df = pd.read_csv(self.dataset)
         states = df[actuators_list].drop_duplicates().to_numpy()
@@ -143,9 +146,6 @@ class ProcessMining:
 
             self.configurations[', '.join(map(str, config))] = defaultdict(list)
 
-        #ppp = json.dumps(self.configurations, indent=4)
-        #print(ppp)
-
         for i in range(len(df)):
             # if df['P1_MV101'].iloc[i] == 1 and df['P1_P101'].iloc[i] == 2:
             values = [df[k].iloc[i] for k in actuators_list]
@@ -154,8 +154,7 @@ class ProcessMining:
                 if starting_time:
                     act_conf = list()
                     next_conf = list()
-                    #for k in range(len(actuators_list)):
-                    #    act_conf.append(f'{actuators_list[k]} == {prev_values[k]}')
+
                     for a, pv in zip(actuators_list, prev_values):
                         act_conf.append(f'{a} == {pv}')
 
@@ -175,7 +174,37 @@ class ProcessMining:
             prev_values = values
 
         print_json = json.dumps(self.configurations, indent=4)
-        print(print_json)
+        # print(print_json)
+
+    def generate_state_graph(self):
+        dot = graphviz.Digraph(name='State graph', node_attr={'color': 'lightblue2', 'style': 'filled'}, format='png')
+        stati = [k for k, v in self.configurations.items()]
+        nodi = [f'Nodo{n+1}' for n in range(len(stati))]
+
+        nodes_labels = list()
+        for n, s in zip(nodi, stati):
+            nodes_labels.append((n, s))
+
+        next_states = list()
+        pend = list()
+        for x in nodes_labels:
+            ns = list(set(self.configurations[x[1]]['next_state']))
+            pend = list(set(self.configurations[x[1]]['trend']))
+            if len(pend) > 1:
+                pend = pend[1]
+            else:
+                pend = pend[0]
+            for w in nodes_labels:
+                if ns[0] in w:
+                    next_states.append((x[0], w[0], pend))
+
+        for x in nodes_labels:
+            dot.node(f'{x[0]}', f'{x[1]}')
+        for w in next_states:
+            dot.edge(w[0], w[1], label=w[2])
+
+        # print(dot.source)
+        dot.view()
 
 
 def main():
@@ -188,6 +217,8 @@ def main():
     output = pm.call_daikon()
     pm.find_actuators_list(output)
     pm.mining()
+    if pm.graph:
+        pm.generate_state_graph()
     os.chdir(start_dir)
 
 
