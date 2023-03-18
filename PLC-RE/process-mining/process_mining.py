@@ -167,10 +167,10 @@ class ProcessMining:
                     # print()
 
                 starting_value = df[self.sensor].iloc[i]
-                starting_time = df['Timestamp'].iloc[i]
+                starting_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
             else:
                 ending_value = df[self.sensor].iloc[i]
-                ending_time = df['Timestamp'].iloc[i]
+                ending_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
             prev_values = values
 
         print_json = json.dumps(self.configurations, indent=4)
