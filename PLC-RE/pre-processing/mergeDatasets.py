@@ -158,6 +158,7 @@ class MergeDatasets:
     @staticmethod
     def concat_datasets(datasets_list):
         df = pd.concat(datasets_list, axis=1).reset_index(drop=True)
+        df = df.T.drop_duplicates().T  # Drop dup columns in the dataframe (i.e. Timestamps)
         return df
 
     @staticmethod

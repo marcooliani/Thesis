@@ -23,6 +23,7 @@ class ProcessMining:
         group = parser.add_argument_group()
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+        group.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
         group.add_argument('-s', "--sensor", type=str, required=False, help="sensor's name")
         group.add_argument('-t', "--tolerance", type=int, default=0, required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
@@ -120,11 +121,11 @@ class ProcessMining:
         conf = ', '.join(map(str, config))
         # if conf not in self.configurations:
         #   self.configurations[conf] = defaultdict(dict)
-        self.configurations[conf]['start_value'].append(starting_value)
-        self.configurations[conf]['end_value'].append(ending_value)
+        self.configurations[conf][f'start_value_{self.sensor}'].append(starting_value)
+        self.configurations[conf][f'end_value_{self.sensor}'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
-        self.configurations[conf]['trend'].append(trend)
-        self.configurations[conf]['slope'].append(slope)
+        self.configurations[conf][f'trend_{self.sensor}'].append(trend)
+        self.configurations[conf][f'slope_{self.sensor}'].append(slope)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
 
     def mining(self):
@@ -176,8 +177,13 @@ class ProcessMining:
         print_json = json.dumps(self.configurations, indent=4)
         # print(print_json)
 
+        with open('results.json', 'w') as f:
+            f.write(print_json)
+
     def generate_state_graph(self):
-        dot = graphviz.Digraph(name='State graph', node_attr={'color': 'lightblue2', 'style': 'filled'}, format='png')
+        dot = graphviz.Digraph(name=f'State graph {self.sensor}',
+                               node_attr={'color': 'lightblue2', 'style': 'filled'},
+                               format='png')
         stati = [k for k, v in self.configurations.items()]
         nodi = [f'Nodo{n+1}' for n in range(len(stati))]
 
@@ -189,7 +195,7 @@ class ProcessMining:
         pend = list()
         for x in nodes_labels:
             ns = list(set(self.configurations[x[1]]['next_state']))
-            pend = list(set(self.configurations[x[1]]['trend']))
+            pend = list(set(self.configurations[x[1]][f'trend_{self.sensor}']))
             if len(pend) > 1:
                 pend = pend[1]
             else:
