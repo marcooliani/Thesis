@@ -24,7 +24,7 @@ class ProcessMining:
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
         group.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
-        group.add_argument('-s', "--sensor", type=str, required=False, help="sensor's name")
+        group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
         group.add_argument('-t', "--tolerance", type=int, default=0, required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
         group.add_argument('-g', "--graph", type=bool, default=0, required=False, help="generate state graph")
@@ -32,10 +32,9 @@ class ProcessMining:
         self.args = parser.parse_args()
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
-        self.actuators = dict()
 
-        self.actuator = None
-        self.sensor = None
+        self.actuators = list()
+        self.sensors = None
         self.tolerance = None
         self.offset = None
         self.graph = None
@@ -49,7 +48,13 @@ class ProcessMining:
                 exit(1)
             self.dataset = self.args.filename
 
-        self.sensor = self.args.sensor
+        if self.args.actuators:
+            self.actuators = self.args.actuators
+        else:
+            output = self.call_daikon()
+            self.find_actuators_list(output)
+
+        self.sensors = self.args.sensor
         self.tolerance = self.args.tolerance
         self.offset = self.args.offset
         self.graph = self.args.graph
@@ -77,15 +82,14 @@ class ProcessMining:
         for inv in output:
             if 'one of' in inv and self.config['DATASET']['prev_cols_prefix'] not in inv and \
                     self.config['DATASET']['slope_cols_prefix'] not in inv:
-                a, b = inv.split(' one of ')
+                a, _ = inv.split(' one of ')
                 a.replace('(', '').replace(')', '')
-                b = [float(i) for i in b.replace('{ ', '').replace(' }', '').replace(',', '').split(' ')]
 
-                self.actuators[a] = b
+                self.actuators.append(a)
 
                 equals = self.__find_other_actuators(a, output)
                 for act in equals:
-                    self.actuators[act] = b
+                    self.actuators.append(act)
 
     def __find_other_actuators(self, actuator, daikon_output):
         equals = list()
@@ -121,11 +125,11 @@ class ProcessMining:
         conf = ', '.join(map(str, config))
         # if conf not in self.configurations:
         #   self.configurations[conf] = defaultdict(dict)
-        self.configurations[conf][f'start_value_{self.sensor}'].append(starting_value)
-        self.configurations[conf][f'end_value_{self.sensor}'].append(ending_value)
+        self.configurations[conf][f'start_value_{self.sensors}'].append(starting_value)
+        self.configurations[conf][f'end_value_{self.sensors}'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
-        self.configurations[conf][f'trend_{self.sensor}'].append(trend)
-        self.configurations[conf][f'slope_{self.sensor}'].append(slope)
+        self.configurations[conf][f'trend_{self.sensors}'].append(trend)
+        self.configurations[conf][f'slope_{self.sensors}'].append(slope)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
 
     def mining(self):
@@ -135,31 +139,29 @@ class ProcessMining:
         starting_time = None
         ending_time = None
 
-        actuators_list = [key for key, val in self.actuators.items()]
-
         df = pd.read_csv(self.dataset)
-        states = df[actuators_list].drop_duplicates().to_numpy()
+        states = df[self.actuators].drop_duplicates().to_numpy()
 
         for state in states:
             config = list()
-            for a, s in zip(actuators_list, state):
+            for a, s in zip(self.actuators, state):
                 config.append(f'{a} == {s}')
 
             self.configurations[', '.join(map(str, config))] = defaultdict(list)
 
         for i in range(len(df)):
             # if df['P1_MV101'].iloc[i] == 1 and df['P1_P101'].iloc[i] == 2:
-            values = [df[k].iloc[i] for k in actuators_list]
+            values = [df[k].iloc[i] for k in self.actuators]
 
             if values != prev_values:
                 if starting_time:
                     act_conf = list()
                     next_conf = list()
 
-                    for a, pv in zip(actuators_list, prev_values):
+                    for a, pv in zip(self.actuators, prev_values):
                         act_conf.append(f'{a} == {pv}')
 
-                    for a, nv in zip(actuators_list, values):
+                    for a, nv in zip(self.actuators, values):
                         next_conf.append(f'{a} == {nv}')
 
                     # print(', '.join(map(str, act_conf)))
@@ -167,10 +169,10 @@ class ProcessMining:
                     self.__compute(act_conf, next_conf, starting_time, ending_time, starting_value, ending_value)
                     # print()
 
-                starting_value = df[self.sensor].iloc[i]
+                starting_value = df[self.sensors].iloc[i]
                 starting_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
             else:
-                ending_value = df[self.sensor].iloc[i]
+                ending_value = df[self.sensors].iloc[i]
                 ending_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
             prev_values = values
 
@@ -181,33 +183,40 @@ class ProcessMining:
             f.write(print_json)
 
     def generate_state_graph(self):
-        dot = graphviz.Digraph(name=f'State graph {self.sensor}',
+        dot = graphviz.Digraph(name=f'State graph {self.sensors}',
                                node_attr={'color': 'lightblue2', 'style': 'filled'},
                                format='png')
         stati = [k for k, v in self.configurations.items()]
-        nodi = [f'Nodo{n+1}' for n in range(len(stati))]
+        nodi = [s for s in stati]
 
         nodes_labels = list()
         for n, s in zip(nodi, stati):
             nodes_labels.append((n, s))
 
         next_states = list()
-        pend = list()
-        for x in nodes_labels:
-            ns = list(set(self.configurations[x[1]]['next_state']))
-            pend = list(set(self.configurations[x[1]][f'trend_{self.sensor}']))
-            if len(pend) > 1:
-                pend = pend[1]
-            else:
-                pend = pend[0]
-            for w in nodes_labels:
-                if ns[0] in w:
-                    next_states.append((x[0], w[0], pend))
 
-        for x in nodes_labels:
-            dot.node(f'{x[0]}', f'{x[1]}')
-        for w in next_states:
-            dot.edge(w[0], w[1], label=w[2])
+        for node_label in nodes_labels:
+            ns_list = list(dict.fromkeys(self.configurations[node_label[1]]['next_state']))  # Lista degli stati successivi
+            trend = list(dict.fromkeys(self.configurations[node_label[1]][f'trend_{self.sensors}']))  # Elimino i duplicati
+            if len(trend) >= 3:
+                trend = ', '.join(map(str, trend[1:-1]))  # Elimino primo e ultimo elemento
+            elif len(trend) == 2:
+                trend = trend[1]
+            else:
+                trend = trend[0]
+
+            for nl in nodes_labels:
+                for bla in ns_list:
+                #if ns_list[0] in nl:
+                #    next_states.append((node_label[0], nl[0], trend))
+                    if bla in nl:
+                        next_states.append((node_label[0], bla, trend))
+
+        # print(next_states)
+        for node_label in nodes_labels:
+            dot.node(f'{node_label[0]}', f'{node_label[1]}')
+        for ns in next_states:
+            dot.edge(ns[0], ns[1], label=ns[2])
 
         # print(dot.source)
         dot.view()
@@ -215,13 +224,14 @@ class ProcessMining:
 
 def main():
     pm = ProcessMining()
-    pm.check_args()
     start_dir = os.getcwd()
     if os.chdir('data/'):
         print("Error generating invariants. Aborting.")
         exit(1)
-    output = pm.call_daikon()
-    pm.find_actuators_list(output)
+
+    pm.check_args()
+    # output = pm.call_daikon()
+    # pm.find_actuators_list(output)
     pm.mining()
     if pm.graph:
         pm.generate_state_graph()
