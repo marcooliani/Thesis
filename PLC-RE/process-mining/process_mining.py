@@ -7,9 +7,9 @@ import configparser
 import subprocess
 import re
 import datetime as dt
-
 import graphviz
 
+from statistics import mean
 from collections import defaultdict
 import json
 
@@ -182,7 +182,7 @@ class ProcessMining:
         with open('results.json', 'w') as f:
             f.write(print_json)
 
-    def generate_state_graph(self):
+    def _generate_state_graph(self):
         dot = graphviz.Digraph(name=f'State graph {self.sensors}',
                                node_attr={'color': 'lightblue2', 'style': 'filled'},
                                format='png')
@@ -219,6 +219,61 @@ class ProcessMining:
             dot.edge(ns[0], ns[1], label=ns[2])
 
         # print(dot.source)
+        # dot.view()
+
+    def generate_state_graph(self):
+        dot = graphviz.Digraph(name=f'State graph {self.sensors}',
+                               node_attr={'color': 'lightblue2', 'style': 'filled'},
+                               format='png')
+        states_list = [k for k, v in self.configurations.items()]
+
+        for state in states_list:
+            # Genero i nodi.
+            # L'id del nodo è lo stato stesso, mentre la label è composta dallo stato
+            # più l'indicazione del trend per quello stato (acendente, discentende, stabile)
+            trend_list = list(
+                dict.fromkeys(self.configurations[state][f'trend_{self.sensors}']))  # Elimino i duplicati
+            if len(trend_list) >= 3:
+                trend = ', '.join(map(str, trend_list[1:-1]))  # Elimino primo e ultimo elemento
+            elif len(trend_list) == 2:
+                trend = trend_list[1:]
+            else:
+                trend = trend_list
+
+            # Metto come attributo del nodo anche lo slope
+            slope_list = list(dict.fromkeys(self.configurations[state][f'slope_{self.sensors}']))
+            if len(slope_list) >= 3:
+                slope = round(mean(slope_list[1:-1]), 2)
+            else:
+                slope = round(mean(slope_list[1:]), 2)
+
+            dot.node(state, f'{state}\n{trend} ({slope})')
+
+            # Preparo gli attributi per gli archi: valore di cambio stato e tempo di permanenza
+            change_values_list = list(dict.fromkeys(self.configurations[state][f'end_value_{self.sensors}']))
+            print(change_values_list)
+            if len(change_values_list) >= 3:
+                change_value = change_values_list[1:-1]
+            else:
+                change_value = change_values_list
+            # print(state, change_value)
+
+            avg_time_list = list(dict.fromkeys(self.configurations[state][f'time']))
+            if len(avg_time_list) >= 3:
+                avg_time = avg_time_list[1:-1]
+            else:
+                avg_time = avg_time_list
+            # print(state, avg_time)
+
+            edge_attr = list()
+            for v, t in zip(change_value, avg_time):
+                edge_attr.append([v, t])
+
+            # Genero gli archi
+            nextstates_list = list(
+                dict.fromkeys(self.configurations[state]['next_state']))  # Lista degli stati successivi
+
+        print(dot.source)
         dot.view()
 
 
