@@ -7,6 +7,7 @@ import configparser
 import subprocess
 import re
 import datetime as dt
+import math
 import graphviz
 
 from statistics import mean
@@ -182,45 +183,6 @@ class ProcessMining:
         with open('results.json', 'w') as f:
             f.write(print_json)
 
-    def _generate_state_graph(self):
-        dot = graphviz.Digraph(name=f'State graph {self.sensors}',
-                               node_attr={'color': 'lightblue2', 'style': 'filled'},
-                               format='png')
-        stati = [k for k, v in self.configurations.items()]
-        nodi = [s for s in stati]
-
-        nodes_labels = list()
-        for n, s in zip(nodi, stati):
-            nodes_labels.append((n, s))
-
-        next_states = list()
-
-        for node_label in nodes_labels:
-            ns_list = list(dict.fromkeys(self.configurations[node_label[1]]['next_state']))  # Lista degli stati successivi
-            trend = list(dict.fromkeys(self.configurations[node_label[1]][f'trend_{self.sensors}']))  # Elimino i duplicati
-            if len(trend) >= 3:
-                trend = ', '.join(map(str, trend[1:-1]))  # Elimino primo e ultimo elemento
-            elif len(trend) == 2:
-                trend = trend[1]
-            else:
-                trend = trend[0]
-
-            for nl in nodes_labels:
-                for bla in ns_list:
-                #if ns_list[0] in nl:
-                #    next_states.append((node_label[0], nl[0], trend))
-                    if bla in nl:
-                        next_states.append((node_label[0], bla, trend))
-
-        # print(next_states)
-        for node_label in nodes_labels:
-            dot.node(f'{node_label[0]}', f'{node_label[1]}')
-        for ns in next_states:
-            dot.edge(ns[0], ns[1], label=ns[2])
-
-        # print(dot.source)
-        # dot.view()
-
     def generate_state_graph(self):
         dot = graphviz.Digraph(name=f'State graph {self.sensors}',
                                node_attr={'color': 'lightblue2', 'style': 'filled'},
@@ -240,40 +202,38 @@ class ProcessMining:
             else:
                 trend = trend_list
 
-            # Metto come attributo del nodo anche lo slope
+            # Metto come attributo del nodo anche lo slope (arrotondato al secondo decimale)
             slope_list = list(dict.fromkeys(self.configurations[state][f'slope_{self.sensors}']))
             if len(slope_list) >= 3:
                 slope = round(mean(slope_list[1:-1]), 2)
             else:
                 slope = round(mean(slope_list[1:]), 2)
 
-            dot.node(state, f'{state}\n{trend} ({slope})')
-
-            # Preparo gli attributi per gli archi: valore di cambio stato e tempo di permanenza
-            change_values_list = list(dict.fromkeys(self.configurations[state][f'end_value_{self.sensors}']))
-            print(change_values_list)
-            if len(change_values_list) >= 3:
-                change_value = change_values_list[1:-1]
-            else:
-                change_value = change_values_list
-            # print(state, change_value)
-
-            avg_time_list = list(dict.fromkeys(self.configurations[state][f'time']))
-            if len(avg_time_list) >= 3:
-                avg_time = avg_time_list[1:-1]
-            else:
-                avg_time = avg_time_list
-            # print(state, avg_time)
-
-            edge_attr = list()
-            for v, t in zip(change_value, avg_time):
-                edge_attr.append([v, t])
+            state_label = '\n'.join(map(str, state.split(', ')))  # Riformatto lo stato per una label più leggibile
+            dot.node(state, f'{state_label}\n\n{" ".join(map(str, trend))}\n(slope: {slope})')  # Creo nodo
 
             # Genero gli archi
             nextstates_list = list(
                 dict.fromkeys(self.configurations[state]['next_state']))  # Lista degli stati successivi
 
-        print(dot.source)
+            for nextstate in nextstates_list:
+                endvals = list()
+                timevals = list()
+                edge_attr = list()
+
+                indexes = [i for (i, item) in enumerate(self.configurations[state]['next_state']) if item == nextstate]
+                for i in indexes:
+                    endvals.append(self.configurations[state][f'end_value_{self.sensors}'][i])
+                    timevals.append(self.configurations[state][f'time'][i])
+                # print(endvals, timevals)
+
+                for v, t in zip(endvals, timevals):
+                    row = f' Value: {math.ceil(v)} | Time: {t}'
+                    edge_attr.append(row)
+
+                dot.edge(state, nextstate, label='\n'.join(map(str, edge_attr)))
+
+        # print(dot.source)
         dot.view()
 
 
