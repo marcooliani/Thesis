@@ -111,21 +111,16 @@ class ProcessMining:
 
         difference_value = ending_value - starting_value
 
-        # print(starting_value, ending_value, difference_seconds, end=' ')
         slope = (ending_value - starting_value) / difference_seconds
         if difference_value > self.tolerance:
-            # print(f"-> ASCENDING ({slope})")
             trend = "ASCENDING"
         elif difference_value < -self.tolerance:
-            # print(f"-> DESCENDING ({slope})")
             trend = "DESCENDING"
         else:
-            # print(f"-> STABLE ({slope})")
             trend = "STABLE"
 
         conf = ', '.join(map(str, config))
-        # if conf not in self.configurations:
-        #   self.configurations[conf] = defaultdict(dict)
+
         self.configurations[conf][f'start_value_{self.sensors}'].append(starting_value)
         self.configurations[conf][f'end_value_{self.sensors}'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
@@ -165,10 +160,7 @@ class ProcessMining:
                     for a, nv in zip(self.actuators, values):
                         next_conf.append(f'{a} == {nv}')
 
-                    # print(', '.join(map(str, act_conf)))
-                    # print(prev_values)
                     self.__compute(act_conf, next_conf, starting_time, ending_time, starting_value, ending_value)
-                    # print()
 
                 starting_value = df[self.sensors].iloc[i]
                 starting_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
@@ -185,8 +177,12 @@ class ProcessMining:
 
     def generate_state_graph(self):
         dot = graphviz.Digraph(name=f'State graph {self.sensors}',
-                               node_attr={'color': 'lightblue2', 'style': 'filled'},
+                               node_attr={'color': 'lightblue2', 'style': 'rounded, filled',
+                                          'shape': 'box', 'fontsize': '10'},
+                               edge_attr={'fontfamily': 'Courier', 'fontsize': '8'},
                                format='png')
+        dot.attr(rankdir='LR')
+
         states_list = [k for k, v in self.configurations.items()]
 
         for state in states_list:
@@ -200,7 +196,7 @@ class ProcessMining:
             elif len(trend_list) == 2:
                 trend = trend_list[1:]
             else:
-                trend = trend_list
+                trend = trend_list[0]
 
             # Metto come attributo del nodo anche lo slope (arrotondato al secondo decimale)
             slope_list = list(dict.fromkeys(self.configurations[state][f'slope_{self.sensors}']))
@@ -210,7 +206,7 @@ class ProcessMining:
                 slope = round(mean(slope_list[1:]), 2)
 
             state_label = '\n'.join(map(str, state.split(', ')))  # Riformatto lo stato per una label più leggibile
-            dot.node(state, f'{state_label}\n\n{" ".join(map(str, trend))}\n(slope: {slope})')  # Creo nodo
+            dot.node(state, f'{state_label}\n\n{trend}\n(slope: {slope})')  # Creo nodo
 
             # Genero gli archi
             nextstates_list = list(
@@ -222,13 +218,18 @@ class ProcessMining:
                 edge_attr = list()
 
                 indexes = [i for (i, item) in enumerate(self.configurations[state]['next_state']) if item == nextstate]
+
                 for i in indexes:
                     endvals.append(self.configurations[state][f'end_value_{self.sensors}'][i])
                     timevals.append(self.configurations[state][f'time'][i])
-                # print(endvals, timevals)
+
+                if len(endvals) >= 3:
+                    endvals = endvals[1:-1]
+                if len(timevals) >= 3:
+                    timevals = timevals[1:-1]
 
                 for v, t in zip(endvals, timevals):
-                    row = f' Value: {math.ceil(v)} | Time: {t}'
+                    row = f' Value: {round(v)} | Time: {t}'
                     edge_attr.append(row)
 
                 dot.edge(state, nextstate, label='\n'.join(map(str, edge_attr)))
