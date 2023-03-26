@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import numpy as np
 import pandas as pd
 import os
 import argparse
@@ -26,19 +26,20 @@ class ProcessMining:
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
         group.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
         group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
-        group.add_argument('-t', "--tolerance", type=int, default=0, required=False, help="tolerance")
+        group.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],
+                           required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
-        group.add_argument('-g', "--graph", type=bool, default=0, required=False, help="generate state graph")
+        group.add_argument('-g', "--graph", type=bool, default=False, required=False, help="generate state graph")
 
         self.args = parser.parse_args()
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
 
         self.actuators = list()
-        self.sensors = None
-        self.tolerance = None
+        self.sensors = self.args.sensor
+        self.tolerance = self.args.tolerance
         self.offset = None
-        self.graph = None
+        self.graph = self.args.graph
 
         self.configurations = defaultdict(dict)
 
@@ -55,10 +56,7 @@ class ProcessMining:
             output = self.call_daikon()
             self.find_actuators_list(output)
 
-        self.sensors = self.args.sensor
-        self.tolerance = self.args.tolerance
         self.offset = self.args.offset
-        self.graph = self.args.graph
 
     def call_daikon(self):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
@@ -107,24 +105,15 @@ class ProcessMining:
     def __compute(self, config, next_config, starting_time, ending_time, starting_value, ending_value):
         date1 = dt.datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S.%f')
         date2 = dt.datetime.strptime(ending_time, '%Y-%m-%d %H:%M:%S.%f')
-        difference_seconds = 1 + (date2 - date1).seconds  # Conta anche il secondo di partenza!
-
-        difference_value = ending_value - starting_value
+        difference_seconds = 1 + abs((date2 - date1)).seconds  # Conta anche il secondo di partenza!
 
         slope = (ending_value - starting_value) / difference_seconds
-        if difference_value > self.tolerance:
-            trend = "ASCENDING"
-        elif difference_value < -self.tolerance:
-            trend = "DESCENDING"
-        else:
-            trend = "STABLE"
 
         conf = ', '.join(map(str, config))
 
         self.configurations[conf][f'start_value_{self.sensors}'].append(starting_value)
         self.configurations[conf][f'end_value_{self.sensors}'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
-        self.configurations[conf][f'trend_{self.sensors}'].append(trend)
         self.configurations[conf][f'slope_{self.sensors}'].append(slope)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
 
@@ -169,8 +158,8 @@ class ProcessMining:
                 ending_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
             prev_values = values
 
+        # Converto i dict in json per poi salvare tutto su file
         print_json = json.dumps(self.configurations, indent=4)
-        # print(print_json)
 
         with open('results.json', 'w') as f:
             f.write(print_json)
@@ -189,21 +178,24 @@ class ProcessMining:
             # Genero i nodi.
             # L'id del nodo è lo stato stesso, mentre la label è composta dallo stato
             # più l'indicazione del trend per quello stato (acendente, discentende, stabile)
-            trend_list = list(
-                dict.fromkeys(self.configurations[state][f'trend_{self.sensors}']))  # Elimino i duplicati
-            if len(trend_list) >= 3:
-                trend = ', '.join(map(str, trend_list[1:-1]))  # Elimino primo e ultimo elemento
-            elif len(trend_list) == 2:
-                trend = trend_list[1:]
-            else:
-                trend = trend_list[0]
-
             # Metto come attributo del nodo anche lo slope (arrotondato al secondo decimale)
             slope_list = list(dict.fromkeys(self.configurations[state][f'slope_{self.sensors}']))
             if len(slope_list) >= 3:
                 slope = round(mean(slope_list[1:-1]), 2)
             else:
                 slope = round(mean(slope_list[1:]), 2)
+
+            # Se lo slope è entro un range minimo allora lo considero zero
+            if -self.tolerance <= slope <= self.tolerance:
+                slope = 0
+
+            # Indico il trend in base allo slope
+            if slope > 0:
+                trend = 'ASCENDING'
+            elif slope < 0:
+                trend = 'DESCENDING'
+            else:
+                trend = 'STABLE'
 
             state_label = '\n'.join(map(str, state.split(', ')))  # Riformatto lo stato per una label più leggibile
             dot.node(state, f'{state_label}\n\n{trend}\n(slope: {slope})')  # Creo nodo
@@ -215,7 +207,6 @@ class ProcessMining:
             for nextstate in nextstates_list:
                 endvals = list()
                 timevals = list()
-                edge_attr = list()
 
                 indexes = [i for (i, item) in enumerate(self.configurations[state]['next_state']) if item == nextstate]
 
@@ -228,12 +219,13 @@ class ProcessMining:
                 if len(timevals) >= 3:
                     timevals = timevals[1:-1]
 
-                for v, t in zip(endvals, timevals):
-                    row = f' Value: {round(v)} | Time: {t}'
-                    edge_attr.append(row)
+                val_mean = mean(endvals)
+                val_std_dev = np.std(endvals)
+                time_mean = mean(timevals)
+                time_std_dev = np.std(timevals)
 
-                dot.edge(state, nextstate, label='\n'.join(map(str, edge_attr)))
-
+                dot.edge(state, nextstate, label=f'Avg end val: {round(val_mean)} (Std dev: {round(val_std_dev)})\n'
+                                                 f'Avg T: {round(time_mean)} (Std dev: {round(time_std_dev)})')
         # print(dot.source)
         dot.view()
 
@@ -241,13 +233,11 @@ class ProcessMining:
 def main():
     pm = ProcessMining()
     start_dir = os.getcwd()
-    if os.chdir('data/'):
+    if os.chdir(pm.config['MINING']['data_dir']):
         print("Error generating invariants. Aborting.")
         exit(1)
 
     pm.check_args()
-    # output = pm.call_daikon()
-    # pm.find_actuators_list(output)
     pm.mining()
     if pm.graph:
         pm.generate_state_graph()
