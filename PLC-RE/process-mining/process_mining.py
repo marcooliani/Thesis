@@ -107,7 +107,16 @@ class ProcessMining:
         date2 = dt.datetime.strptime(ending_time, '%Y-%m-%d %H:%M:%S.%f')
         difference_seconds = 1 + abs((date2 - date1)).seconds  # Conta anche il secondo di partenza!
 
-        slope = (ending_value - starting_value) / difference_seconds
+        # Con l'arrotondamento al terzo decimale sono un po' più preciso...
+        slope = round((ending_value - starting_value) / difference_seconds, 3)
+
+        if -self.tolerance < slope < self.tolerance:
+            trend = 'STABLE'
+            slope = 0
+        elif slope >= self.tolerance:
+            trend = 'ASCENDING'
+        else:
+            trend = 'DESCENDING'
 
         conf = ', '.join(map(str, config))
 
@@ -115,6 +124,7 @@ class ProcessMining:
         self.configurations[conf][f'end_value_{self.sensors}'].append(ending_value)
         self.configurations[conf]['time'].append(difference_seconds)
         self.configurations[conf][f'slope_{self.sensors}'].append(slope)
+        self.configurations[conf][f'trend_{self.sensors}'].append(trend)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
 
     def mining(self):
@@ -135,11 +145,16 @@ class ProcessMining:
             self.configurations[', '.join(map(str, config))] = defaultdict(list)
 
         for i in range(len(df)):
-            # if df['P1_MV101'].iloc[i] == 1 and df['P1_P101'].iloc[i] == 2:
             values = [df[k].iloc[i] for k in self.actuators]
 
             if values != prev_values:
                 if starting_time:
+                    # Se lo stato dura un secondo, l'ending time non fa in tempo ad aggiornarsi
+                    # e resta quello precedente (minore dello starting time): quindi lo forzo ad essere uguale
+                    # allo starting time. Il resto è corretto!
+                    if ending_time < starting_time:
+                        ending_time = starting_time
+
                     act_conf = list()
                     next_conf = list()
 
@@ -179,26 +194,27 @@ class ProcessMining:
             # L'id del nodo è lo stato stesso, mentre la label è composta dallo stato
             # più l'indicazione del trend per quello stato (acendente, discentende, stabile)
             # Metto come attributo del nodo anche lo slope (arrotondato al secondo decimale)
-            slope_list = list(dict.fromkeys(self.configurations[state][f'slope_{self.sensors}']))
-            if len(slope_list) >= 3:
-                slope = round(mean(slope_list[1:-1]), 2)
-            else:
-                slope = round(mean(slope_list[1:]), 2)
+            trend_list = list(dict.fromkeys(self.configurations[state][f'trend_{self.sensors}'][1:-1]))
+            slope_list = list(self.configurations[state][f'slope_{self.sensors}'][1:-1])
 
-            # Se lo slope è entro un range minimo allora lo considero zero
-            if -self.tolerance <= slope <= self.tolerance:
-                slope = 0
+            slope_vals = defaultdict(list)
+            for tl in trend_list:
+                indexes = [i for (i, item) in enumerate(self.configurations[state][f'trend_{self.sensors}'][1:-1]) if item == tl]
 
-            # Indico il trend in base allo slope
-            if slope > 0:
-                trend = 'ASCENDING'
-            elif slope < 0:
-                trend = 'DESCENDING'
-            else:
-                trend = 'STABLE'
+                for i in indexes:
+                    slope_vals[tl].append(slope_list[i])
+
+            slope_state = list()
+            for k, v in slope_vals.items():
+                slope_state.append((k, round(mean(v), 2)))
+
+            # print(state, slope_state)
+            trend_slope_label = ''
+            for s in slope_state:
+                trend_slope_label += str(s[0])+'\n(slope: '+str(s[1]) + ')\n'
 
             state_label = '\n'.join(map(str, state.split(', ')))  # Riformatto lo stato per una label più leggibile
-            dot.node(state, f'{state_label}\n\n{trend}\n(slope: {slope})')  # Creo nodo
+            dot.node(state, f'{state_label}\n\n{trend_slope_label}')  # Creo nodo
 
             # Genero gli archi
             nextstates_list = list(
