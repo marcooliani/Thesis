@@ -25,7 +25,8 @@ class ProcessMining:
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
         group.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
-        group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
+        # group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
+        group.add_argument('-s', "--sensors", nargs='+', required=False, help="sensors list")
         group.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],
                            required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
@@ -35,28 +36,39 @@ class ProcessMining:
 
         self.dataset = self.config['DEFAULTS']['dataset_file']
 
-        self.actuators = list()
-        self.sensors = self.args.sensor
         self.tolerance = self.args.tolerance
-        self.offset = None
+        self.offset = self.args.offset
         self.graph = self.args.graph
 
         self.configurations = defaultdict(dict)
 
-    def check_args(self):
         if self.args.filename is not None:
             if self.args.filename.split('.')[-1] != "csv":
                 print("Invalid file format (must be .csv). Aborting")
                 exit(1)
             self.dataset = self.args.filename
 
+        # Vado nella dir col dataset
+        if os.chdir(self.config['MINING']['data_dir']):
+            print("Error generating invariants. Aborting.")
+            exit(1)
+
+        self.df = pd.read_csv(self.dataset)
+
+        # Recupero la lista completa di attuatori e sensori (mi servono poi)
+        output = self.call_daikon()
+        self.full_actuators = self.find_actuators_list(output)
+        self.full_sensors = self.find_sensors()
+
         if self.args.actuators:
             self.actuators = self.args.actuators
         else:
-            output = self.call_daikon()
-            self.find_actuators_list(output)
+            self.actuators = self.full_actuators
 
-        self.offset = self.args.offset
+        if self.args.sensors:
+            self.sensors = self.args.sensors
+        else:
+            self.sensors = self.find_sensors()
 
     def call_daikon(self):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
@@ -78,17 +90,20 @@ class ProcessMining:
         return output
 
     def find_actuators_list(self, output):
+        actuators = list()
         for inv in output:
             if 'one of' in inv and self.config['DATASET']['prev_cols_prefix'] not in inv and \
                     self.config['DATASET']['slope_cols_prefix'] not in inv:
                 a, _ = inv.split(' one of ')
                 a.replace('(', '').replace(')', '')
 
-                self.actuators.append(a)
+                actuators.append(a)
 
                 equals = self.__find_other_actuators(a, output)
                 for act in equals:
-                    self.actuators.append(act)
+                    actuators.append(act)
+
+        return actuators
 
     def __find_other_actuators(self, actuator, daikon_output):
         equals = list()
@@ -102,40 +117,62 @@ class ProcessMining:
 
         return equals
 
+    def find_sensors(self):
+        df_cols = list(self.df.columns)
+
+        # Se le colonne hanno un unico valore, abbiamo un attuatore di spare o un setpoint settato
+        # nei registri, quindi elimino il registro dalla lista
+        for col in df_cols[:]:
+            if len(self.df[col].unique()) == 1:
+                df_cols.remove(col)
+
+        # Rimuovo il timestamp
+        df_cols.remove(self.config['DATASET']['timestamp_col'])
+
+        # Rimuovo dalla lista gli attuatori trovati in precedenza, ottenendo così i soli sensori
+        for col in self.full_actuators:
+            df_cols.remove(col)
+
+        return df_cols
+
     def __compute(self, config, next_config, starting_time, ending_time, starting_value, ending_value):
+        conf = ', '.join(map(str, config))
+
         date1 = dt.datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S.%f')
         date2 = dt.datetime.strptime(ending_time, '%Y-%m-%d %H:%M:%S.%f')
         difference_seconds = 1 + abs((date2 - date1)).seconds  # Conta anche il secondo di partenza!
 
         # Con l'arrotondamento al terzo decimale sono un po' più preciso...
-        slope = round((ending_value - starting_value) / difference_seconds, 3)
+        # slope = round((ending_value - starting_value) / difference_seconds, 3)
 
-        if -self.tolerance < slope < self.tolerance:
-            trend = 'STABLE'
-            slope = 0
-        elif slope >= self.tolerance:
-            trend = 'ASCENDING'
-        else:
-            trend = 'DESCENDING'
+        for (sensor, end_val), (sensor, start_val) in zip(ending_value.items(), starting_value.items()):
+            self.configurations[conf][f'start_value_{sensor}'].append(start_val)
+            self.configurations[conf][f'end_value_{sensor}'].append(end_val)
 
-        conf = ', '.join(map(str, config))
+            slope = round((end_val - start_val)/difference_seconds, 3)
 
-        self.configurations[conf][f'start_value_{self.sensors}'].append(starting_value)
-        self.configurations[conf][f'end_value_{self.sensors}'].append(ending_value)
+            if -self.tolerance < slope < self.tolerance:
+                trend = 'STBL'
+                slope = 0
+            elif slope >= self.tolerance:
+                trend = 'ASC'
+            else:
+                trend = 'DESC'
+
+            self.configurations[conf][f'slope_{sensor}'].append(slope)
+            self.configurations[conf][f'trend_{sensor}'].append(trend)
+
         self.configurations[conf]['time'].append(difference_seconds)
-        self.configurations[conf][f'slope_{self.sensors}'].append(slope)
-        self.configurations[conf][f'trend_{self.sensors}'].append(trend)
         self.configurations[conf]['next_state'].append(', '.join(map(str, next_config)))
 
     def mining(self):
         prev_values = []
-        starting_value = None
-        ending_value = None
+        starting_value = defaultdict(list)
+        ending_value = defaultdict(list)
         starting_time = None
         ending_time = None
 
-        df = pd.read_csv(self.dataset)
-        states = df[self.actuators].drop_duplicates().to_numpy()
+        states = self.df[self.actuators].drop_duplicates().to_numpy()
 
         for state in states:
             config = list()
@@ -144,8 +181,8 @@ class ProcessMining:
 
             self.configurations[', '.join(map(str, config))] = defaultdict(list)
 
-        for i in range(len(df)):
-            values = [df[k].iloc[i] for k in self.actuators]
+        for i in range(len(self.df)):
+            values = [self.df[k].iloc[i] for k in self.actuators]
 
             if values != prev_values:
                 if starting_time:
@@ -166,11 +203,15 @@ class ProcessMining:
 
                     self.__compute(act_conf, next_conf, starting_time, ending_time, starting_value, ending_value)
 
-                starting_value = df[self.sensors].iloc[i]
-                starting_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
+                # starting_value = self.df[self.sensors].iloc[i]
+                for sensor in self.full_sensors:
+                    starting_value[sensor] = self.df[sensor].iloc[i]
+                starting_time = self.df[self.config['DATASET']['timestamp_col']].iloc[i]
             else:
-                ending_value = df[self.sensors].iloc[i]
-                ending_time = df[self.config['DATASET']['timestamp_col']].iloc[i]
+                # ending_value = self.df[self.sensors].iloc[i]
+                for sensor in self.full_sensors:
+                    ending_value[sensor] = self.df[sensor].iloc[i]
+                ending_time = self.df[self.config['DATASET']['timestamp_col']].iloc[i]
             prev_values = values
 
         # Converto i dict in json per poi salvare tutto su file
@@ -184,34 +225,39 @@ class ProcessMining:
                                node_attr={'color': 'lightblue2', 'style': 'rounded, filled',
                                           'shape': 'box', 'fontsize': '10'},
                                edge_attr={'fontfamily': 'Courier', 'fontsize': '8'},
-                               format='png')
+                               format='png',
+                               directory='graphs')
         dot.attr(rankdir='LR')
 
         states_list = [k for k, v in self.configurations.items()]
 
         for state in states_list:
-            # Genero i nodi.
-            # L'id del nodo è lo stato stesso, mentre la label è composta dallo stato
-            # più l'indicazione del trend per quello stato (acendente, discentende, stabile)
-            # Metto come attributo del nodo anche lo slope (arrotondato al secondo decimale)
-            trend_list = list(dict.fromkeys(self.configurations[state][f'trend_{self.sensors}'][1:-1]))
-            slope_list = list(self.configurations[state][f'slope_{self.sensors}'][1:-1])
+            slope_state = defaultdict(list)
 
-            slope_vals = defaultdict(list)
-            for tl in trend_list:
-                indexes = [i for (i, item) in enumerate(self.configurations[state][f'trend_{self.sensors}'][1:-1]) if item == tl]
+            for sensor in self.sensors:
+                trend_list = list(dict.fromkeys(self.configurations[state][f'trend_{sensor}'][1:-1]))
+                slope_list = list(self.configurations[state][f'slope_{sensor}'][1:-1])
 
-                for i in indexes:
-                    slope_vals[tl].append(slope_list[i])
+                slope_vals = defaultdict(list)
+                for tl in trend_list:
+                    indexes = [i for (i, item) in enumerate(self.configurations[state][f'trend_{sensor}'][1:-1])
+                               if item == tl]
 
-            slope_state = list()
-            for k, v in slope_vals.items():
-                slope_state.append((k, round(mean(v), 2)))
+                    for i in indexes:
+                        slope_vals[tl].append(slope_list[i])
 
-            # print(state, slope_state)
-            trend_slope_label = ''
-            for s in slope_state:
-                trend_slope_label += str(s[0])+'\n(slope: '+str(s[1]) + ')\n'
+                for trend, slopes in slope_vals.items():
+                    slope_state[sensor].append((trend, round(mean(slopes), 2)))
+
+                trend_slope_label = ''
+
+                for sens, vals in slope_state.items():
+                    # print(state, sens, vals)
+                    trend_slope_label += f'{sens}: '
+
+                    for v in vals:
+                        trend_slope_label += str(v[0]) + ' (slope: ' + str(v[1]) + ') '
+                    trend_slope_label += '\n'
 
             state_label = '\n'.join(map(str, state.split(', ')))  # Riformatto lo stato per una label più leggibile
             dot.node(state, f'{state_label}\n\n{trend_slope_label}')  # Creo nodo
@@ -221,42 +267,59 @@ class ProcessMining:
                 dict.fromkeys(self.configurations[state]['next_state']))  # Lista degli stati successivi
 
             for nextstate in nextstates_list:
-                endvals = list()
+                startvals = defaultdict(list)
+                endvals = defaultdict(list)
+                endval_mean = defaultdict(list)
+                startval_mean = defaultdict(list)
+                endval_std_dev = defaultdict(list)
+                startval_std_dev = defaultdict(list)
+
                 timevals = list()
 
                 indexes = [i for (i, item) in enumerate(self.configurations[state]['next_state']) if item == nextstate]
 
                 for i in indexes:
-                    endvals.append(self.configurations[state][f'end_value_{self.sensors}'][i])
+                    for sensor in self.full_sensors:
+                        endvals[sensor].append(self.configurations[state][f'end_value_{sensor}'][i])
+                        startvals[sensor].append(self.configurations[state][f'start_value_{sensor}'][i])
                     timevals.append(self.configurations[state][f'time'][i])
 
-                if len(endvals) >= 3:
-                    endvals = endvals[1:-1]
                 if len(timevals) >= 3:
                     timevals = timevals[1:-1]
 
-                val_mean = mean(endvals)
-                val_std_dev = np.std(endvals)
                 time_mean = mean(timevals)
                 time_std_dev = np.std(timevals)
 
-                dot.edge(state, nextstate, label=f'Avg end val: {round(val_mean)} (Std dev: {round(val_std_dev)})\n'
-                                                 f'Avg T: {round(time_mean)} (Std dev: {round(time_std_dev)})')
+                for sensor in self.full_sensors:
+                    if len(endvals[sensor]) >= 3:
+                        endvals[sensor] = endvals[sensor][1:-1]
+                    if len(startvals[sensor]) >= 3:
+                        startvals[sensor] = startvals[sensor][1:-1]
+
+                    endval_mean[sensor] = mean(endvals[sensor])
+                    endval_std_dev[sensor] = np.std(list(endvals[sensor]))
+
+                edge_label = ''
+                for sensor in self.full_sensors:
+                    edge_label += f'{sensor} lvl: {round(endval_mean[sensor], 1)} ' \
+                                  f'(Std dev: {round(endval_std_dev[sensor])})\n'
+                edge_label += f'Time: {round(time_mean)} (Std dev: {round(float(time_std_dev))})'
+
+                dot.edge(state, nextstate, label=edge_label)
+
         # print(dot.source)
         dot.view()
 
 
 def main():
-    pm = ProcessMining()
     start_dir = os.getcwd()
-    if os.chdir(pm.config['MINING']['data_dir']):
-        print("Error generating invariants. Aborting.")
-        exit(1)
+    pm = ProcessMining()
+    # pm.find_sensors()
 
-    pm.check_args()
     pm.mining()
     if pm.graph:
         pm.generate_state_graph()
+
     os.chdir(start_dir)
 
 
