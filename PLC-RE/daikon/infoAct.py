@@ -18,8 +18,8 @@ class ActuatorsBehaviour:
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
         parser.add_argument('-l', "--actuatorslist", default=False, help="print actuators list")
-        group.add_argument('-a', "--actuator", type=str, required=False, help="actuator's name")
-        group.add_argument('-s', "--sensor", type=str, required=False, help="sensor's name")
+        group.add_argument('-a', "--actuator", type=str, required=True, help="actuator's name")
+        group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
 
         self.args = parser.parse_args()
 
