@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
+import subprocess
 
 import numpy as np
+import os
+import sys
 import pandas as pd
 import glob
 import csv
@@ -18,46 +21,37 @@ class MergeDatasets:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-g', "--granularity", type=int, help="choose granularity in seconds (for slopes)")
-        parser.add_argument('-s', "--skiprows", type=int, help="skip seconds from start")
-        parser.add_argument('-n', "--nrows", type=int, help="number of seconds to consider")
-        parser.add_argument('-d', "--directory", type=str, help="directory containing CSV files")
-        parser.add_argument('-o', "--output", type=str, help="output file")
+        parser.add_argument('-g', "--granularity", type=int, default=self.config['DEFAULTS']['granularity'],
+                            help="choose granularity in seconds (for slopes)")
+        parser.add_argument('-s', "--skiprows", type=int, default=self.config['DEFAULTS']['skip_rows'],
+                            help="skip seconds from start")
+        parser.add_argument('-n', "--nrows", type=int, default=self.config['DEFAULTS']['number_of_rows'],
+                            help="number of seconds to consider")
+        parser.add_argument('-t', "--timerange", nargs=2,
+                            help="time range selection (date format YYYY-MM-DD HH:MM:SS")
+        parser.add_argument('-d', "--directory", type=str, default=self.config['PATHS']['input_dataset_directory'],
+                            help="directory containing CSV files")
+        parser.add_argument('-o', "--output", type=str, default=self.config['DEFAULTS']['dataset_file'],
+                            help="output file")
         parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
         self.args = parser.parse_args()
 
-        # self.granularity = int(self.config['DEFAULTS']['granularity'])
-        self.granularity = None
-        self.nrows = int(self.config['DEFAULTS']['number_of_rows'])
+        self.granularity = self.args.granularity
+        self.nrows = self.args.nrows
+        # La read_csv() vuole un array con tutte le righe da skippare
         self.skiprows = [row for row in range(1, self.args.skiprows)]
-        self.directory = self.config['PATHS']['input_dataset_directory']
-        self.output_file = self.config['DEFAULTS']['dataset_file']
-        self.plcs = []
+        self.timerange = self.args.timerange
+        self.directory = self.args.directory
+        self.output_file = self.args.output
+        self.plcs = self.args.plcs
 
-    def check_args(self):
-        if self.args.granularity:
-            self.granularity = self.args.granularity
+    def list_files(self):
+        if self.plcs:
+            filenames = [f'{self.directory}/{p}' for p in self.plcs]
         else:
-            self.granularity = int(self.config['DEFAULTS']['granularity'])
+            filenames = glob.glob(f'{self.directory}/*.csv')
 
-        if self.args.nrows:
-            self.nrows = self.args.nrows
-
-        if self.args.skiprows:
-            # Skip di tutte le prime row righe tranne l'header
-            self.skiprows = [row for row in range(1, self.args.skiprows)]
-
-        if self.args.directory is not None:
-            self.directory = self.args.directory
-
-        if self.args.output is not None:
-            if self.args.output.split('.')[-1] != 'csv':
-                print('Invalid file format (must be .csv). Aborting')
-                exit(1)
-            self.output_file = self.args.output
-
-        if self.args.plcs is not None:
-            self.plcs = [p for p in self.args.plcs]
+        return sorted(filenames)
 
     @staticmethod
     def clean_null(filename):
@@ -73,21 +67,8 @@ class MergeDatasets:
             csv_output.writerow(h for h, c in data)  # write the new header
             csv_output.writerows(zip(*[c for h, c in data]))
 
-    # Enrich the dataset with a partial bounded history of registers
-    # Add previous values of registers
-    def enrich_df(self, data_set, filename):
-        print(f'Enriching {filename.split("/")[-1]}. This may take a while ...')
-        # Set registers names that holds measurements and actuations
-        val_cols_prevs = data_set.columns[
-            data_set.columns.str.contains(pat=self.config['DATASET']['prev_cols_list'], case=False, regex=True)]
-        val_cols_slopes = data_set.columns[
-            data_set.columns.str.contains(pat=self.config['DATASET']['slope_cols_list'], case=False, regex=True)]
-        val_cols_trends = data_set.columns[
-            data_set.columns.str.contains(pat=self.config['DATASET']['trend_cols_list'], case=False, regex=True)]
-        val_cols_max_min = data_set.columns[
-            data_set.columns.str.contains(pat=self.config['DATASET']['max_min_cols_list'], case=False, regex=True)]
-
-        for col in val_cols_max_min:
+    def __add_setpoints(self, data_set, cols):
+        for col in cols:
             data_var = data_set[col]
 
             # Valore massimo della colonna selezionata
@@ -103,22 +84,29 @@ class MergeDatasets:
             data_set.insert(len(data_set.columns), self.config['DATASET']['max_prefix'] + col, max_val)
             data_set.insert(len(data_set.columns), self.config['DATASET']['min_prefix'] + col, min_val)
 
-        for col in val_cols_trends:
-            # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive', period=int(self.config['DATASET']['trend_period']))
+        return data_set
+
+    def __add_trends(self, data_set, cols):
+        for col in cols:
+            # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive',
+            # period=int(self.config['DATASET']['trend_period']))
             stl = STL(data_set[col], period=int(self.config['DATASET']['trend_period']), robust=True)
             decomposition = stl.fit()
             col_trend = [x for x in decomposition.trend]
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['trend_cols_prefix'] + col, col_trend)
 
+        return data_set
+
+    def __add_slopes(self, data_set, cols):
         # Genero e aggiungo le colonne slope_
-        for col in val_cols_slopes:
+        for col in cols:
             data_var = data_set[self.config['DATASET']['trend_cols_prefix'] + col]
 
             mean_slope = [None for _ in range(len(data_var))]
 
             for i in range(len(data_var)):
-                if i % self.granularity == 0 and i + self.granularity <= len(data_var)-1:
+                if i % self.granularity == 0 and i + self.granularity <= len(data_var) - 1:
                     for j in range(i, (i + self.granularity)):
                         # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
                         if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
@@ -129,23 +117,14 @@ class MergeDatasets:
                             mean_slope[j] = -1
                         else:
                             mean_slope[j] = 0
-                    '''
-                    if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
-                        mean_slope[i] = math.ceil(
-                            round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                        # mean_slope[j] = 1
-                    elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
-                        mean_slope[i] = math.floor(
-                            round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                        # mean_slope[j] = -1
-                    else:
-                        mean_slope[i] = 0
-                    '''
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, mean_slope)
 
+        return data_set
+
+    def __add_prevs(self, data_set, cols):
         # Genero e aggiungo le colonne prev_
-        for col in val_cols_prevs:
+        for col in cols:
             prev_val = list()
             prev_val.append(0)
             data_var = data_set[col]
@@ -155,11 +134,120 @@ class MergeDatasets:
 
             data_set.insert(len(data_set.columns), self.config['DATASET']['prev_cols_prefix'] + col, prev_val)
 
+        return data_set
+
+    # Enrich the dataset with a partial bounded history of registers
+    # Add previous values of registers
+    def enrich_df(self, dataset, filename):
+        print(f'Enriching {filename.split("/")[-1]}. This may take a while ...')
+
+        data_set = None
+        val_cols_max_min = None
+        val_cols_trends = None
+        val_cols_slopes = None
+        val_cols_prevs = None
+
+        if self.config['DATASET']['max_min_cols_list']:
+            val_cols_max_min = dataset.columns[
+                dataset.columns.str.contains(pat=self.config['DATASET']['max_min_cols_list'], case=False, regex=True)]
+        if self.config['DATASET']['trend_cols_list']:
+            val_cols_trends = dataset.columns[
+                dataset.columns.str.contains(pat=self.config['DATASET']['trend_cols_list'], case=False, regex=True)]
+        if self.config['DATASET']['slope_cols_list'] and self.config['DATASET']['trend_cols_list']:
+            val_cols_slopes = dataset.columns[
+                dataset.columns.str.contains(pat=self.config['DATASET']['slope_cols_list'], case=False, regex=True)]
+        if self.config['DATASET']['prev_cols_list']:
+            val_cols_prevs = dataset.columns[
+                dataset.columns.str.contains(pat=self.config['DATASET']['prev_cols_list'], case=False, regex=True)]
+
+        if self.config['DATASET']['max_min_cols_list']:
+            data_set = self.__add_setpoints(dataset, val_cols_max_min)
+        if self.config['DATASET']['trend_cols_list']:
+            data_set = self.__add_trends(data_set, val_cols_trends)
+        if self.config['DATASET']['slope_cols_list'] and self.config['DATASET']['trend_cols_list']:
+            data_set = self.__add_slopes(data_set, val_cols_slopes)
+        if self.config['DATASET']['prev_cols_list']:
+            data_set = self.__add_prevs(data_set, val_cols_prevs)
+
+        return data_set
+
+    def get_datasets_lists(self):
+        filenames = self.list_files()
+
+        df_list_mining = list()
+        df_list_daikon = list()
+
+        for file in sorted(filenames):
+            # Read Dataset files
+            # nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
+            # usare skiprows=<int>, che skippa n righe da inizio file
+            print(f'Reading {file.split("/")[-1]} ...')
+
+            if self.timerange:
+                datasetPLC = pd.read_csv(file)
+                datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
+                datasetPLC[self.config['DATASET']['timestamp_col']] = \
+                    datasetPLC[self.config['DATASET']['timestamp_col']].apply(lambda x:
+                                                                              pd.Timestamp(x).strftime(
+                                                                                  '%Y-%m-%d %H:%M:%S.%f'))
+                datasetPLC = datasetPLC.loc[datasetPLC[self.config['DATASET']['timestamp_col']].between(self.timerange[0],
+                                                                                                        self.timerange[1],
+                                                                                                        inclusive="both")]
+            else:
+                datasetPLC = pd.read_csv(file, skiprows=self.skiprows, nrows=self.nrows)
+                datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
+                datasetPLC[self.config['DATASET']['timestamp_col']] = \
+                    datasetPLC[self.config['DATASET']['timestamp_col']].apply(lambda x:
+                                                                              pd.Timestamp(x).strftime(
+                                                                                '%Y-%m-%d %H:%M:%S.%f'))
+
+            # I punti nei nomi delle colonne creano parecchi problemi, quindi vanno sostituiti
+            # datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
+            # print(datasetPLC.isnull().values.any()) # Debug NaN
+
+            # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
+            self.clean_null(file)
+
+            datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
+
+            # Concatenate the single PLCs datasets for process mining
+            df_list_mining.append(datasetPLC)
+
+            # Add previous values, slopes and limits to dataframe
+            datasetPLC_daikon = self.enrich_df(datasetPLC_daikon, file)
+            # Concatenate the single PLCs datasets for Daikon
+            df_list_daikon.append(datasetPLC_daikon)
+
+        return df_list_mining, df_list_daikon
+
     @staticmethod
-    def concat_datasets(datasets_list):
+    def __concat_datasets(datasets_list):
         df = pd.concat(datasets_list, axis=1).reset_index(drop=True)
         df = df.T.drop_duplicates().T  # Drop dup columns in the dataframe (i.e. Timestamps)
+
         return df
+
+    def save_mining_dataset(self, datasets_list):
+        mining_datasets = self.__concat_datasets(datasets_list)
+        # Save dataset with the timestamp for the process mining.
+        mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
+        mining_datasets.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"],self.config["MINING"]["data_dir"],self.output_file.split(".")[0])}_TS.csv',
+                               index=False)
+        # print(mining_datasets)  # Debug
+
+    def save_daikon_dataset(self, datasets_list):
+        daikon_datasets = self.__concat_datasets(datasets_list)
+
+        # drop timestamps is NOT needed in Daikon
+        daikon_datasets = daikon_datasets.drop(self.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
+
+        # Drop first rows (Daikon does not process missing values)
+        # Taglio anche le ultime righe, che hanno lo slope = 0
+        # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :] # Prendo solo le n-granularities righe
+        daikon_datasets = daikon_datasets.iloc[1:-self.granularity, :]
+        daikon_datasets.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"],self.config["DAIKON"]["daikon_invariants_dir"],self.output_file)}',
+                               index=False)
+        # print(daikon_datasets)  # Debug
 
     @staticmethod
     def add_zeros_column(dataframe):
@@ -171,64 +259,28 @@ class MergeDatasets:
 def main():
     mg = MergeDatasets()
 
-    mg.check_args()
-
     # CSV files converted from JSON PLCs readings (convertoCSV.py)
-    if mg.plcs:
-        filenames = [f'{mg.directory}/' + p for p in mg.plcs]
-    else:
-        filenames = glob.glob(f'{mg.directory}/*.csv')
-
-    df_list_mining = list()
-    df_list_daikon = list()
-
-    for file in sorted(filenames):
-        # Read Dataset files
-        # nrows indica il numero di righe da considerare. Se si vuole partire da una certa riga,
-        # usare skiprows=<int>, che skippa n righe da inizio file
-        print(f'Reading {file.split("/")[-1]} ...')
-        datasetPLC = pd.read_csv(file, skiprows=mg.skiprows, nrows=mg.nrows)
-        # I punti nei nomi delle colonne creano parecchi problemi, quindi vanno sostituiti
-        datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
-        datasetPLC[mg.config['DATASET']['timestamp_col']] = \
-            datasetPLC[mg.config['DATASET']['timestamp_col']].apply(lambda x:
-                                                                    pd.Timestamp(x).strftime('%Y-%m-%d %H:%M:%S.%f'))
-        # print(datasetPLC.isnull().values.any()) # Debug NaN
-
-        # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
-        mg.clean_null(file)
-
-        datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
-
-        # Concatenate the single PLCs datasets for process mining
-        df_list_mining.append(datasetPLC)
-
-        # Add previous values, slopes and limits to dataframe
-        mg.enrich_df(datasetPLC_daikon, file)
-        # Concatenate the single PLCs datasets for Daikon
-        df_list_daikon.append(datasetPLC_daikon)
+    df_list_mining, df_list_daikon = mg.get_datasets_lists()
 
     print(f'Generating Process Mining dataset ...')
-    mining_datasets = mg.concat_datasets(df_list_mining)
-    # Save dataset with the timestamp for the process mining.
-    mining_datasets.to_csv(f'../process-mining/data/{mg.output_file.split(".")[0]}_TS.csv', index=False)
-    # print(mining_datasets)  # Debug
+    mg.save_mining_dataset(df_list_mining)
     print('Process Mining dataset generated successfully')
 
     print(f'Generating Invariants Analysis dataset ...')
-    daikon_datasets = mg.concat_datasets(df_list_daikon)
-    # mg.add_zeros_column(daikon_datasets)  # Maybe not necessary
-
-    # drop timestamps is NOT needed in Daikon
-    daikon_datasets = daikon_datasets.drop(mg.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
-
-    # Drop first rows (Daikon does not process missing values)
-    # Taglio anche le ultime righe, che hanno lo slope = 0
-    # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :] # Prendo solo le n-granularities righe
-    daikon_datasets = daikon_datasets.iloc[1:-mg.granularity, :]
-    daikon_datasets.to_csv(f'../daikon/Daikon_Invariants/{mg.output_file}', index=False)
-    # print(daikon_datasets)  # Debug
+    mg.save_daikon_dataset(df_list_daikon)
     print('Invariants Analysis dataset generated successfully')
+
+    print()
+
+    choice = input("Do you want to perform a brief analysis of the dataset? [y/n]: ")
+    while choice != 'Y' or choice != 'y' or choice != 'N' or choice != 'n' or choice != '':
+        if choice == 'Y' or choice == 'y':
+            subprocess.call(f'./system_info.py -f {mg.output_file}', shell=True)
+            break
+        elif choice == 'N' or choice == 'n' or choice == '':
+            break
+        else:
+            choice = input("Do you want to perform a brief analysis of the dataset? [y/n]: ")
 
 
 if __name__ == '__main__':

@@ -7,7 +7,6 @@ import configparser
 import subprocess
 import re
 import datetime as dt
-import math
 import graphviz
 
 from statistics import mean
@@ -49,7 +48,7 @@ class ProcessMining:
             self.dataset = self.args.filename
 
         # Vado nella dir col dataset
-        if os.chdir(self.config['MINING']['data_dir']):
+        if os.chdir(os.path.join(self.config['PATHS']['project_dir'], self.config['MINING']['data_dir'])):
             print("Error generating invariants. Aborting.")
             exit(1)
 
@@ -71,7 +70,7 @@ class ProcessMining:
             self.sensors = self.find_sensors()
 
     def call_daikon(self):
-        dataset_name = self.dataset.split('/')[-1].split('.')[0]
+        dataset_name = self.dataset.split('.')[0].split('/')[-1]
 
         # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):

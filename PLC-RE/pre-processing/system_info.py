@@ -28,10 +28,14 @@ class SystemInfo:
         self.sensors = defaultdict(dict)
         self.setpoints = defaultdict(dict)
 
-        os.chdir(os.path.join(self.config['PATHS']['project_dir'], self.config['DAIKON']['daikon_invariants_dir']))
+        path = self.dataset.split('/')[0:-1]
+        if not path:
+            os.chdir(os.path.join(self.config['PATHS']['project_dir'], self.config['DAIKON']['daikon_invariants_dir']))
+        else:
+            os.chdir(path)
 
     def __call_daikon(self):
-        dataset_name = self.dataset.split('.')[0]
+        dataset_name = self.dataset.split('.')[0].split('/')[-1]
 
         # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):

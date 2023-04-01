@@ -20,22 +20,12 @@ class RunDaikon:
         self.args = parser.parse_args()
 
         # self.dataset = self.config['DEFAULTS']['dataset_file']
-        self.dataset = None
-        self.register = ''
-        self.conditions = None
-
-    def check_args(self):
-        if self.args.filename is not None:
-            if self.args.filename.split('.')[-1] != "csv":
-                print("Invalid file format (must be .csv). Aborting")
-                exit(1)
-            self.dataset = self.args.filename
-
-        if self.args.register is not None:
-            self.register = self.args.register
-
-        if self.args.conditions is not None:
-            self.conditions = [c for c in self.args.conditions]
+        if self.args.filename.split('.')[-1] != "csv":
+            print("Invalid file format (must be .csv). Aborting")
+            exit(1)
+        self.dataset = self.args.filename
+        self.register = self.args.register
+        self.conditions = [c for c in self.args.conditions]
 
     def call_daikon(self, condition=None):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
@@ -46,7 +36,7 @@ class RunDaikon:
             exit(1)
 
         # if self.conditions is not None:
-        if condition is not None:
+        if condition:
             inv_conditions_file = self.config['DAIKON']['inv_conditions_file']
 
             print(f'Generating invariants with condition {condition} ...')
@@ -256,10 +246,9 @@ class RunDaikon:
 def main():
     rd = RunDaikon()
 
-    rd.check_args()
     start_dir = os.getcwd()
     # print("Process start")
-    if os.chdir(rd.config["DAIKON"]["daikon_invariants_dir"]):
+    if os.chdir(os.path.join(rd.config["PATHS"]["project_dir"], rd.config["DAIKON"]["daikon_invariants_dir"])):
         print("Error generating invariants. Aborting.")
         exit(1)
 

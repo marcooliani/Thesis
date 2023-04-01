@@ -21,17 +21,13 @@ class FindActuators:
         parser.add_argument('-c', "--customanalysis", nargs='+', default=[], help="daikon analysis on actuators based on a condition")
         self.args = parser.parse_args()
 
-        self.dataset = self.config['DEFAULTS']['dataset_file']
+        if self.args.filename.split('.')[-1] != "csv":
+            print("Invalid file format (must be .csv). Aborting")
+            exit(1)
+        self.dataset = self.args.filename
         self.actuators = dict()
         self.constants = list()
         self.setpoints = list()
-
-    def check_args(self):
-        if self.args.filename is not None:
-            if self.args.filename.split('.')[-1] != "csv":
-                print("Invalid file format (must be .csv). Aborting")
-                exit(1)
-            self.dataset = self.args.filename
 
     def call_daikon(self):
         start_dir = os.getcwd()
@@ -39,7 +35,7 @@ class FindActuators:
             print("Error generating invariants. Aborting.")
             exit(1)
 
-        dataset_name = self.dataset.split('/')[-1].split('.')[0]
+        dataset_name = self.dataset.split('.')[0].split('/')[-1]
 
         # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):
@@ -192,9 +188,10 @@ class FindActuators:
 
     def make_daikon_custom_analysis(self, str_min, str_max, sensor):
         actuators_list = [key for key, value in self.actuators.items()]
-        df = pd.read_csv(os.path.join(self.config['DAIKON']['daikon_invariants_dir'], self.dataset), usecols=actuators_list)
+        df = pd.read_csv(os.path.join(self.config['DAIKON']['daikon_invariants_dir'], self.dataset),
+                         usecols=actuators_list)
 
-        statuses = df[actuators_list].drop_duplicates().to_numpy()
+        states = df[actuators_list].drop_duplicates().to_numpy()
         sensor_condition = ''
 
         for const in self.setpoints:
@@ -209,10 +206,10 @@ class FindActuators:
                 # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
                 sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
 
-        for status in statuses:
+        for state in states:
             daikon_condition = list()
-            for i in range(len(status)):
-                tmp = f'{actuators_list[i]} == {status[i]}'
+            for i in range(len(state)):
+                tmp = f'{actuators_list[i]} == {state[i]}'
                 daikon_condition.append(tmp)
             daikon_condition = ' && '.join(map(str, daikon_condition)) + sensor_condition
 
@@ -223,7 +220,6 @@ class FindActuators:
 def main():
     fa = FindActuators()
 
-    fa.check_args()
     start_dir = os.getcwd()
     print("Process start")
 
