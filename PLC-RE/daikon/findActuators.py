@@ -16,9 +16,12 @@ class FindActuators:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-        parser.add_argument('-s', "--simpleanalysis", type=bool, default=False, help="simple daikon analysis on actuators")
-        parser.add_argument('-c', "--customanalysis", nargs='+', default=[], help="daikon analysis on actuators based on a condition")
+        parser.add_argument('-f', "--filename", required=True, type=str,
+                            help="name of the input dataset file (CSV format) w/o path")
+        parser.add_argument('-s', "--simpleanalysis", type=bool, default=False,
+                            help="simple Daikon analysis on actuators")
+        parser.add_argument('-c', "--customanalysis", type=bool, default=False,
+                            help="Daikon analysis on actuators based on a condition")
         self.args = parser.parse_args()
 
         if self.args.filename.split('.')[-1] != "csv":
@@ -29,25 +32,20 @@ class FindActuators:
         self.constants = list()
         self.setpoints = list()
 
-    def call_daikon(self):
-        start_dir = os.getcwd()
-        if os.chdir(self.config['DAIKON']['daikon_invariants_dir']):
+        if os.chdir(os.path.join(self.config['PATHS']['project_dir'], self.config['DAIKON']['daikon_invariants_dir'])):
             print("Error generating invariants. Aborting.")
             exit(1)
 
+    def call_daikon(self):
         dataset_name = self.dataset.split('.')[0].split('/')[-1]
 
-        # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):
             print("Error generating invariants. Aborting.")
             exit(1)
 
-        # print("Generating invariants with no conditions ...")
         output = subprocess.check_output(
             f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
             shell=True)
-
-        os.chdir(start_dir)
 
         output = output.decode("utf-8")
         output = re.sub('[=]{6,}', '', output)
@@ -151,25 +149,27 @@ class FindActuators:
         print('---------------------------')
         print()
 
-        print('### Constants ###')
+        print('### Constants / Relative Setpoints ###')
         print('---------------------------')
         for i in self.constants:
             print(' = '.join(map(str, i)))
         print('---------------------------')
         print()
 
-        print('### Relative Setpoints ###')
+        print('### Other Relative Setpoints ###')
         print('---------------------------')
         for i in self.setpoints:
             print(' = '.join(map(str, i)))
 
-    def find_min_max(self, sensor):
+    def __find_min_max(self, sensor):
         str_max = self.config['DATASET']['max_prefix'] + sensor
         str_min = self.config['DATASET']['min_prefix'] + sensor
 
         return str_max, str_min
 
-    def make_daikon_simple_analysis(self, str_min, str_max, sensor):
+    def make_daikon_simple_analysis(self, sensor):
+        str_max, str_min = self.__find_min_max(sensor)
+
         daikon_condition = ''
         for const in self.setpoints:
             if str_max in const:
@@ -186,12 +186,14 @@ class FindActuators:
                 subprocess.call(f'./runDaikon.py -c "{key} == {v} {daikon_condition}" -r {key}', shell=True)
                 print()
 
-    def make_daikon_custom_analysis(self, str_min, str_max, sensor):
+    def make_daikon_custom_analysis(self, sensor):
+        str_max, str_min = self.__find_min_max(sensor)
+
         actuators_list = [key for key, value in self.actuators.items()]
         df = pd.read_csv(os.path.join(self.config['DAIKON']['daikon_invariants_dir'], self.dataset),
                          usecols=actuators_list)
 
-        states = df[actuators_list].drop_duplicates().to_numpy()
+        actuators_states = df[actuators_list].drop_duplicates().to_numpy()
         sensor_condition = ''
 
         for const in self.setpoints:
@@ -206,7 +208,7 @@ class FindActuators:
                 # sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor} + {margin}'
                 sensor_condition += f' && {sensor} > {self.config["DATASET"]["min_prefix"]}{sensor}'
 
-        for state in states:
+        for state in actuators_states:
             daikon_condition = list()
             for i in range(len(state)):
                 tmp = f'{actuators_list[i]} == {state[i]}'
@@ -220,14 +222,7 @@ class FindActuators:
 def main():
     fa = FindActuators()
 
-    start_dir = os.getcwd()
     print("Process start")
-
-    '''
-    if os.chdir(fa.config['DAIKON']['daikon_invariants_dir']):
-        print("Error generating invariants. Aborting.")
-        exit(1)
-    '''
 
     # Controllo se esiste la directory dove verranno scritti i file con i risultati. Se non esiste la creo
     if not os.path.exists(fa.config["DAIKON"]["daikon_results_dir"]):
@@ -237,24 +232,16 @@ def main():
     fa.parse_output(daikon_output)
     fa.print_info()
 
-    # os.chdir(start_dir)
-
-    sensor = input('Insert sensor name: ')
-    str_max, str_min = fa.find_min_max(sensor)
-    fa.make_daikon_custom_analysis(str_min, str_max, sensor)
-
     if fa.args.simpleanalysis:
-        # res = input('Perform Daikon analysis? [y/n] ')
-        # if res == 'Y' or res == 'y':
         sensor = input('Insert sensor name: ')
-        str_max, str_min = fa.find_min_max(sensor)
-        fa.make_daikon_simple_analysis(str_min, str_max, sensor)
+        fa.make_daikon_simple_analysis(sensor)
+
+    if fa.args.customanalysis:
+        sensor = input('Insert sensor name: ')
+        fa.make_daikon_custom_analysis(sensor)
 
     print('\n')
 
 
 if __name__ == '__main__':
     main()
-
-# Appunti sparsi
-# df[['P1.MV101', 'P1.P101']].drop_duplicates().to_numpy()

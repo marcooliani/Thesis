@@ -27,6 +27,10 @@ class RunDaikon:
         self.register = self.args.register
         self.conditions = [c for c in self.args.conditions]
 
+        if os.chdir(os.path.join(self.config["PATHS"]["project_dir"], self.config["DAIKON"]["daikon_invariants_dir"])):
+            print("Error generating invariants. Aborting.")
+            exit(1)
+
     def call_daikon(self, condition=None):
         dataset_name = self.dataset.split('/')[-1].split('.')[0]
 
@@ -246,7 +250,6 @@ class RunDaikon:
 def main():
     rd = RunDaikon()
 
-    start_dir = os.getcwd()
     # print("Process start")
     if os.chdir(os.path.join(rd.config["PATHS"]["project_dir"], rd.config["DAIKON"]["daikon_invariants_dir"])):
         print("Error generating invariants. Aborting.")
@@ -283,7 +286,6 @@ def main():
         rd.write_invariants_to_file(invariants_full, condition)
 
     print("Invariants generated successfully")
-    os.chdir(start_dir)
 
 
 if __name__ == '__main__':

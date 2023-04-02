@@ -23,11 +23,10 @@ class ProcessMining:
         group = parser.add_argument_group()
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-        group.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
-        # group.add_argument('-s', "--sensor", type=str, required=True, help="sensor's name")
-        group.add_argument('-s', "--sensors", nargs='+', required=False, help="sensors list")
-        group.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],
-                           required=False, help="tolerance")
+        parser.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
+        parser.add_argument('-s', "--sensors", nargs='+', required=False, help="sensors list")
+        parser.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],
+                            required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
         group.add_argument('-g', "--graph", type=bool, default=False, required=False, help="generate state graph")
 
@@ -49,7 +48,8 @@ class ProcessMining:
 
         # Vado nella dir col dataset
         if os.chdir(os.path.join(self.config['PATHS']['project_dir'], self.config['MINING']['data_dir'])):
-            print("Error generating invariants. Aborting.")
+            print(f"Directory {os.path.join(self.config['PATHS']['project_dir'], self.config['MINING']['data_dir'])} "
+                  f"not found. Aborting.")
             exit(1)
 
         self.df = pd.read_csv(self.dataset)
@@ -72,12 +72,10 @@ class ProcessMining:
     def call_daikon(self):
         dataset_name = self.dataset.split('.')[0].split('/')[-1]
 
-        # print(f"Generating {dataset_name}.decls and {dataset_name}.dtrace files ...")
         if subprocess.call(f'perl $DAIKONDIR/scripts/convertcsv.pl {self.dataset}', shell=True):
             print("Error generating invariants. Aborting.")
             exit(1)
 
-        # print("Generating invariants with no conditions ...")
         output = subprocess.check_output(
             f'java -cp $DAIKONDIR/daikon.jar daikon.Daikon --nohierarchy {dataset_name}.decls {dataset_name}.dtrace ',
             shell=True)
@@ -141,13 +139,11 @@ class ProcessMining:
         date2 = dt.datetime.strptime(ending_time, '%Y-%m-%d %H:%M:%S.%f')
         difference_seconds = 1 + abs((date2 - date1)).seconds  # Conta anche il secondo di partenza!
 
-        # Con l'arrotondamento al terzo decimale sono un po' più preciso...
-        # slope = round((ending_value - starting_value) / difference_seconds, 3)
-
         for (sensor, end_val), (sensor, start_val) in zip(ending_value.items(), starting_value.items()):
             self.configurations[conf][f'start_value_{sensor}'].append(start_val)
             self.configurations[conf][f'end_value_{sensor}'].append(end_val)
 
+            # Con l'arrotondamento al terzo decimale sono un po' più preciso...
             slope = round((end_val - start_val)/difference_seconds, 3)
 
             if -self.tolerance < slope < self.tolerance:
@@ -202,12 +198,10 @@ class ProcessMining:
 
                     self.__compute(act_conf, next_conf, starting_time, ending_time, starting_value, ending_value)
 
-                # starting_value = self.df[self.sensors].iloc[i]
                 for sensor in self.full_sensors:
                     starting_value[sensor] = self.df[sensor].iloc[i]
                 starting_time = self.df[self.config['DATASET']['timestamp_col']].iloc[i]
             else:
-                # ending_value = self.df[self.sensors].iloc[i]
                 for sensor in self.full_sensors:
                     ending_value[sensor] = self.df[sensor].iloc[i]
                 ending_time = self.df[self.config['DATASET']['timestamp_col']].iloc[i]
@@ -251,7 +245,6 @@ class ProcessMining:
                 trend_slope_label = ''
 
                 for sens, vals in slope_state.items():
-                    # print(state, sens, vals)
                     trend_slope_label += f'{sens}: '
 
                     for v in vals:

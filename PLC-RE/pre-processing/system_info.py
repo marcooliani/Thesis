@@ -18,8 +18,8 @@ class SystemInfo:
         group = parser.add_argument_group()
 
         parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
-        parser.add_argument('-a', "--actuators", nargs='+', help="name of the input dataset file (CSV format)")
-        parser.add_argument('-s', "--sensors", nargs='+', help="name of the input dataset file (CSV format)")
+        parser.add_argument('-a', "--actuators", nargs='+', help="actuators list")
+        parser.add_argument('-s', "--sensors", nargs='+', help="sensors list")
 
         self.args = parser.parse_args()
 
