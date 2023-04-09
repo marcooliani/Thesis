@@ -61,6 +61,9 @@ Production Control level and Production Scheduling level are not directly connec
 \label{subsec:field_devs}
 \textit{Field devices} are the \textbf{sensors} and \textbf{actuators} that are used to collect data from the process and control it. Examples of field devices include temperature sensors, pressure sensors, valves and pumps.
 
+\subsection{IED} 
+todo
+
 \subsection{PLC}
 \label{subsec:plc}
 A \textit{Programmable Logic Controller} (PLC) is a \textbf{small and specialized industrial computer} having the capability of controlling complex industrial and manifacturing processes \cite{plc_definition}.
@@ -101,17 +104,58 @@ The basic hardware architecture of a PLC consists of these elements \cite{plc_bo
 
 \subsubsection{PLC Programming}
 \label{subsubsec:plc_programming}
-PLCs are programmed with logic that defines how the process should operate and can be used to make control decisions based on data from the field devices.
+Two different programs are executed in a PLC: the \textbf{operating system} and the \textbf{user program}.
+
+\bigskip
+The operating system tasks include executing the user program, managing memory areas and the \textit{process image table} (memory registers where inputs from sensors and outputs for actuators are stored).
+
+\bigskip
+The user program needs to be uploaded on the PLC via the programming device and runs on the process image table in \textit{scan cycles}: each scan is made up of three phases \cite{ceccato}:
+
+\begin{enumerate}
+	\item reading inputs from the process images table
+	\item execution of the control code and computing the physical process evolution
+	\item writing output to the process image table to have an effect on the physical process. At the end of the cycle, the process image table is refreshed by the CPU
+\end{enumerate}
+
+Standard PLCs \textbf{programming languages} are basically of two types: \textbf{textuals} and \textbf{graphicals}.
+Textual languages include languages such as \textit{Instruction List} (IL) and \textit{Structured Text} (ST), while \textit{Ladder Diagrams} (LD), \textit{Function Block Diagram} (FBD) and \textit{Sequential Function Chart} (SFC) belong to the graphical languages.
+
+\bigskip
+Graphical languages are more simple and immediate comparing to the textual ones and are preferred by programmers because of their features and simplicity, in particular the \textbf{Ladder Logic programming} (see Figure \ref{fig:st_ll_comparison} for a comparison).
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{0.47\textwidth}
+		\includegraphics[scale=0.30]{st.png}
+		\caption{Example of ST programming}
+		\label{subfig:st_example}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.47\textwidth}
+		\includegraphics[scale=0.55]{ll.png}
+		\caption{Example of Ladder Logic}
+		\label{subfig:ladder_logic_example}
+	\end{subfigure}
+	\caption{Comparison between ST language and Ladder Logic}
+	\label{fig:st_ll_comparison}
+	
+\end{figure}
 
 \subsubsection{PLC Security}
 \label{subsubsec:plc_security}
+PLCs were originally designed to operate as closed systems, not connected and exposed to the outside world via communication networks: the question of the safety of these systems, therefore, was not a primary aspect. The advent of the Internet has brought undoubted advantages, but has introduced problems relating to the safety and protection of PLCs from external attacks and vulnerabilities.
 
 \subsection{RTU}
 \label{subsec:rtu}
-Remote Terminal Units (RTUs) are devices that are used to collect data from field devices and send it to the PLCs or the control center. RTUs can also be used to control field devices based on instructions from the PLCs.
+\textit{Remote Terminal Units} (RTUs) are computers with radio interfacing similar to PLCs: they transmit telemetry data to the control center or the PLCs
+and use messages from the master supervisory system to control connected objects \cite{rtu_definition}.
 
-\subsection{IED} 
-todo
+\bigskip
+RTUs are intended to work in remote areas communicating via wireless connections, while PLCs are meant to work locally with a high speed wired connection; due to this reason, RTUs can operate in low power modes for long periods of time using solar panels or batteries, with less energy consumption than PLCs.
+
+\bigskip
+Industries that use RTUs include telecom, rail, utilities.
 
 \subsection{HMI}
 \label{subsec:hmi}
