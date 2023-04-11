@@ -17,7 +17,7 @@ The increasing connectivity of ICSs and the associated security risks have led t
 
 \section{ICS components}
 \label{sec:ics_components}
-Industrial control systems (ICSs) are composed of several different components that work together to monitor and control industrial processes. 
+\textit{Industrial control systems} (ICSs) are composed of several different components that work together to monitor and control industrial processes. 
 
 \subsection{SCADA systems}
 \textit{Supervisory control and data acquisition} (\textbf{SCADA}) is a system of software and hardware elements that allows industrial organizations to \cite{scada_definition}:
@@ -38,7 +38,7 @@ SCADA systems were not originally designed with security in mind, and many of th
 To secure SCADA systems, it is important to implement security measures such as network segmentation, secure communication protocols, and access control. Additionally, it is important to monitor SCADA systems for unusual activity and to implement incident response procedures to quickly detect and respond to any security breaches.
 
 \subsubsection{Scada architecture}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[scale=0.20]{layers_scada_architecture_wiki.png}
 	\caption{SCADA architecture schema}
@@ -78,7 +78,7 @@ PLCs are more \textit{user-friendly}: they are not intended (only) for computer 
 \subsubsection{PLC Architecture}
 The basic hardware architecture of a PLC consists of these elements \cite{plc_book}:
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[scale=0.35]{plc_architecture.png}
 	\caption{PLC architecture}
@@ -95,7 +95,7 @@ The basic hardware architecture of a PLC consists of these elements \cite{plc_bo
 	\item \textbf{Communications interface:} used to send and receive data on a network from/to other PLCs.
 \end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[scale=0.45]{plc_comm.png}
 	\caption{PLC communication schema}
@@ -124,7 +124,7 @@ Textual languages include languages such as \textit{Instruction List} (IL) and \
 \bigskip
 Graphical languages are more simple and immediate comparing to the textual ones and are preferred by programmers because of their features and simplicity, in particular the \textbf{Ladder Logic programming} (see Figure \ref{fig:st_ll_comparison} for a comparison).
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\begin{subfigure}{0.47\textwidth}
 		\includegraphics[scale=0.30]{st.png}
@@ -144,28 +144,43 @@ Graphical languages are more simple and immediate comparing to the textual ones 
 
 \subsubsection{PLC Security}
 \label{subsubsec:plc_security}
-PLCs were originally designed to operate as closed systems, not connected and exposed to the outside world via communication networks: the question of the safety of these systems, therefore, was not a primary aspect. The advent of the Internet has brought undoubted advantages, but has introduced problems relating to the safety and protection of PLCs from external attacks and vulnerabilities.
+PLCs were originally designed to operate as closed systems, not connected and exposed to the outside world via communication networks: the question of the safety of these systems, therefore, was not a primary aspect. The advent of  Internet has brought undoubted advantages, but has introduced problems relating to the safety and protection of PLCs from external attacks and vulnerabilities.
+
+Indeed, a variety of different communication protocols used in ICSs are designed to be efficient in communications, but do not provide any security measure i.e. confidentiality, authentication and data integrity, which makes these protocols vulnerable against many of the IT classic attacks such as \textit{Replay Attack} or \textit{Man in the Middle Attack}. 
+
+\bigskip
+Countermeasures to enhance security in PLC systems may include \cite{plc_security}:
+\begin{itemize}
+	\item protocol modifications implementing \textbf{data integrity}, \textbf{authentication} and \textbf{protection} against \textit{Replay Attacks}
+	\item use of \textit{Intrusion Detection and Prevention Systems} (IDP) 
+	\item creation of \textit{Demilitarized Zones} (DMZ) on the network
+\end{itemize}
+
+In addition to this, keeping the process network and Internet separated, limiting the use of USB devices among users to reduce the risks of infections, and using strong account management and maintenance policies are best practices to prevent attacks and threats and to avoid potential damages. 
 
 \subsection{RTU}
 \label{subsec:rtu}
-\textit{Remote Terminal Units} (RTUs) are computers with radio interfacing similar to PLCs: they transmit telemetry data to the control center or the PLCs
-and use messages from the master supervisory system to control connected objects \cite{rtu_definition}.
+\textit{Remote Terminal Units} (RTUs) are computers with radio interfacing similar to PLCs: they transmit telemetry data to the control center or to the PLCs and use messages from the master supervisory system to control connected objects \cite{rtu_definition}.
 
 \bigskip
-RTUs are intended to work in remote areas communicating via wireless connections, while PLCs are meant to work locally with a high speed wired connection; due to this reason, RTUs can operate in low power modes for long periods of time using solar panels or batteries, with less energy consumption than PLCs.
+The purpose of RTUs is to operate efficiently in remote and isolated locations by utilizing wireless connections. In contrast, PLCs are designed for local use and rely on high-speed wired connections. This key difference allows RTUs to conserve energy by operating in low-power mode for extended periods using batteries or solar panels. As a result, RTUs consume less energy than PLCs, making them a more sustainable and cost-effective option for remote operations.
 
 \bigskip
-Industries that use RTUs include telecom, rail, utilities.
+Industries that require RTUs often operate in areas without reliable access to the power grid or require monitoring and control substations in remote locations. These include telecommunications, railways, and utilities that manage critical infrastructure such as power grids, pipelines, and water treatment facilities. The advanced technology of RTUs allows these industries to maintain essential services, even in challenging environments or under adverse weather conditions.
 
 \subsection{HMI}
 \label{subsec:hmi}
-The Human-Machine Interface (HMI) is the interface that operators use to interact with the ICS. HMIs can be used to display process data, make control decisions, and configure the ICS.
+The \textit{Human-Machine Interface} (HMI) is the hardware and software interface that operators use to monitor the processes and interact with the ICS. 
+
+An HMI shows the operator and authorized users information about system status and history; it also allows them to configure parameters on the ICS such as set points and, send commands and make control decisions \cite{hmi_definition}.
+
+The HMI can be in the form of a physical panel, with buttons and indicator lights, or PC software.
 
 \subsection{Cybersecurity components}
-Cybersecurity components: This can include firewalls, intrusion detection and prevention systems (IDPS), and security information and event management (SIEM) systems. These are used to protect the ICS from cyber threats and vulnerabilities.
+\textit{Cybersecurity components}, as seen in section \ref{subsubsec:plc_security} about PLCs security, are used to protect  ICSs from cyber threats and vulnerabilities. They can include firewalls, \textit{Intrusion Detection and Prevention systems} (IDP), and \textit{Security Information and Event Management} (SIEM) systems.
 
 \subsection{Communication Networks}
-Communication Networks are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Communication networks can include wired and wireless networks, such as Ethernet, MODBUS, and DNP3.
+\textit{Communication Networks} are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Communication networks can include wired and wireless networks, such as Ethernet/IP, Modbus, and DNP3 (see Section \ref{sec:ics_protocols}).
 
 \section{ICS Communication Protocols}
 \label{sec:ics_protocols}
