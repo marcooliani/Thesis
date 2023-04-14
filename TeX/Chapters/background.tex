@@ -2,6 +2,7 @@
 \label{background}
 
 \section{What ICSs are}
+\label{sec:what_ics_are}
 \lettrine[lines=2]{I}{ndustrial control systems} (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}.
 
 ICSs are often found in critical infrastructure facilities such as power plants, oil and gas refineries, and chemical plants.
@@ -60,9 +61,9 @@ Production Control level and Production Scheduling level are not directly connec
 \subsection{Field devices}
 \label{subsec:field_devs}
 \textit{Field devices} are the \textbf{sensors} and \textbf{actuators} that are used to collect data from the process and control it. Examples of field devices include temperature sensors, pressure sensors, valves and pumps.
-
-\subsection{IED} 
-todo
+%
+%\subsection{IED} 
+%todo
 
 \subsection{PLC}
 \label{subsec:plc}
@@ -184,8 +185,41 @@ The HMI can be in the form of a physical panel, with buttons and indicator light
 
 \section{ICS Communication Protocols}
 \label{sec:ics_protocols}
+As mentioned in Section \ref{sec:what_ics_are}, industrial systems differ from classical IT systems in the purpose for which they are designed: controlling physical processes the former, processing and storing data the latter. For this reason, ICSs require different communication protocols than traditional IT systems for real time communications and data transfer.
+
+\bigskip
+A wide variety of industrial protocols exists: this is because originally each vendor developed and used its own proprietary protocol. However, these protocols were often incompatible with each other, resulting in devices from different vendors being unable to communicate with each other.
+
+To solve this problem, standards were defined with a view to allowing these otherwise incompatible device to intercommunicates.
+
+\bigskip
+Among all the various protocols, some have risen to prominence as widely accepted standards. These \textit{de facto} protocols are commonly utilized in industrial systems due to their proven reliability and effectiveness. In the following sections, we will provide a brief overview of some of the most prevalent and widely used protocols in the industry.
 
 \subsection{Modbus}
+\label{subsec:modbus}
+\textit{Modbus} is a serial communication protocol developed by Modicon (now Schneider Electric) in 1979 for use with its PLCs \cite{Modbus_definition} and designed expressly for industrial use: it facilitates interoperability of different devices connected to the same network (sensors, PLCs, HMIs, ...) and it is also often used to connect RTUs to SCADA acquisition systems.
+
+\bigskip
+Modbus is the most widely used communication protocol among industrial systems because it has several advantages:
+
+\begin{itemize}
+	\item simplicity of implementation and debugging
+	\item it moves raw bits and words, letting the individual vendor to represent the data as it prefers
+	\item it is, nowadays, an \textbf{open} and \textbf{\textit{royalty-free}} protocol: there is no need to sustain licensing costs for implementation and use by industrial device vendors
+\end{itemize}
+
+Modbus is a \textbf{request/response} (or \textit{master/slave}) protocol: this makes it independent of the transport layer used.
+
+There are several variants of Modbus, of which the most popular and widely used are Modbus RTU (used in serial port connections) and Modbus TCP (which instead uses TCP/IP as the transport layer): Modbus TCP embeds a standard Modbus frame in a TCP frame (see Figure \ref{fig:modbus_frames}).
+
+\begin{figure}[ht]
+	\includegraphics[scale=0.50]{modbus_frames.png}
+	\caption{Modbus RTU frame and Modbus TCP frame}
+	\label{fig:modbus_frames}
+\end{figure}
+
+\subsubsection{Modbus TCP}
+\label{subsub:modbus_tcp}
 
 \subsection{Ethernet/IP}
 
