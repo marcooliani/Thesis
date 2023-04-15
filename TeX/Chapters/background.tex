@@ -210,46 +210,74 @@ Modbus is the most widely used communication protocol among industrial systems b
 
 Modbus is a \textbf{request/response} (or \textit{master/slave}) protocol: this makes it independent of the transport layer used.
 
-There are several variants of Modbus, of which the most popular and widely used are Modbus RTU (used in serial port connections) and Modbus TCP (which instead uses TCP/IP as the transport layer): Modbus TCP embeds a standard Modbus frame in a TCP frame (see Figure \ref{fig:modbus_frames}).
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.50]{Modbus_RequestResponse.png}
+	\caption{Modbus Request/Response schema}
+	\label{fig:modbus_requestresponse}
+\end{figure}
+
+In this kind of architecture, a single device (master) can send requests to other devices (slaves), either individually or in broadcast: these slave devices (usually peripherals such as actuators) will respond to the master by providing data or performing the action requested by the master using the Modbus protocol. Slave devices cannot generate requests to the master \cite{Modbus_rr}.
+
+\bigskip
+There are several variants of Modbus, of which the most popular and widely used are Modbus RTU (used in serial port connections) and Modbus TCP (which instead uses TCP/IP as the transport layer).
+Modbus TCP embeds a standard Modbus frame in a TCP frame (see Figure \ref{fig:modbus_frames}): both masters and slaves listen and receive data via TCP port 502.
 
 \begin{figure}[ht]
+	\centering
 	\includegraphics[scale=0.50]{modbus_frames.png}
 	\caption{Modbus RTU frame and Modbus TCP frame}
 	\label{fig:modbus_frames}
 \end{figure}
 
-\subsubsection{Modbus TCP}
-\label{subsub:modbus_tcp}
+\subsubsection{Modbus registers}
+\label{subsub:modbus_registers}
+Modbus provides four object types, which map the data accessed by master and slave to the PLC memory:
+
+\begin{itemize}
+	\item \textit{Coil}: binary type, read/write accessible by both masters and slaves
+	\item \textit{Discrete Input}: binary type, accessible in read-only mode by masters and in read/write mode by slaves
+	\item \textit{Analog Input}: 16 bits in size (word), are accessible in read-only mode by masters and in read/write mode by slaves
+	\item \textit{Holding Register}:  16 bits in size (word), accessible in read/write mode by both masters and slaves. Holding Registers are the most commonly used registers for output and as general memory registers.
+\end{itemize}
+
+\subsubsection{Modbus Function Codes}
+\label{subsub:modbus_func_codes}
+\textit{Modbus Function Codes} are specific codes used by the Modbus master within a request frame (see Figure \ref{fig:modbus_frames}) to tell the Modbus slave device which register type to access and which action to perform on it.
+
+\bigskip
+Two types of Function Codes exists: for data access and for diagnostic
+Function Codes list for data access are listed in Table \ref{table:modbus_fc_list}:
+
+\bigskip
+\begin{longtable}[c]{| c | c |}
+	\hline
+	\textbf{Function Code} & \textbf{Description} \\ [0.5ex] 
+	\hline
+	FC01 & Read Coils \\
+	\hline 
+	FC02 & Read Discrete Input \\
+	\hline
+	FC03 & Read Holding Registers \\
+	\hline
+	FC04 & Read Analog Input Registers \\
+	\hline
+	FC05 & Write/Force Single Coil \\ 
+	\hline
+	FC06 & Write/Force Single Holding Register \\ 
+	\hline 
+	FC15 & Write/Force Multiple Coils \\ 
+	\hline
+	FC16 & Write/Force Multiple Holding Registers \\ 
+	\hline
+	
+	\caption{Modbus Function Codes list}
+	\label{table:modbus_fc_list}
+\end{longtable}
 
 \subsection{Ethernet/IP}
 
 \subsection{Other Protocols}
 
 \vfill
-%
-%Test cite \cite{ceccato} \\
-%test cite 2 \cite{itrust_swat} \\
-%test cite 3 \cite{itrust_site} \\
-%test cite 3 \cite{itrust_invariants_paper}\\
-%
-%\begin{figure}[h]
-%	\includegraphics[scale=0.3]{swat_schema_2}
-%	\caption{SWaT schema}
-%	\label{fig:Schema SWaT}
-%\end{figure}
-%
-%\begin{table}
-%	\centering
-%	\begin{tabular}{||c c c c||} 
-%		\hline
-%		Col1 & Col2 & Col2 & Col3 \\ [0.5ex] 
-%		\hline
-%		 & & & \\
-%		1 & 6 & 87837 & 787 \\ 
-%		2 & 7 & 78 & 5415 \\
-%		3 & 545 & 778 & 7507 \\
-%		4 & 545 & 18744 & 7560 \\
-%		5 & 88 & 788 & 6344 \\ [1ex] 
-%	\end{tabular}
-%	\label{table:1}
-%\end{table}
+
