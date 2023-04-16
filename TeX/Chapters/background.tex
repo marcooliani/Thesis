@@ -275,7 +275,31 @@ Function Codes list for data access are listed in Table \ref{table:modbus_fc_lis
 	\label{table:modbus_fc_list}
 \end{longtable}
 
+\subsubsection{Modbus Security}
+\label{subsub:modbus_sec}
+Despite its simplicity and widespread use, the Modbus protocol does not have any security features, which exposes it to vulnerabilities and attacks.
+
+Data in Modbus are transmitted unencrypted (\textit{lack of confidentiality}), with no data integrity controls (\textit{lack of integrity}) and authentication checks (\textit{lack of authentication}), in addition to the \textit{lack of session}. Hence, the protocol is vulnerable to a variety of attacks, such as Denial of Services (DoS), buffer overflows and reconnaissance activities.
+
+\bigskip
+The easiest attack to bring to the Modbus protocol, however, is \textbf{packet sniffing}: since, as mentioned earlier, network traffic is unencrypted and the data transmitted is in cleartext, it is sufficient to use a packet sniffer to capture the network traffic, read the packets and thus gather informations about the system such as ip addresses, function codes of requests and to modify the operation of the devices.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.25]{modbus_packet_sniffing.png}
+	\caption{Example of packet sniffing on the Modbus protocol}
+	\label{fig:modbus_packet_sniffing}
+\end{figure}
+
+To make the Modbus protocol more secure, an encapsulated version was developed within the \textit{Transport Security Layer} (TLS) cryptographic protocol, also using mutual authentication. This version of the Modbus protocol is called \textbf{Secure Modbus} or \textbf{Modbus TLS}. In addition to this, Secure Modbus also includes X.509-type certificates to define permissions and authorisations \cite{modbus_tls_pdf}.
+
+\vfill
+
 \subsection{Ethernet/IP}
+\label{sub:enip}
+
+\subsection{Common Industrial Protocol (CIP)}
+\label{sub:cip}
 
 \subsection{Other Protocols}
 
