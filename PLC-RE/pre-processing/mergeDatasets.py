@@ -163,15 +163,24 @@ class MergeDatasets:
         if self.config['DATASET']['max_min_cols_list']:
             data_set = self.__add_setpoints(dataset, val_cols_max_min)
         if self.config['DATASET']['trend_cols_list']:
-            data_set = self.__add_trends(data_set, val_cols_trends)
+            if data_set is not None:
+                data_set = self.__add_trends(data_set, val_cols_trends)
+            else:
+                data_set = self.__add_trends(dataset, val_cols_trends)
         if self.config['DATASET']['slope_cols_list'] and self.config['DATASET']['trend_cols_list']:
-            data_set = self.__add_slopes(data_set, val_cols_slopes)
+            if data_set is not None:
+                data_set = self.__add_slopes(data_set, val_cols_slopes)
+            else:
+                data_set = self.__add_slopes(dataset, val_cols_slopes)
         if self.config['DATASET']['prev_cols_list']:
-            data_set = self.__add_prevs(data_set, val_cols_prevs)
+            if data_set is not None:
+                data_set = self.__add_prevs(data_set, val_cols_prevs)
+            else:
+                data_set = self.__add_prevs(dataset, val_cols_prevs)
 
         # Se i campi dell'enrichment sono tutti vuoti, anche data_set è vuoto. Quindi ritorno dataset, passato
         # in ingresso
-        if data_set:
+        if data_set is not None:
             return data_set
         else:
             return dataset
@@ -236,8 +245,9 @@ class MergeDatasets:
         mining_datasets = self.__concat_datasets(datasets_list)
         # Save dataset with the timestamp for the process mining.
         mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
-        mining_datasets.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"],self.config["MINING"]["data_dir"],self.output_file.split(".")[0])}_TS.csv',
-                               index=False)
+        mining_datasets.to_csv(
+            f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"], self.output_file.split(".")[0])}_TS.csv',
+            index=False)
         # print(mining_datasets)  # Debug
 
     def save_daikon_dataset(self, datasets_list):
@@ -251,8 +261,9 @@ class MergeDatasets:
         # Taglio anche le ultime righe, che hanno lo slope = 0
         # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :] # Prendo solo le n-granularities righe
         daikon_datasets = daikon_datasets.iloc[1:-self.granularity, :]
-        daikon_datasets.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"],self.config["DAIKON"]["daikon_invariants_dir"],self.output_file)}',
-                               index=False)
+        daikon_datasets.to_csv(
+            f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["DAIKON"]["daikon_invariants_dir"], self.output_file)}',
+            index=False)
         # print(daikon_datasets)  # Debug
 
     @staticmethod
