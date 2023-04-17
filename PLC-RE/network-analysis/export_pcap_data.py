@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 from io import StringIO
+from textwrap import wrap
 
+import numpy as np
 import pyshark
 import argparse
 import configparser
 import subprocess
 import pandas as pd
+import service_codes as sc
 
 
 class ExportPCAPData:
@@ -108,6 +111,11 @@ class ExportPCAPData:
             df = df.loc[df[self.config['DATASET']['timestamp_col']].between(self.pcap_timerange[0],
                                                                             self.pcap_timerange[1],
                                                                             inclusive="both")]
+        ## Da qui
+
+        df['cp.rr'] = df['cp.rr'].apply(wrap(df['cp.rr'], 8))
+
+        ## A qui
 
         print("Saving CSV export ... ")
         df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
@@ -115,7 +123,10 @@ class ExportPCAPData:
         print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
 
         sources = sorted(df['src'].unique())
-        print(sources)
+        destinations = sorted(df['dst'].unique())
+        # print(sources, destinations)
+        ips = list(set(sources).intersection(destinations))
+        print(ips)
 
 
 def main():

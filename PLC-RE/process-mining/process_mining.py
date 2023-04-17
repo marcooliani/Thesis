@@ -22,7 +22,8 @@ class ProcessMining:
         parser = argparse.ArgumentParser()
         group = parser.add_argument_group()
 
-        parser.add_argument('-f', "--filename", type=str, help="name of the input dataset file (CSV format)")
+        parser.add_argument('-f', "--filename", type=str, help="name of the input physical dataset file (CSV format)")
+        # parser.add_argument('-n', "--network", type=str, help="name of the input network dataset file (CSV format)")
         parser.add_argument('-a', "--actuators", nargs='+', required=False, help="actuators list")
         parser.add_argument('-s', "--sensors", nargs='+', required=False, help="sensors list")
         parser.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],

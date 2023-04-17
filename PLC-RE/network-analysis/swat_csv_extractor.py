@@ -30,15 +30,11 @@ class SwatCSVExtractor:
         self.df = None
         self.csv_file = self.args.file
         self.csv_multiple = self.args.mergefiles
-        self.csv_dir = None
+        self.csv_dir = self.args.mergedir
         self.csv_timerange = self.args.timerange
 
-    def check_args(self):
-        if self.args.mergedir:
-            self.csv_dir = self.args.mergedir
-
     @staticmethod
-    def get_cip_data(self, hex_val):
+    def __get_cip_data(hex_val):
         dec_val = struct.unpack('<f', binascii.unhexlify(hex_val))[0]
 
         return dec_val
@@ -96,23 +92,37 @@ class SwatCSVExtractor:
         mp = {'src': 'dst', 'dst': 'src'}
         self.df.update(self.df.loc[cond].rename(mp, axis=1))
 
+        # Potrei in realtà eliminare gli ultimi due elementi: il penultimo non so cosa sia, ma è un decimale,
+        # l'ultimo invece è la ripetizione del valore letto all'inizio...
         self.df['Modbus_Value'] = self.df['Modbus_Value'].str.split('; ').str[0]
         self.df['Modbus_Value'] = self.df['Modbus_Value'].str.replace('0x', '').str.replace(' ', '')
 
+        for row in range(len(self.df)):
+            if pd.isna(self.df['Modbus_Value'].iloc[row]):
+                continue
+            if "Response" in self.df['service'].iloc[row]:
+                converted_val = self.__get_cip_data(self.df['Modbus_Value'].iloc[row])
+                self.df['Modbus_Value'].iloc[row] = converted_val
+
         # print(self.df)
         sources = sorted(self.df['src'].unique())
+        destinations = sorted(self.df['dst'].unique())
+        ips = list(set(sources).intersection(destinations))
+        print(ips)
         # print(sources)
 
-        for i in range(len(sources)):
-            self.df['src'] = self.df['src'].replace(sources[i], 'P' + str(i + 1))
-            self.df['dst'] = self.df['dst'].replace(sources[i], 'P' + str(i + 1))
+        '''
+        for i in range(len(ips)):
+            self.df['src'] = self.df['src'].replace(ips[i], 'P' + str(i + 1))
+            self.df['dst'] = self.df['dst'].replace(ips[i], 'P' + str(i + 1))
+        '''
 
-        self.df.to_csv(f'test_net2015.csv', index=False)
+        self.df.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"])}/test_net2015.csv',
+                       index=False)
 
 
 def main():
     sce = SwatCSVExtractor()
-    sce.check_args()
     sce.import_csv()
 
 

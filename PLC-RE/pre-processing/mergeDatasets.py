@@ -169,7 +169,12 @@ class MergeDatasets:
         if self.config['DATASET']['prev_cols_list']:
             data_set = self.__add_prevs(data_set, val_cols_prevs)
 
-        return data_set
+        # Se i campi dell'enrichment sono tutti vuoti, anche data_set è vuoto. Quindi ritorno dataset, passato
+        # in ingresso
+        if data_set:
+            return data_set
+        else:
+            return dataset
 
     def get_datasets_lists(self):
         filenames = self.list_files()
@@ -184,22 +189,22 @@ class MergeDatasets:
             print(f'Reading {file.split("/")[-1]} ...')
 
             if self.timerange:
-                datasetPLC = pd.read_csv(file)
-                datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
-                datasetPLC[self.config['DATASET']['timestamp_col']] = \
-                    datasetPLC[self.config['DATASET']['timestamp_col']].apply(lambda x:
-                                                                              pd.Timestamp(x).strftime(
-                                                                                  '%Y-%m-%d %H:%M:%S.%f'))
-                datasetPLC = datasetPLC.loc[datasetPLC[self.config['DATASET']['timestamp_col']].between(self.timerange[0],
-                                                                                                        self.timerange[1],
-                                                                                                        inclusive="both")]
+                df = pd.read_csv(file)
+                df.columns = df.columns.str.replace('.', '_', regex=False)
+                df[self.config['DATASET']['timestamp_col']] = \
+                    df[self.config['DATASET']['timestamp_col']].apply(lambda x:
+                                                                      pd.Timestamp(x).strftime('%Y-%m-%d %H:%M:%S.%f'))
+                df = df.loc[df[self.config['DATASET']['timestamp_col']].between(self.timerange[0],
+                                                                                self.timerange[1],
+                                                                                inclusive="both")]
             else:
-                datasetPLC = pd.read_csv(file, skiprows=self.skiprows, nrows=self.nrows)
-                datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
-                datasetPLC[self.config['DATASET']['timestamp_col']] = \
-                    datasetPLC[self.config['DATASET']['timestamp_col']].apply(lambda x:
-                                                                              pd.Timestamp(x).strftime(
-                                                                                '%Y-%m-%d %H:%M:%S.%f'))
+                df = pd.read_csv(file, skiprows=self.skiprows, nrows=self.nrows)
+                df.columns = df.columns.str.replace('.', '_', regex=False)
+
+                if self.config['DATASET']['timestamp_col'] in df.columns:
+                    df[self.config['DATASET']['timestamp_col']] = \
+                        df[self.config['DATASET']['timestamp_col']].apply(lambda x: pd.Timestamp(x).strftime(
+                            '%Y-%m-%d %H:%M:%S.%f'))
 
             # I punti nei nomi delle colonne creano parecchi problemi, quindi vanno sostituiti
             # datasetPLC.columns = datasetPLC.columns.str.replace('.', '_', regex=False)
@@ -208,10 +213,10 @@ class MergeDatasets:
             # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
             self.clean_null(file)
 
-            datasetPLC_daikon = datasetPLC.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
+            datasetPLC_daikon = df.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
 
             # Concatenate the single PLCs datasets for process mining
-            df_list_mining.append(datasetPLC)
+            df_list_mining.append(df)
 
             # Add previous values, slopes and limits to dataframe
             datasetPLC_daikon = self.enrich_df(datasetPLC_daikon, file)
@@ -239,7 +244,8 @@ class MergeDatasets:
         daikon_datasets = self.__concat_datasets(datasets_list)
 
         # drop timestamps is NOT needed in Daikon
-        daikon_datasets = daikon_datasets.drop(self.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
+        if self.config['DATASET']['timestamp_col'] in daikon_datasets.columns:
+            daikon_datasets = daikon_datasets.drop(self.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
 
         # Drop first rows (Daikon does not process missing values)
         # Taglio anche le ultime righe, che hanno lo slope = 0

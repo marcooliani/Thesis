@@ -21,6 +21,14 @@ class ServiceCodes:
         0x52: "Read_Tag_Fragmented_Service",
         0x53: "Write_Tag_Fragmented_Service",
         0x54: "Forward_Open?",
+        0xcc: "Read Tag Response",
+        0xd2: "Read Tag Fragmented Response",
+        0xcd: "Write Tag Response",
+        0xd3: "Write Tag Fragmented Response",
+        0xce: "Read Modify Write Tag Response",
+        0x8a: "Multiple Service Packet Response",
+        0xd5: "Get Instance Attributes List Response",
+        0x83: "Get Attributes Response",
     }
 
     MODBUS_SERVICE_CODES = {}

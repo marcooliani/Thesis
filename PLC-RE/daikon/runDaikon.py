@@ -230,12 +230,18 @@ class RunDaikon:
         else:
             conditions = ['Generic', condition]
 
-        if not os.path.exists(self.config["DAIKON"]["daikon_results_dir"]+'/' + self.register):
-            os.makedirs(self.config["DAIKON"]["daikon_results_dir"]+'/' + self.register)
+        if not os.path.exists(os.path.join(self.config['PATHS']['project_dir'],
+                                           self.config["DAIKON"]["daikon_results_dir"],
+                                           self.register)):
+            os.makedirs(os.path.join(self.config['PATHS']['project_dir'],
+                                     self.config["DAIKON"]["daikon_results_dir"],
+                                     self.register))
 
         # Scrivo il risultato finale sui file
         print(f'Writing output file {os.getcwd()}/daikon_results_{condition.replace(" ", "_")}.txt ...')
-        with open(f'{self.config["DAIKON"]["daikon_results_dir"]}/{self.register}/daikon_results_{condition.replace(" ", "_")}.txt',
+        with open(f'{self.config["PATHS"]["project_dir"]}/'
+                  f'{self.config["DAIKON"]["daikon_results_dir"]}/'
+                  f'{self.register}/daikon_results_{condition.replace(" ", "_")}.txt',
                   'w') as of:
             i = 0
             for inv in invariants:
@@ -256,8 +262,8 @@ def main():
         exit(1)
 
     # Controllo se esiste la directory dove verranno scritti i file con i risultati. Se non esiste la creo
-    if not os.path.exists(rd.config["DAIKON"]["daikon_results_dir"]):
-        os.makedirs(rd.config["DAIKON"]["daikon_results_dir"])
+    if not os.path.exists(os.path.join(rd.config["PATHS"]["project_dir"], rd.config["DAIKON"]["daikon_results_dir"])):
+        os.makedirs(os.path.join(rd.config["PATHS"]["project_dir"], rd.config["DAIKON"]["daikon_results_dir"]))
 
     # Bug di Daikon: se specifico condizioni su righe separate nel file .spinfo, dalla seconda condizione
     # mette assieme anche parte delle invarianti generiche mischiate a quelle specifiche. Quindi meglio richiamare
