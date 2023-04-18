@@ -3,6 +3,7 @@
 
 \section{What ICSs are}
 \label{sec:what_ics_are}
+
 \lettrine[lines=2]{I}{ndustrial control systems} (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}.
 
 ICSs are often found in critical infrastructure facilities such as power plants, oil and gas refineries, and chemical plants.
@@ -21,7 +22,7 @@ The increasing connectivity of ICSs and the associated security risks have led t
 \textit{Industrial control systems} (ICSs) are composed of several different components that work together to monitor and control industrial processes. 
 
 \subsection{SCADA systems}
-\textit{Supervisory control and data acquisition} (\textbf{SCADA}) is a system of software and hardware elements that allows industrial organizations to \cite{scada_definition}:
+\textit{Supervisory Control And Data Acquisition} (\textbf{SCADA}) is a system of software and hardware elements that allows industrial organizations to \cite{scada_definition}:
 \begin{itemize}
 	\item Control industrial processes locally or at remote locations
 	\item Monitor, gather, and process real-time data
@@ -297,6 +298,16 @@ To make the Modbus protocol more secure, an encapsulated version was developed w
 
 \subsection{Ethernet/IP}
 \label{sub:enip}
+\textit{Ethernet/IP} (where IP stands for \textit{Industrial Protocol}) is an industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.40]{enip.png}
+	\caption{Ethernet/IP stack compared to the OSI stack}
+	\label{fig:enip}
+\end{figure}
+
+Ethernet/IP uses the main Ethernet standards, such as IEEE 802.3 and the TCP/IP suite, and implements the CIP protocol stack at the upper layers of the OSI stack (see Figure \ref{fig:enip}). It is furthermore compatible with the main Internet standard protocols, such as SNMP, HTTP, FTP and DHCP, and other industrial protocols for data access and exchange such as \textit{Open Platform Communication} (OPC).
 
 \subsection{Common Industrial Protocol (CIP)}
 \label{sub:cip}
