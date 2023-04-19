@@ -190,8 +190,7 @@ As mentioned in Section \ref{sec:what_ics_are}, industrial systems differ from c
 
 \bigskip
 A wide variety of industrial protocols exists: this is because originally each vendor developed and used its own proprietary protocol. However, these protocols were often incompatible with each other, resulting in devices from different vendors being unable to communicate with each other.
-
-To solve this problem, standards were defined with a view to allowing these otherwise incompatible device to intercommunicates.
+\\To solve this problem, standards were defined with a view to allowing these otherwise incompatible device to intercommunicates.
 
 \bigskip
 Among all the various protocols, some have risen to prominence as widely accepted standards. These \textit{de facto} protocols are commonly utilized in industrial systems due to their proven reliability and effectiveness. In the following sections, we will provide a brief overview of some of the most prevalent and widely used protocols in the industry.
@@ -296,18 +295,40 @@ To make the Modbus protocol more secure, an encapsulated version was developed w
 
 \vfill
 
-\subsection{Ethernet/IP}
+\subsection{EtherNet/IP}
 \label{sub:enip}
-\textit{Ethernet/IP} (where IP stands for \textit{Industrial Protocol}) is an industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}.
+\textit{EtherNet/IP} (where IP stands for \textit{Industrial Protocol}) is an open industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[scale=0.40]{enip.png}
-	\caption{Ethernet/IP stack compared to the OSI stack}
+	\caption{OSI model for EtherNet/IP stack}
 	\label{fig:enip}
 \end{figure}
 
-Ethernet/IP uses the main Ethernet standards, such as IEEE 802.3 and the TCP/IP suite, and implements the CIP protocol stack at the upper layers of the OSI stack (see Figure \ref{fig:enip}). It is furthermore compatible with the main Internet standard protocols, such as SNMP, HTTP, FTP and DHCP, and other industrial protocols for data access and exchange such as \textit{Open Platform Communication} (OPC).
+EtherNet/IP uses the major Ethernet standards, such as IEEE 802.3 and the TCP/IP suite, and implements the CIP protocol stack at the upper layers of the OSI stack (see Figure \ref{fig:enip}). It is furthermore compatible with the main Internet standard protocols, such as SNMP, HTTP, FTP and DHCP, and other industrial protocols for data access and exchange such as \textit{Open Platform Communication} (OPC).
+
+\bigskip
+The use of the IEEE 802.3 standard allows EtherNet/IP to flexibly adopt different network topologies (star, linear, ring, etc.) over different connections (copper, fibre optic, wireless, etc.), as well as the possibility to choose the speed of network devices. \\
+IEEE 802.3 in addition defines at Data Link layer the \textit{Carrier Sense Multiple Access - Collision Detection} (CSMA/CD) protocol, which controls access to the communication channel and prevents collisions.
+
+\bigskip
+At the transport level, EtherNet/IP encapsulates messages from the CIP stack into an Ethernet message, so that messages can be transmitted from one node to another on the network using the TCP/IP protocol. \\
+EtherNet/IP uses two forms of messaging \cite{enip_pdf}\cite{enip_pdf2}:
+
+\begin{itemize}
+	\item \textbf{unconnected messaging:} used during the connection establishment phase and for infrequent, low priority, explicit messages. Unconnected messaging uses TCP/IP to transmit messages across the network asking for connection resource each time from the \textit{Unconnected Message Manager} (UCMM).
+	
+	\item \textbf{connected messaging:} used for frequent message transactions or for real-time I/O data transfers. Connection resources are reserved and configured using communications services available via the UCMM.
+	
+	\bigskip
+	EtherNet/IP has two types of message connection \cite{enip_pdf}:
+	\begin{itemize}
+		\item \textbf{explicit messaging:} \textit{point-to-point} connections to facilitate \textit{request-response} transactions between two nodes. These connections use TCP/IP service to transmit messages over Ethernet.
+		\item \textbf{implicit messaging:} this kind of connection moves application-specific \textbf{real-time I/O data} at regular intervals. It uses multicast \textit{producer-consumer} model and UDP/IP service (which has lower protocol overhead and smaller packet size than TCP/IP) to transfer data over Ethernet.
+	\end{itemize}
+\end{itemize}
+
 
 \subsection{Common Industrial Protocol (CIP)}
 \label{sub:cip}
