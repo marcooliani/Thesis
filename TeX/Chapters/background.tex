@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{background}
 
-\section{What ICSs are}
+\section{Industrial Control Systems in a nutshell}
 \label{sec:what_ics_are}
 
 \lettrine[lines=2]{I}{ndustrial control systems} (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}.
@@ -39,25 +39,32 @@ SCADA systems were not originally designed with security in mind, and many of th
 
 To secure SCADA systems, it is important to implement security measures such as network segmentation, secure communication protocols, and access control. Additionally, it is important to monitor SCADA systems for unusual activity and to implement incident response procedures to quickly detect and respond to any security breaches.
 
-\subsubsection{Scada architecture}
+\subsubsection{SCADA architecture}
 \begin{figure}[ht]
 	\centering
-	\includegraphics[scale=0.20]{layers_scada_architecture_wiki.png}
+	% \includegraphics[scale=0.20]{layers_scada_architecture_wiki.png}
+	\includegraphics[scale=0.35]{purdue_model_ics.png}
 	\caption{SCADA architecture schema}
 	\label{fig:SCADA_schema}
 \end{figure}
 
-SCADA architecture consists in \textbf{five layers} (Figure \ref{fig:SCADA_schema}):
+According to the \textit{Purdue Enterprise Reference Architecture} (PERA), or simply \textbf{Purdue Model}, SCADA architecture consists in \textbf{six levels} each representing a functionality \cite{purdue_model}, as shown in Figure \ref{fig:SCADA_schema}:
 
 \begin{itemize}
-	\item Level 0 (\textbf{Field Level}): contains \textbf{field devices} (\ref{subsec:field_devs}), or \textit{sensors}.
-	\item Level 1 (\textbf{Direct Control}): includes \textbf{local or remote controllers} such as \textbf{PLCs} (\ref{subsec:plc}) and \textbf{RTUs} (\ref{subsec:rtu}). Controllers interface directly to the field devices reading data from sensors and sending commands to actuators.
-	\item Level 2 (\textbf{Plant Supervisory}): contains computer systems that \textbf{collate and store informations} from the previous level and provide a \textbf{Human-Machine Interface} (\textit{HMI}, \ref{subsec:hmi}) for operator control.
-	\item Level 3 (\textbf{Production Control}): collect and aggregates data from the Plant Supervisory level to generate \textbf{reporting} to the Production Scheduling layer.
-	\item Level 4 (\textbf{Production Scheduling}): includes business systems (such as ERP systems) used to \textbf{manage ongoing processes}.
+	\item Level 0 (\textbf{Processes}): contains \textbf{field devices} (\ref{subsec:field_devs}), or \textit{sensors}.
+	
+	\item Level 1 (\textbf{Intlligent Devices}): includes \textbf{local or remote controllers} that sense, monitor and control the physical process, such as \textbf{PLCs} (\ref{subsec:plc}) and \textbf{RTUs} (\ref{subsec:rtu}). Controllers interface directly to the field devices reading data from sensors and sending commands to actuators.
+	
+	\item Level 2 (\textbf{Control Systems}): contains computer systems used to supervising and monitoring the physical process: they provide a \textbf{Human-Machine Interface} (\textit{HMI}, \ref{subsec:hmi}) and \textit{Engineering Workstations} (EW) for operator control.
+	
+	\item Level 3 (\textbf{Manufactoring/Site Operations}): comprises systems used to manage the production workflow for plant-wide control: they collate informations from the previous levels and store them in Data Historian servers.
+	
+	\item \textbf{Industrial Demilitarized Zone} (DMZ): intermediate level that connects the \textit{Operational Technology} (OT) part (levels 0-3) with the \textit{Information Technology} (IT) part of the system (levels 4 and 5). Communication takes place indirectly through services such as \textit{proxy servers} and \textit{remote access servers}, which act as intermediaries between the two environments.
+	
+	\item Level 4 (\textbf{Business Logistics Systems}): collect and aggregates data from the Manufactoring/Site Operations level overseeing the IT-related activities to generate \textbf{reporting} to the Enterprise System layer. At this layer we can find application and e-mail servers, and \textit{Enterprise Resource Planning} (ERP) systems.
+	
+	\item Level 5 (\textbf{Enterprise Systems}): represents the enterprise network, used for the business-to-business activities and for business-to-client purpose services. At Enteprise Systems level are typical IT services such as mail servers, web servers and all the systems used to manage the ongoing process.
 \end{itemize}
-
-Production Control level and Production Scheduling level are not directly connected to the process control, but concerned with monitoring production and targets and production scheduling level.
 
 \subsection{Field devices}
 \label{subsec:field_devs}
@@ -66,7 +73,7 @@ Production Control level and Production Scheduling level are not directly connec
 %\subsection{IED} 
 %todo
 
-\subsection{PLC}
+\subsection{Programmable Logic Controllers}
 \label{subsec:plc}
 A \textit{Programmable Logic Controller} (PLC) is a \textbf{small and specialized industrial computer} having the capability of controlling complex industrial and manifacturing processes \cite{plc_definition}.
 
@@ -160,7 +167,7 @@ Countermeasures to enhance security in PLC systems may include \cite{plc_securit
 
 In addition to this, keeping the process network and Internet separated, limiting the use of USB devices among users to reduce the risks of infections, and using strong account management and maintenance policies are best practices to prevent attacks and threats and to avoid potential damages. 
 
-\subsection{RTU}
+\subsection{Remote Terminal Units}
 \label{subsec:rtu}
 \textit{Remote Terminal Units} (RTUs) are computers with radio interfacing similar to PLCs: they transmit telemetry data to the control center or to the PLCs and use messages from the master supervisory system to control connected objects \cite{rtu_definition}.
 
@@ -170,10 +177,10 @@ The purpose of RTUs is to operate efficiently in remote and isolated locations b
 \bigskip
 Industries that require RTUs often operate in areas without reliable access to the power grid or require monitoring and control substations in remote locations. These include telecommunications, railways, and utilities that manage critical infrastructure such as power grids, pipelines, and water treatment facilities. The advanced technology of RTUs allows these industries to maintain essential services, even in challenging environments or under adverse weather conditions.
 
-\subsection{HMI}
+\subsection{Human-Machine Interface}
 \label{subsec:hmi}
 The \textit{Human-Machine Interface} (HMI) is the hardware and software interface that operators use to monitor the processes and interact with the ICS. 
-
+\\
 An HMI shows the operator and authorized users information about system status and history; it also allows them to configure parameters on the ICS such as set points and, send commands and make control decisions \cite{hmi_definition}.
 
 The HMI can be in the form of a physical panel, with buttons and indicator lights, or PC software.
@@ -181,11 +188,11 @@ The HMI can be in the form of a physical panel, with buttons and indicator light
 \subsection{Cybersecurity components}
 \textit{Cybersecurity components}, as seen in section \ref{subsubsec:plc_security} about PLCs security, are used to protect  ICSs from cyber threats and vulnerabilities. They can include firewalls, \textit{Intrusion Detection and Prevention systems} (IDP), and \textit{Security Information and Event Management} (SIEM) systems.
 
-\subsection{Communication Networks}
-\textit{Communication Networks} are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Communication networks can include wired and wireless networks, such as Ethernet/IP, Modbus, and DNP3 (see Section \ref{sec:ics_protocols}).
+\section{Communication Networks}
+\textit{Communication Networks} are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Communication networks can include wired and wireless networks, such as Ethernet/IP, Modbus, DNP3 and others.
 
-\section{ICS Communication Protocols}
-\label{sec:ics_protocols}
+\subsection{ICS Communication Protocols}
+\label{subsec:ics_protocols}
 As mentioned in Section \ref{sec:what_ics_are}, industrial systems differ from classical IT systems in the purpose for which they are designed: controlling physical processes the former, processing and storing data the latter. For this reason, ICSs require different communication protocols than traditional IT systems for real time communications and data transfer.
 
 \bigskip
@@ -195,7 +202,7 @@ A wide variety of industrial protocols exists: this is because originally each v
 \bigskip
 Among all the various protocols, some have risen to prominence as widely accepted standards. These \textit{de facto} protocols are commonly utilized in industrial systems due to their proven reliability and effectiveness. In the following sections, we will provide a brief overview of some of the most prevalent and widely used protocols in the industry.
 
-\subsection{Modbus}
+\subsubsection{Modbus}
 \label{subsec:modbus}
 \textit{Modbus} is a serial communication protocol developed by Modicon (now Schneider Electric) in 1979 for use with its PLCs \cite{Modbus_definition} and designed expressly for industrial use: it facilitates interoperability of different devices connected to the same network (sensors, PLCs, HMIs, ...) and it is also often used to connect RTUs to SCADA acquisition systems.
 
@@ -230,7 +237,7 @@ Modbus TCP embeds a standard Modbus frame in a TCP frame (see Figure \ref{fig:mo
 	\label{fig:modbus_frames}
 \end{figure}
 
-\subsubsection{Modbus registers}
+\paragraph{Modbus registers}
 \label{subsub:modbus_registers}
 Modbus provides four object types, which map the data accessed by master and slave to the PLC memory:
 
@@ -241,7 +248,7 @@ Modbus provides four object types, which map the data accessed by master and sla
 	\item \textit{Holding Register}:  16 bits in size (word), accessible in read/write mode by both masters and slaves. Holding Registers are the most commonly used registers for output and as general memory registers.
 \end{itemize}
 
-\subsubsection{Modbus Function Codes}
+\paragraph{Modbus Function Codes}
 \label{subsub:modbus_func_codes}
 \textit{Modbus Function Codes} are specific codes used by the Modbus master within a request frame (see Figure \ref{fig:modbus_frames}) to tell the Modbus slave device which register type to access and which action to perform on it.
 
@@ -275,9 +282,9 @@ Function Codes list for data access are listed in Table \ref{table:modbus_fc_lis
 	\label{table:modbus_fc_list}
 \end{longtable}
 
-\subsubsection{Modbus Security}
+\paragraph{Modbus Security Issues}
 \label{subsub:modbus_sec}
-Despite its simplicity and widespread use, the Modbus protocol does not have any security features, which exposes it to vulnerabilities and attacks.
+Despite its simplicity and widespread use, the Modbus protocol does not have any security feature, which exposes it to vulnerabilities and attacks.
 
 Data in Modbus are transmitted unencrypted (\textit{lack of confidentiality}), with no data integrity controls (\textit{lack of integrity}) and authentication checks (\textit{lack of authentication}), in addition to the \textit{lack of session}. Hence, the protocol is vulnerable to a variety of attacks, such as Denial of Services (DoS), buffer overflows and reconnaissance activities.
 
@@ -293,10 +300,8 @@ The easiest attack to bring to the Modbus protocol, however, is \textbf{packet s
 
 To make the Modbus protocol more secure, an encapsulated version was developed within the \textit{Transport Security Layer} (TLS) cryptographic protocol, also using mutual authentication. This version of the Modbus protocol is called \textbf{Secure Modbus} or \textbf{Modbus TLS}. In addition to this, Secure Modbus also includes X.509-type certificates to define permissions and authorisations \cite{modbus_tls_pdf}.
 
-\vfill
-
-\subsection{EtherNet/IP}
-\label{sub:enip}
+\subsubsection{EtherNet/IP}
+\label{subsub:enip}
 \textit{EtherNet/IP} (where IP stands for \textit{Industrial Protocol}) is an open industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}.
 
 \begin{figure}[ht]
@@ -309,10 +314,14 @@ To make the Modbus protocol more secure, an encapsulated version was developed w
 EtherNet/IP uses the major Ethernet standards, such as IEEE 802.3 and the TCP/IP suite, and implements the CIP protocol stack at the upper layers of the OSI stack (see Figure \ref{fig:enip}). It is furthermore compatible with the main Internet standard protocols, such as SNMP, HTTP, FTP and DHCP, and other industrial protocols for data access and exchange such as \textit{Open Platform Communication} (OPC).
 
 \bigskip
+\paragraph{Physical and Data Link layer}
+
 The use of the IEEE 802.3 standard allows EtherNet/IP to flexibly adopt different network topologies (star, linear, ring, etc.) over different connections (copper, fibre optic, wireless, etc.), as well as the possibility to choose the speed of network devices. \\
 IEEE 802.3 in addition defines at Data Link layer the \textit{Carrier Sense Multiple Access - Collision Detection} (CSMA/CD) protocol, which controls access to the communication channel and prevents collisions.
 
 \bigskip
+\paragraph{Transport layer} 
+
 At the transport level, EtherNet/IP encapsulates messages from the CIP stack into an Ethernet message, so that messages can be transmitted from one node to another on the network using the TCP/IP protocol. \\
 EtherNet/IP uses two forms of messaging \cite{enip_pdf}\cite{enip_pdf2}:
 
@@ -325,15 +334,16 @@ EtherNet/IP uses two forms of messaging \cite{enip_pdf}\cite{enip_pdf2}:
 	EtherNet/IP has two types of message connection \cite{enip_pdf}:
 	\begin{itemize}
 		\item \textbf{explicit messaging:} \textit{point-to-point} connections to facilitate \textit{request-response} transactions between two nodes. These connections use TCP/IP service to transmit messages over Ethernet.
-		\item \textbf{implicit messaging:} this kind of connection moves application-specific \textbf{real-time I/O data} at regular intervals. It uses multicast \textit{producer-consumer} model and UDP/IP service (which has lower protocol overhead and smaller packet size than TCP/IP) to transfer data over Ethernet.
+		\item \textbf{implicit messaging:} this kind of connection moves application-specific \textbf{real-time I/O data} at regular intervals. It uses multicast \textit{producer-consumer} model and UDP/IP service (which has lower protocol overhead and smaller packet size than TCP/IP) to transfer data over Ethernet. 
 	\end{itemize}
 \end{itemize}
 
+\paragraph{Session, Presentation and Application layer} At the upper layers, EtherNet/IP implements the CIP protocol stack. We will discuss this protocol in more detail in Section \ref{subsub:cip}. 
 
-\subsection{Common Industrial Protocol (CIP)}
-\label{sub:cip}
+\subsubsection{Common Industrial Protocol (CIP)}
+\label{subsub:cip}
 
-\subsection{Other Protocols}
+\subsubsection{Other Protocols}
 
 \vfill
 
