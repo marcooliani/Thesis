@@ -3,7 +3,7 @@
 %% fronte-retro
 \documentclass[a4paper,12pt,openright,twoside,titlepage]{book}
 
-%% Imposto l'italiano
+%% Imposto l'inglese
 \usepackage[italian,english]{babel}
 
 %% Imposto l'encoding dei caratteri. Specificando utf8 posso mettere
@@ -12,7 +12,7 @@
 \usepackage[T1]{fontenc}
 
 %% Uso il template di frontespizio di Gregorio
-\usepackage{frontespizio}
+%\usepackage{frontespizio}
 
 \usepackage{fancyhdr}
 
@@ -113,9 +113,12 @@
 
 %% Bibliografia
 \usepackage[sorting=none,style=numeric-comp,backend=bibtex,maxbibnames=999,urldate=iso,date=iso]{biblatex}
+\usepackage{csquotes}
 \addbibresource{biblio/bibliography.bib} % Database con le citazioni
 
 %% Formattazioni varie
+\newcommand{\fncyblank}{\fancyhf{}}
+
 \pagestyle{fancy}\addtolength{\headwidth}{20pt}
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
@@ -165,6 +168,9 @@
 
 %###### ABSTRACT ######%
 \include{abstract}
+
+%###### ACKNOWLEDGEMENTS #####%
+%\include{acknowledgements}
 
 %% Faccio partire la numerazione normale DOPO l'indice: lo stesso indice 
 %% verrà numerato in numeri romani
