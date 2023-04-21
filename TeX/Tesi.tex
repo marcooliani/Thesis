@@ -11,6 +11,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
+%% Uso il template di frontespizio di Gregorio
+\usepackage{frontespizio}
+
 \usepackage{fancyhdr}
 
 %% Formato del titolo dei capitoli
@@ -41,12 +44,49 @@
 
 %% Per inserire gli url all'interno del testo
 \usepackage[hidelinks]{hyperref}
+%\hypersetup{
+%	colorlinks=true,
+%	linkcolor=blue,
+%	filecolor=magenta,      
+%%	citecolor=blue
+%}
+%
+% \urlstyle{same}
 
 %% Per inserire codici sorgenti
 \usepackage{listings}
+\usepackage{verbatim}
 \usepackage{xcolor}
-\definecolor{light-gray}{gray}{0.80}
-\addto\captionsitalian{\renewcommand{\lstlistingname}{Esempio}}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ 
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+	language=Python,
+	backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+	basicstyle=\small\ttfamily,        % the size of the fonts that are used for the code
+	breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+	breaklines=true,                 % sets automatic line breaking
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygray},    % comment style
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	deletekeywords={path},
+	morekeywords={def},
+	frame=none,	                   % adds a frame around the code
+	keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},       % keyword style
+	numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+	numbersep=5pt,                   % how far the line-numbers are from the code
+	numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+	rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,          % underline spaces within strings only
+	showtabs=false,                  % show tabs within strings adding particular underscores
+	stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mygreen},     % string literal style
+	tabsize=2	                   % sets default tabsize to 2 spaces
+}
 
 %% Elenchi puntati e affini
 \usepackage{enumitem}
@@ -68,8 +108,11 @@
 %% Fa sì che le tabelle possano essere divise tra più pagine
 \usepackage{longtable}
 
+%% Numeri di riga nelle pagine -> SOLO PER LE CORREZIONI!!
+\usepackage{lineno}
+
 %% Bibliografia
-\usepackage[sorting=none,style=numeric-comp,backend=bibtex,maxbibnames=99,urldate=iso,date=iso]{biblatex}
+\usepackage[sorting=none,style=numeric-comp,backend=bibtex,maxbibnames=999,urldate=iso,date=iso]{biblatex}
 \addbibresource{biblio/bibliography.bib} % Database con le citazioni
 
 %% Formattazioni varie
@@ -111,108 +154,17 @@
 \setcounter{tocdepth}{3}
 \setcounter{secnumdepth}{3}
 
-%%
-%% Titolo della tesi, relatori et similia
-%%
-\newcommand{\thesistitle}{Towards Process Comprehension of Industrial Control Systems: a Framework for Analyzing Industrial Systems}
-\newcommand{\supervisor}{Prof. \textbf{Massimo \textsc{Merro}}}
-\newcommand{\firstcosupervisor}{Prof. \textbf{Ruggero \textsc{Lanotte}}}
-\newcommand{\secondcosupervisor}{\textbf{Marco \textsc{Lucchese}}}
-\newcommand{\opponent}{Prof. \textbf{Severus \textsc{Piton}}}
-% \newcommand{\candidate}{\textbf{Marco \textsc{Oliani}}\\ Matr. VR457249}
-\newcommand{\candidate}{\textbf{Marco \textsc{Oliani}}\\VR457249}
-\newcommand{\academicyear}{\large Academic Year 2022/2023}
-
-%% Abstract
-\newcommand{\fncyblank}{\fancyhf{}}
-\newenvironment{abstract}%
-{\cleardoublepage\fncyblank\null\vfill\begin{center}%
-	\bfseries\Large\abstractname\end{center}}%
-{\vfill\null}
-
-%######
-%% Inizio documento
-%######
+%###### Inizio documento ######%
 \begin{document}
 
 %###### Frontespizio ######%
-\begin{titlepage}
-	\begin{center}
-		\thispagestyle{empty}
-		
-		% logo
-		%\includegraphics[width=0.15\textwidth]{logo_univr.png}~\\[0.5cm]
-		
-		% Upper part of the page. The '~' is needed because \\
-		% only works if a paragraph has started.
-		
-		\textsc{\LARGE Università degli Studi di Verona}\\
-		\textsc{Department of COMPUTER SCIENCE}\\[1.0cm]
-		\textsc{\large Master's Degree in \\ 
-			COMPUTER SCIENCE AND ENGINEERING}\\[1.5cm]
-		
-		\large Master Thesis \\[0.5cm]
-		% Title
-		
-		\hrulefill
-		
-		%{ \Large\bfseries [PROVVISORIO] \\
-		%	BLACKBOX APPROACH TO \\ 
-		%	CPS REVERSE ENGINEERING \\ }
-
-		%{ \Large\bfseries\MakeUppercase{\thesistitle}}
-		{ \Large\bfseries\thesistitle}
-		
-		\hrulefill \\[2.0cm]
-		
-		% Author and supervisor
-		\begin{minipage}[t]{0.45\textwidth}
-			\begin{flushleft} \large
-				\emph{Candidate:} \\
-				\candidate
-			\end{flushleft}
-		\end{minipage}
-		\begin{minipage}[t]{0.45\textwidth}\raggedleft
-			\begin{flushright} \large
-				\emph{Supervisor:}\\
-				\supervisor 
-			\end{flushright}
-			\begin{flushright} \large
-				\emph{Co-supervisors:}\\
-				\firstcosupervisor \\
-				\secondcosupervisor
-			\end{flushright}
-		\end{minipage}
-		
-		\vfill
-		
-		% Bottom of the page -> è la data
-		\academicyear
-		
-	\end{center}
-\end{titlepage}
-
-\thispagestyle{empty}
+\include{frontespizio}
 
 %###### Aforisma ######%
-\begin{titlepage}
-	\thispagestyle{empty}
-	\begin{flushright}
-		\vspace*{40 mm}
-		\small{\emph{``Gallina vecchia fa buon brodo''}\\(Valentino Rossi)}
-	\end{flushright}	
-	\vfill
-\end{titlepage}
-\thispagestyle{empty}
+\include{aforisma}
 
 %###### ABSTRACT ######%
-\begin{titlepage}
-	\begin{abstract}
-		Bla bla bla
-	\end{abstract}
-	\vfill
-\end{titlepage}
-\thispagestyle{empty}
+\include{abstract}
 
 %% Faccio partire la numerazione normale DOPO l'indice: lo stesso indice 
 %% verrà numerato in numeri romani
@@ -230,22 +182,19 @@
 %###### CAPITOLO 2 ######%
 \include{Chapters/background}
 
-%###### CAPITOLO 3 (inglobato nel 4)######%
-%\include{Chapters/relatedwork}
-
-%###### CAPITOLO 4 ######%
+%###### CAPITOLO 3 ######%
 \include{Chapters/stateofart}
 
-%###### CAPITOLO 5 ######%
+%###### CAPITOLO 4 ######%
 \include{Chapters/proposal}
 
-%###### CAPITOLO 6 ######%
+%###### CAPITOLO 5 ######%
 \include{Chapters/casestudy}
 
-%###### CAPITOLO 7 ######%
+%###### CAPITOLO 6 ######%
 \include{Chapters/application}
 
-%###### CAPITOLO 8 ######%
+%###### CAPITOLO 7 ######%
 \include{Chapters/conclusions}
 
 %##### LISTA FIGURE #####%
@@ -260,11 +209,6 @@
 
 %###### BIBLIOGRAFIA ######%
 \printbibliography[heading=bibintoc, title=References]
-
-%% Vecchia versione
-%\begin{thebibliography}{99}
-%	\addcontentsline{toc}{chapter}{Bibliografia}	
-%\end{thebibliography}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %		Fine TESI				%

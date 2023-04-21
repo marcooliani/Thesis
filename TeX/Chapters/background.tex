@@ -4,6 +4,7 @@
 \section{Industrial Control Systems in a nutshell}
 \label{sec:what_ics_are}
 
+\linenumbers
 \lettrine[lines=2]{I}{ndustrial control systems} (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}.
 
 ICSs are often found in critical infrastructure facilities such as power plants, oil and gas refineries, and chemical plants.
@@ -302,7 +303,7 @@ To make the Modbus protocol more secure, an encapsulated version was developed w
 
 \subsubsection{EtherNet/IP}
 \label{subsub:enip}
-\textit{EtherNet/IP} (where IP stands for \textit{Industrial Protocol}) is an open industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}.
+\textit{EtherNet/IP} (where IP stands for \textit{Industrial Protocol}) is an open industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}. It is supported by ODVA \cite{odva_url}.
 
 \begin{figure}[ht]
 	\centering
@@ -322,8 +323,8 @@ IEEE 802.3 in addition defines at Data Link layer the \textit{Carrier Sense Mult
 \bigskip
 \paragraph{Transport layer} 
 
-At the transport level, EtherNet/IP encapsulates messages from the CIP stack into an Ethernet message, so that messages can be transmitted from one node to another on the network using the TCP/IP protocol. \\
-EtherNet/IP uses two forms of messaging \cite{enip_pdf}\cite{enip_pdf2}:
+At the transport level, EtherNet/IP encapsulates messages from the CIP stack into an Ethernet message, so that messages can be transmitted from one node to another on the network using the TCP/IP protocol. EtherNet/IP uses two forms of messaging, as
+defined by CIP standard \cite{enip_pdf}\cite{enip_pdf2}:
 
 \begin{itemize}
 	\item \textbf{unconnected messaging:} used during the connection establishment phase and for infrequent, low priority, explicit messages. Unconnected messaging uses TCP/IP to transmit messages across the network asking for connection resource each time from the \textit{Unconnected Message Manager} (UCMM).
@@ -333,17 +334,39 @@ EtherNet/IP uses two forms of messaging \cite{enip_pdf}\cite{enip_pdf2}:
 	\bigskip
 	EtherNet/IP has two types of message connection \cite{enip_pdf}:
 	\begin{itemize}
-		\item \textbf{explicit messaging:} \textit{point-to-point} connections to facilitate \textit{request-response} transactions between two nodes. These connections use TCP/IP service to transmit messages over Ethernet.
-		\item \textbf{implicit messaging:} this kind of connection moves application-specific \textbf{real-time I/O data} at regular intervals. It uses multicast \textit{producer-consumer} model and UDP/IP service (which has lower protocol overhead and smaller packet size than TCP/IP) to transfer data over Ethernet. 
+		\item \textbf{explicit messaging:} \textit{point-to-point} connections to facilitate \textit{request-response} transactions between two nodes. These connections use TCP/IP service on port 44818 to transmit messages over Ethernet.
+		
+		\item \textbf{implicit messaging:} this kind of connection moves application-specific \textbf{real-time I/O data} at regular intervals. It uses multicast \textit{producer-consumer} model in contrast to the traditional \textit{source-destination} model and UDP/IP service (which has lower protocol overhead and smaller packet size than TCP/IP) on port 2222 to transfer data over Ethernet. 
 	\end{itemize}
 \end{itemize}
 
-\paragraph{Session, Presentation and Application layer} At the upper layers, EtherNet/IP implements the CIP protocol stack. We will discuss this protocol in more detail in Section \ref{subsub:cip}. 
+\paragraph{Session, Presentation and Application layer} At the upper layers, EtherNet/IP implements the CIP protocol stack. We will discuss this protocol more in detail in Section \ref{subsubsec:cip}. 
 
 \subsubsection{Common Industrial Protocol (CIP)}
-\label{subsub:cip}
+\label{subsubsec:cip}
+The \textit{Common Industrial Protocol} (CIP) is an open industrial automation protocol supported by ODVA. It is a \textbf{media independent} (or \textit{transport independent}) protocol using a \textit{producer-consumer} communication model and providing a \textbf{unified architecture} throughout the manufacturing enterprise \cite{cip_protocol_web}\cite{cip_wiki}.\newline
+CIP has been adapted in different types of network:
+
+\begin{itemize}
+	\item \textbf{EtherNet/IP}, adaptation to \textit{Transmission Control Protocol} (TCP) technologies
+	
+	\item \textbf{ControlNet}, adaptation to \textit{Concurrent Time Domain Multiple Access} (CTDMA) technologies
+	
+	\item \textbf{DeviceNet}, adaptation to \textit{Controller Area Network} (CAN) technologies
+	
+	\item \textbf{CompoNet}, adaptation to \textit{Time Division Multiple Access} (TDMA) technologies
+\end{itemize}
+
+\bigskip
+\paragraph{CIP objects} CIP is a \textit{strictly object oriented} protocol at the upper layers: each object of CIP has \textbf{attributes} (data), \textbf{services} (commands), \textbf{connections}, and \textbf{behaviors} (relationship between values and services of attributes) which are defined in the \textbf{CIP object library}. The object library supports many common automation devices and functions, such as analog and digital I/O, valves, motion systems, sensors, and actuators. So if the same object is implemented in two or more devices, it will behave the same way in each device \cite{cip_objects}.
+
+\paragraph{Security}\cite{cip_security} In EtherNet/IP implementation, security issues are the same as in traditional Ethernet, such as network traffic sniffing and spoofing. The use of the UDP protocol also exposes CIP to transmission route manipulation attacks using the \textit{Internet Group Management Protocol} (IGMP) and malicious traffic injection.
+
+\bigskip
+Regardless of the implementation used, it is recommended that certain basic measures be implemented on the CIP network to ensure a high level of security, such as \textit{integrity}, \textit{authentication} and \textit{authorization}.
 
 \subsubsection{Other Protocols}
 
 \vfill
+\nolinenumbers
 
