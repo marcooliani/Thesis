@@ -6,7 +6,7 @@
 The result of these two preliminary investigation techniques is a \textbf{reverse engineering} of the software, which is useful for identifying any weaknesses or bugs and therefore planning an attack.
 
 \bigskip
-In the OT context, however, the concept of \textit{reverse engineering} is also associated with that of \textit{\textbf{process comprehension}}, a term coined by Green et al.'s \cite{proc_compr_green} to describe the understanding of the characteristics of the system and the physical elements of within it, that are responsible for its proper functioning.
+In the OT context, however, the concept of \textit{reverse engineering} is also associated with that of \textit{\textbf{process comprehension}}, a term coined by Green et al.'s \cite{green_et_al} to describe the understanding of the characteristics of the system and the physical elements of within it, that are responsible for its proper functioning.
 
 \bigskip
 Not much knowledge exists in the literature regarding the collection and analysis of information regarding the understanding and operation of an ICS: in Section \ref{sec:related_work} we will look at a quick overview of some of the existing literature on the subject and in the following sections we will focus in particular on one of the papers exposed.
@@ -16,19 +16,30 @@ Not much knowledge exists in the literature regarding the collection and analysi
 \section{Literature on Process Comprehension}
 \label{sec:related_work}
 \begin{description}
-	\item[Keliris and Maniatikos] The first approach presented in this section is by Keliris and Maniatakos \cite{keliris_maniatakos}: they present a methodology for automating the reverse engineering of ICS binaries.
+	\item[Keliris and Maniatikos] The first approach presented in this section is by Keliris and Maniatakos \cite{keliris_maniatakos}: they present a methodology for automating the reverse engineering of ICS binaries based on a \textit{modular framework} (called ICSREF) that can reverse binaries compiled with CODESYS, one of the most popular and widely used PLC compilers, irrespective of the language used.
 	
-	\item[Yuan et al.] description
+	\item[Yuan et al.] Yuan et al. \cite{yuan_et_al} propose a \textit{data-driven} approach to discovering cyber-physical systems from data directly: to achieve this goal, they have implemented a framework whose purpose is to identify physical systems and transition logic inference, and to seek to understand the mechanisms underlying these cyber-physical systems, making furthermore predictions concerning their state trajectories based on the discovered models.
 	
-	\item[Feng et al.] description
+	\item[Feng et al.] Feng et al. \cite{feng_swat} developed a framework that can generate system \textit{invariant rules} based on machine learning and data mining techniques from ICS operational data log. These invariants are then selected by systems engineers to derive IDS systems from them.
 	
-	\item[Winnicki et al.] description
+	The experiment results on two different testbeds, a water distribution system (\textit{WaDi}) and a water treatment system (\textit{SWaT}), both located at the iTrust - Center for Research in Cyber Security at the University of Singapore \cite{itrust_site}, show that under the same false positive rate invariant-based IDSs have a higher efficiency in detecting anomalies than IDS systems based on a residual error-based model. 
 	
-	\item[Green et al.] description
+	\item[Pal et al.] Pal et al. \cite{pal_et_al} work is somewhat related to Feng et al.'s: this paper describes a data-driven approach to identifying invariants automatically using \textit{association rules mining} \cite{association_rules_mining} with the aim of generate invariants sometimes hidden from the design layout. The study has the same objective of Feng et al.'s and uses too the iTrust SwaT System as testbed.
 	
-	\item[Pal et al.] description
+	Currently this technique is limited to only pair wise sensors and actuators: for more accurate invariants generation, the technique adopted must be capable of deriving valid constrains across multiple sensors and actuators.
 	
-	\item[Ceccato et al.] description
+	\item[Winnicki et al.] Winnicki et al. \cite{winnicki_et_al} instead propose a different approach to process comprehension based on the \textbf{attacker's perspective} and not limited to mere \textit{Denial of Service} (DoS): their approach is to discover the dynamic behavior of the system, in a semi-automated and process-aware way, through \textit{probing}, that is, slightly perturbing the cyber physical system and observing how it reacts to changes and how it returns to its original state. The difficulty and challenge for the attacker is to perturb the system in such a way as to achieve an observable change, but at the same time avoid this change being seen as a system anomaly by the IDSs.
+	
+	\item[Green et al.] Green et al. \cite{green_et_al} also adopt an approach based on the attacker's perspective: this approach consists of two practical examples in a \textit{Man in the Middle} (MitM) scenario to obtain, correlate, and understand all the types of information an attacker might need to plan an attack to alter the process while avoiding detection.
+	
+	The paper shows \textit{step-by-step} how to perform a ICS \textbf{reconnaissance}, which is fundamental to process comprenension and thus to the execution of MiTM attacks.
+	
+	\item[Ceccato et al.] Ceccato et al. \cite{ceccato} propose a methodology based on a \textit{black box dynamic analysis} of an ICS using a reverse engineering tool to derive from the scans performed on the memory registers of the exposed PLCs and network scans an approximate model of the physical process. This model is obtained by inferring statistical properties, business process and system invariants.
+	
+	The proposed methodology was tested on a non-trivial case study, using a testbed inspired by an industrial water treatment plant.
+	
+	In the next section I will examine this latest work in more detail, which will be the basis for my work and thus the subsequent chapters of this thesis.
+
 \end{description}
 
 \section{Ceccato et al.’s methodology for analyzing water-tank systems}
