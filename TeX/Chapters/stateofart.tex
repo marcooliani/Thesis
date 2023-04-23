@@ -44,7 +44,16 @@ Not much knowledge exists in the literature regarding the collection and analysi
 
 \section{Ceccato et al.’s methodology for analyzing water-tank systems}
 \label{sec:ceccato_metodology}
+Ceccato et al.'s work draws its origin and inspiration from a previous project made by the writer of this thesis \cite{ns_proj} carried out for the teachings of \textit{Network Security} and \textit{Cyber Security for IoT}, taught at the University of Verona by Professors Massimo Merro and Mariano Ceccato respectively for the academic year 2020/21. \newline
+My project was later expanded by SPY Lab crew at University of Verona and it was the starting point for this work.
 
+\paragraph{Aims} As mentioned earlier, the paper proposes a methodology based on a dynamic black box analysis of an ICS system by identifying potential PLCs on the network and scanning the memory registers of the identified controllers to obtain an approximate model.
+
+\bigskip
+The first objective of this black box analysis is to associate the memory registers of the target PLCs with key concepts of ICSs such as sensors (otherwise known as measurements), actuators, setpoints (range of values of a physical variable), network communications, and so on.\\
+This is performed by analyzing the different types of memory registers associated with the Modbus protocol and trying to figure out what type of data they may contain.
+
+\vfill
 \subsection{Scanning of the System and Graph Analysis}
 \label{subsec:ceccato_graphanalysis}
 
