@@ -66,7 +66,7 @@ In Figure \ref{fig:ceccato_overview} we have a schematic representation of the w
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[scale=0.25]{ceccato_flowchart.png}
+	\includegraphics[scale=0.23]{chap3/ceccato_flowchart.png}
 	\caption{Overview}
 	\label{fig:ceccato_overview}
 \end{figure}
@@ -77,7 +77,7 @@ Before describing the various phases of the methodology, let's take a look at th
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[scale=0.27]{univr_testbed.png}
+	\includegraphics[scale=0.27]{chap3/univr_testbed.png}
 	\caption{The simplified SWaT system used for running Ceccato et al. methodology}
 	\label{fig:univr_testbed}
 \end{figure}
@@ -119,13 +119,92 @@ As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and P
 	 
 \end{description} 
 
-\subsection{Scanning of the System and Graph Analysis}
-\label{subsec:ceccato_graphanalysis}
+\subsection{Scanning of the System and Data Pre-processing}
+\label{subsec:ceccato_scan}
+\paragraph{Scanning tool}
+The Ceccato et al. scanning tool is closely derived from a project I did \cite{ns_proj} for the "\textit{Network Security}" and "\textit{Cyber Security for IoT}" courses taught by Professors Massimo Merro and Mariano Ceccato, respectively, in the 2020/21 academic year. The original project involved, in its first part, the recognition within a network of potential PLCs listening on the standard Modbus TCP port 502 using the Nmap module for Python, obtaining the corresponding IP addresses: then a (sequential) scan of a given range of the memory registers of the found PLCs was performed to collect the register data. The data thus collected were saved to a file in JSON format for later use in the second part of my project.
 
-\subsection{Invariants Analysis}
+\bigskip
+The scanning tool by Ceccato et. al works in a similar way, but extends what I originally did by trying to discover other ports on which the Modbus protocol might be listening (since in many realities Modbus runs on different ports than the standard one, according to the concept of \textit{security by obscurity}) and, most importantly, by \textbf{parallelizing and distributing the scan} of PLC memory registers through the Ray module \cite{ray}, also specifying the desired granularity of the capture. an example of raw data capture can be seen at Listing \ref{lst:raw_registers_capture}:
+
+\bigskip
+\begin{lstlisting}[language=Python, numbers=none, caption=Example of registers capture, label=lst:raw_registers_capture]	
+	"127.0.0.1/8502/2022-05-03 12_10_00.591": {
+		"DiscreteInputRegisters": {"%IX0.0": "0"},
+		"InputRegisters": {"%IW0": "53"},
+		"HoldingOutputRegisters": {"%QW0": "0"},
+		"MemoryRegisters": {"%MW0": "40","%MW1": "80"},
+		"Coils": {"%QX0.0": "0"}}
+\end{lstlisting}
+
+The captured data includes PLC's IP address, Modbus port and timestamp (first line), type and name of registers with their values read from the scan (subsequent lines).
+
+\bigskip
+The tool furthermore offers the possibility of \textbf{sniffing network traffic} related to the Modbus protocol using the \textit{Man in the Middle} (MitM) technique on the supervisory control network using a Python wrapper for tshark/Wireshark \cite{tshark} \cite{wireshark}. An example of raw data obtained with this sniffing can be seen in Listing \ref{lst:raw_network_capture}:
+
+\bigskip
+\begin{lstlisting}[language=Python, numbers=none, caption=Example of raw network capture, label=lst:raw_network_capture]	
+	Time,Source,Destination,Protocol,Length,Function Code,Destination Port,Source Port,Data,Frame length on the wire,Bit Value,Request Frame,Reference Number,Info
+	2022-05-03 11:43:58.158,IP_PLC1,IP_PLC2,Modbus/TCP,76,Read Coils,46106,502,,76,TRUE,25,,"Response: Trans: 62; Unit: 1, Func: 1: Read Coils"
+\end{lstlisting}
+
+\paragraph{Data Pre-processing} 
+The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all those memory registers that do not take values and are therefore useless within the system, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data %\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually}.
+
+\bigskip
+This process leads to the creation of two copies of the full dataset: one enriched with the additional data, but not timestamped, which will be used for the invariant analysis; the other unenriched, but timestamped, which will be used for business process mining.
+
+\vfill
+\subsection{Graphs and Statistical Analysis}
+\label{subsec:ceccato_graphanalysis}
+The paper mentions the presence of a \textit{mild graph analysis}, performed with \textbf{R} \cite{r-project} at the time of data gathering to find any uncovered patterns, trends and identify measurements and/or actuator commands through the analysis of registers holding mutable values. 
+
+\bigskip
+There is actually no trace of this within the tool: \textit{graph analysis} and \textit{statistical analysis} of the data contained in the PLC memory registers are instead performed using the \textbf{matplotlib libraries} and statistical algorithms made available by the \textbf{SciPy libraries} \cite{scipy}, through two separate Python scripts (see Figure \ref{fig:ceccato_graphs}).
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap3/chartPlot_ceccato.png}
+		\caption{Chart plot for\\ PLC1\_InputRegisters\_IW01 register}
+		\label{subfig:chart_plot_ceccato}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap3/histPlot_ceccato.png}
+		\caption{Histogram plot for\\ PLC1\_InputRegisters\_IW01 register}
+		\label{subfig:hist_plot_ceccato}
+	\end{subfigure}
+	\caption{Output graphs from graph analysis}
+	\label{fig:ceccato_graphs}
+\end{figure}
+
+The first script plots the charts, one at the time, of certain registers entered by the user from the command line, plots in which one can see the trend of the data and get a first basic idea of what that particular register contains (a measurement, an actuation, a hardcoded setpoint, ...) and possibly the trend; the second script, instead, shows \textbf{a histogram and statistical informations} about the register entered as command-line input. These informations include:
+
+\begin{itemize}
+	\item the mean, median, standard deviation, maximum value and minimum value
+	
+	\item two tests for the statistical distribution: \textit{Chi-squared} test for uniformity and \textit{Shapiro-Wilk} test for normality, as shown in Listing \ref{lst:stats_anal}:
+
+\end{itemize}
+
+\begin{lstlisting}[language=Python,numbers=none,caption={Statistical data for PLC1\_InputRegisters\_IW0 register},label=lst:stats_anal]
+	Chi-squared test for uniformity
+	Distance      pvalue    Uniform?
+	12488.340   0.00000000    NO    
+	
+	Shapiro-Wilk test for normality
+	Test statistic    pvalue    Normal? 
+	0.844   0.00000000    NO    
+	
+	Stats of PLC1_InputRegisters_IW0
+	Sample mean = 60.8881; Stddev = 13.0164; max = 80; min = 40 for 4488 values
+\end{lstlisting}
+
+\subsection{Invariants Inference and Analysis}
 \label{subsec:ceccato_invariants}
 
-\subsection{Businness Process Analysis}
+\subsection{Businness Process Mining}
 \label{subsec:ceccato_businessprocess}
 
 \subsection{Application}
