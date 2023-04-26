@@ -57,9 +57,12 @@ To achieve this, Ceccato et al. developed a prototype tool \cite{plc_re} that pe
 
 \begin{enumerate}
 	\item \textbf{scanning of the system and data pre-processing}: data gathering is performed to generate the data logs of PLCs registers
+	
 	\item \textbf{graphs and statistical analysis}: provides information about the memory registers using graphs and statistical data derived from the gathered data
+	
 	\item \textbf{invariant inference and analysis}: generates system invariants and allows user to view invariants related to a given sensor or actuator
-	\item \textbf{business process mining}: reconstructs, from event logs, the business process that shows how process is carried out
+	
+	\item \textbf{business process mining and analysis}: reconstructs, from event logs, the business process that shows how process is carried out
 \end{enumerate}
 
 In Figure \ref{fig:ceccato_overview} we have a schematic representation of the workflow related to this work. We will cover all these phases in detail in the next sections of this chapter. 
@@ -122,12 +125,11 @@ As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and P
 \subsection{Scanning of the System and Data Pre-processing}
 \label{subsec:ceccato_scan}
 \paragraph{Scanning tool}
-The Ceccato et al. scanning tool is closely derived from a project I did \cite{ns_proj} for the "\textit{Network Security}" and "\textit{Cyber Security for IoT}" courses taught by Professors Massimo Merro and Mariano Ceccato, respectively, in the 2020/21 academic year. The original project involved, in its first part, the recognition within a network of potential PLCs listening on the standard Modbus TCP port 502 using the Nmap module for Python, obtaining the corresponding IP addresses: then a (sequential) scan of a given range of the memory registers of the found PLCs was performed to collect the register data. The data thus collected were saved to a file in JSON format for later use in the second part of my project.
+The Ceccato et al. scanning tool is closely derived from a project I did \cite{ns_proj} for the "\textit{Network Security}" and "\textit{Cyber Security for IoT}" courses taught by Professors Massimo Merro and Mariano Ceccato, respectively, in the 2020/21 academic year. The original project involved, in its first part, the recognition within a network of potential PLCs listening on the standard Modbus TCP port 502 using the Nmap module for Python, obtaining the corresponding IP addresses: then a (sequential) scan of a given range of the memory registers of the found PLCs was performed to collect the register data. The data thus collected were saved to a file in \textit{JavaScript Object Notation} (JSON) format for later use in the second part of my project.
 
 \bigskip
-The scanning tool by Ceccato et. al works in a similar way, but extends what I originally did by trying to discover other ports on which the Modbus protocol might be listening (since in many realities Modbus runs on different ports than the standard one, according to the concept of \textit{security by obscurity}) and, most importantly, by \textbf{parallelizing and distributing the scan} of PLC memory registers through the Ray module \cite{ray}, also specifying the desired granularity of the capture. an example of raw data capture can be seen at Listing \ref{lst:raw_registers_capture}:
+The scanning tool by Ceccato et. al works in a similar way, but extends what I originally did by trying to discover other ports on which the Modbus protocol might be listening (since in many realities Modbus runs on different ports than the standard one, according to the concept of \textit{security by obscurity}) and, most importantly, by \textbf{parallelizing and distributing the scan} of PLC memory registers through the Ray module \cite{ray}, specifying moreover the desired granularity of the capture. An example of raw data capture can be seen at Listing \ref{lst:raw_registers_capture}:
 
-\bigskip
 \begin{lstlisting}[language=Python, numbers=none, caption=Example of registers capture, label=lst:raw_registers_capture]	
 	"127.0.0.1/8502/2022-05-03 12_10_00.591": {
 		"DiscreteInputRegisters": {"%IX0.0": "0"},
@@ -140,9 +142,8 @@ The scanning tool by Ceccato et. al works in a similar way, but extends what I o
 The captured data includes PLC's IP address, Modbus port and timestamp (first line), type and name of registers with their values read from the scan (subsequent lines).
 
 \bigskip
-The tool furthermore offers the possibility of \textbf{sniffing network traffic} related to the Modbus protocol using the \textit{Man in the Middle} (MitM) technique on the supervisory control network using a Python wrapper for tshark/Wireshark \cite{tshark} \cite{wireshark}. An example of raw data obtained with this sniffing can be seen in Listing \ref{lst:raw_network_capture}:
+The tool furthermore offers the possibility, in parallel to the memory registers scan, of \textbf{sniffing network traffic} related to the Modbus protocol using the \textit{Man in the Middle} (MitM) technique on the supervisory control network using a Python wrapper for tshark/Wireshark \cite{tshark} \cite{wireshark}. An example of raw data obtained with this sniffing can be seen in Listing \ref{lst:raw_network_capture}:
 
-\bigskip
 \begin{lstlisting}[language=Python, numbers=none, caption=Example of raw network capture, label=lst:raw_network_capture]	
 	Time,Source,Destination,Protocol,Length,Function Code,Destination Port,Source Port,Data,Frame length on the wire,Bit Value,Request Frame,Reference Number,Info
 	2022-05-03 11:43:58.158,IP_PLC1,IP_PLC2,Modbus/TCP,76,Read Coils,46106,502,,76,TRUE,25,,"Response: Trans: 62; Unit: 1, Func: 1: Read Coils"
@@ -154,7 +155,6 @@ The data collected by scanning the memory registers of the PLCs are then reproce
 \bigskip
 This process leads to the creation of two copies of the full dataset: one enriched with the additional data, but not timestamped, which will be used for the invariant analysis; the other unenriched, but timestamped, which will be used for business process mining.
 
-\vfill
 \subsection{Graphs and Statistical Analysis}
 \label{subsec:ceccato_graphanalysis}
 The paper mentions the presence of a \textit{mild graph analysis}, performed with \textbf{R} \cite{r-project} at the time of data gathering to find any uncovered patterns, trends and identify measurements and/or actuator commands through the analysis of registers holding mutable values. 
@@ -203,15 +203,58 @@ The first script plots the charts, one at the time, of certain registers entered
 
 \subsection{Invariants Inference and Analysis}
 \label{subsec:ceccato_invariants}
+For invariant analysis Ceccato et al. rely on \textbf{Daikon} \cite{daikon_site}, a framework to \textbf{dynamically detect likely invariants} within a program. An \textit{invariant} is a property that holds at one or more points in a program, properties that are not normally made explicit in the code, but within assert statements, documentation and formal specifications: invariants are useful in understanding the behavior of a program (in our case, of the cyber physical system).
 
-\subsection{Businness Process Mining}
+Daikon uses \textit{machine learning} techniques applied to arbitrary data with the possibility of setting custom conditions for analysis by using a specific file \cite{daikon_spinfo} with a \textit{.spinfo} extension (see Listing \ref{lst:spinfo}). The framework is designed to find the invariants of a program, with various supported programming languages, starting from the direct execution of the program itself or passing as input the execution run (typically a file in CSV format): the authors of the paper tried to apply it by analogy also to the execution runs of a cyber physical system, to extract the invariants of this system.
+
+\begin{lstlisting}[language=Python,numbers=none,caption={Generic example of a .spinfo file for customizing rules in Daikon},label=lst:spinfo]
+	PPT_NAME aprogram.point:::POINT
+	VAR1 > VAR2
+	VAR1 == VAR3 && VAR1 != VAR4
+\end{lstlisting}
+
+Therefore, Daikon is fed with the no-timestamp enriched dataset obtained in the pre-processing phase (in the paper, the timestamped dataset is erroneously mentioned as input): a simple bash script launches Daikon (optionally specifying the desired condition for analysis in the \textit{.spinfo} file), which output is simply redirected to a text file containing the general invariants of the system (i.e., valid regardless of any custom condition specified), those generated based on the custom condition in the \textit{.spinfo} file, and those generated based on the negation of the condition. When the analysis is finished, the user is asked to enter the name of a registry to view its related invariants.\newline \newline
+Some examples of invariants derived from the enriched dataset may be:
+
+\begin{itemize}
+	\item measurements bounded by some setpoint
+	
+	\item Actuators state changes occourred in the proximity of setpoints or, vice versa, proximity of setpoints upon the occurrence of a regular actuator state change
+	
+	\item state invariants of some actuator correspond to a specific trend in the evolution of the measurement (ascending, descending, or stable) or, vice versa, the measurement trend corresponds to a specific state invariant of some actuator
+\end{itemize}
+\vfill
+
+\subsection{Businness Process Mining and Analysis}
 \label{subsec:ceccato_businessprocess}
+\textit{Process mining} is the analysis of operational processes based on the event log \cite{process_mining_def}: the aim of this analysis is to \textbf{extract useful informations} from the event data to \textbf{reconstruct and understand the behavior} of the business process and how it was actually performed.
+
+\bigskip
+Process mining for the system under consideration starts from the event logs obtained from scanning the memory registers of the PLCs and sniffing the network communications related to the Modbus protocol, described in Subsection \ref{subsec:ceccato_scan} and representing the \textit{execution trace} of the system: through a Java program, information is extracted and combined from these event logs, and the result saved in a CSV format file.
+
+This file is fed to \textbf{Disco} \cite{disco}, a commercial process mining tool, which generates an \textit{activity diagram} similar to UML Activity Diagram and whose nodes represent the activities while the edges represent the relations between these activities: in Figure \ref{fig:disco_example} we can see an example of this diagram referred to PLC2 of the testbed.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.30]{chap3/disco_example.png}
+	\caption{An example of Disco generated activity diagram for PLC2}
+	\label{fig:disco_example}
+\end{figure}
+
+The \textit{business process} obtained in this way provides an \textbf{overview of the system} and makes it possible to \textbf{make conjectures} about its behavior, particularly between changes in actuator state and measurement trends (i.e., a given change in state of some actuators corresponds to a specific measurement trend and vice versa), and with the possibility of \textbf{establishing causality} between Modbus communications and state changes within the physical system.
 
 \subsection{Application}
 \label{subsec:ceccato_application}
+In this section we will see how the black box analysis presented above in its various phases is applied in practice, using the testbed described in Subsection \ref{subsec:ceccato_testbed}.
+The methodology supports a \textbf{\textit{top-down} approach}: that is, we start with an overview of the industrial process and then gradually refine our understanding of the process by descending to a higher and higher level of detail based on the results of the previous analyses and focusing on the most interesting parts of the system for further in-depth analysis.
+
+\paragraph{Data Collection and Pre-processing} 
+According to what is described in the paper, the data gathering process lasted six hours, with a granularity of one data point per second (a full system cycle takes approximately 30 minutes). Each datapoint consists of 168 attributes (55 registers plus a special register concerning the tank slope of each PLC) after the enrichment. In addition, IP addresses are automatically replaced by an abstract name identified by the prefix PLC followed by a progressive integer (PLC1, PLC2, PLC3), in order to make reading easier.
+
+\paragraph{Graphs and Statistical Analysis}
+
 
 \subsection{Limitations}
 \label{subsec:ceccato_limitations}
 
 \nolinenumbers
-\vfill

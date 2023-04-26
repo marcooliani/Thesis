@@ -86,7 +86,11 @@
 	showtabs=false,                  % show tabs within strings adding particular underscores
 	stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
 	% stringstyle=\color{mygreen},     % string literal style
-	tabsize=2	                   % sets default tabsize to 2 spaces
+	tabsize=2,	                   % sets default tabsize to 2 spaces
+	aboveskip=2.5mm,
+	belowskip=2.5mm,
+	xleftmargin=5mm,
+	xrightmargin=5mm
 }
 
 %% Elenchi puntati e affini
@@ -97,8 +101,12 @@
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
 % Subfigures
-\usepackage{caption}
+\usepackage[labelfont=bf]{caption}
 \usepackage{subcaption}
+\captionsetup[lstlisting]{font={small,it}}
+\captionsetup[figure]{font={small,it}}
+\captionsetup[subfigure]{font={smaller,it}}
+\captionsetup[table]{font={smaller,it}}
 %\renewcommand{\listfigurename}{List of plots}
 %\renewcommand{\listtablename}{Tables}
 
