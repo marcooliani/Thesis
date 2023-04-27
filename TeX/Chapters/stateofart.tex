@@ -16,25 +16,25 @@ Not much knowledge exists in the literature regarding the collection and analysi
 \section{Literature on Process Comprehension}
 \label{sec:related_work}
 \begin{description}
-	\item[Keliris and Maniatikos] The first approach presented in this section is by Keliris and Maniatakos \cite{keliris_maniatakos}: they present a methodology for automating the reverse engineering of ICS binaries based on a \textit{modular framework} (called ICSREF) that can reverse binaries compiled with CODESYS, one of the most popular and widely used PLC compilers, irrespective of the language used.
+	\item[\textit{Keliris and Maniatikos}] The first approach presented in this section is by Keliris and Maniatakos \cite{keliris_maniatakos}: they present a methodology for automating the reverse engineering of ICS binaries based on a \textit{modular framework} (called ICSREF) that can reverse binaries compiled with CODESYS, one of the most popular and widely used PLC compilers, irrespective of the language used.
 	
-	\item[Yuan et al.] Yuan et al. \cite{yuan_et_al} propose a \textit{data-driven} approach to discovering cyber-physical systems from data directly: to achieve this goal, they have implemented a framework whose purpose is to identify physical systems and transition logic inference, and to seek to understand the mechanisms underlying these cyber-physical systems, making furthermore predictions concerning their state trajectories based on the discovered models.
+	\item[\textit{Yuan et al.}] Yuan et al. \cite{yuan_et_al} propose a \textit{data-driven} approach to discovering cyber-physical systems from data directly: to achieve this goal, they have implemented a framework whose purpose is to identify physical systems and transition logic inference, and to seek to understand the mechanisms underlying these cyber-physical systems, making furthermore predictions concerning their state trajectories based on the discovered models.
 	
-	\item[Feng et al.] Feng et al. \cite{feng_swat} developed a framework that can generate system \textit{invariant rules} based on machine learning and data mining techniques from ICS operational data log. These invariants are then selected by systems engineers to derive IDS systems from them.
+	\item[\textit{Feng et al.}] Feng et al. \cite{feng_swat} developed a framework that can generate system \textit{invariant rules} based on machine learning and data mining techniques from ICS operational data log. These invariants are then selected by systems engineers to derive IDS systems from them.
 	
 	The experiment results on two different testbeds, the \textit{Water Distribution system} (WaDi) and the \textit{Secure Water Treatment system} (SWaT), both located at the iTrust - Center for Research in Cyber Security at the University of Singapore \cite{itrust_site}, show that under the same false positive rate invariant-based IDSs have a higher efficiency in detecting anomalies than IDS systems based on a residual error-based model. 
 	
-	\item[Pal et al.] Pal et al. \cite{pal_et_al} work is somewhat related to Feng et al.'s: this paper describes a data-driven approach to identifying invariants automatically using \textit{association rules mining} \cite{association_rules_mining} with the aim of generate invariants sometimes hidden from the design layout. The study has the same objective of Feng et al.'s and uses too the iTrust SwaT System as testbed.
+	\item[\textit{Pal et al.}] Pal et al. \cite{pal_et_al} work is somewhat related to Feng et al.'s: this paper describes a data-driven approach to identifying invariants automatically using \textit{association rules mining} \cite{association_rules_mining} with the aim of generate invariants sometimes hidden from the design layout. The study has the same objective of Feng et al.'s and uses too the iTrust SwaT System as testbed.
 	
 	Currently this technique is limited to only pair wise sensors and actuators: for more accurate invariants generation, the technique adopted must be capable of deriving valid constrains across multiple sensors and actuators.
 	
-	\item[Winnicki et al.] Winnicki et al. \cite{winnicki_et_al} instead propose a different approach to process comprehension based on the \textbf{attacker's perspective} and not limited to mere \textit{Denial of Service} (DoS): their approach is to discover the dynamic behavior of the system, in a semi-automated and process-aware way, through \textit{probing}, that is, slightly perturbing the cyber physical system and observing how it reacts to changes and how it returns to its original state. The difficulty and challenge for the attacker is to perturb the system in such a way as to achieve an observable change, but at the same time avoid this change being seen as a system anomaly by the IDSs.
+	\item[\textit{Winnicki et al.}] Winnicki et al. \cite{winnicki_et_al} instead propose a different approach to process comprehension based on the \textbf{attacker's perspective} and not limited to mere \textit{Denial of Service} (DoS): their approach is to discover the dynamic behavior of the system, in a semi-automated and process-aware way, through \textit{probing}, that is, slightly perturbing the cyber physical system and observing how it reacts to changes and how it returns to its original state. The difficulty and challenge for the attacker is to perturb the system in such a way as to achieve an observable change, but at the same time avoid this change being seen as a system anomaly by the IDSs.
 	
-	\item[Green et al.] Green et al. \cite{green_et_al} also adopt an approach based on the attacker's perspective: this approach consists of two practical examples in a \textit{Man in the Middle} (MitM) scenario to obtain, correlate, and understand all the types of information an attacker might need to plan an attack to alter the process while avoiding detection.
+	\item[\textit{Green et al.}] Green et al. \cite{green_et_al} also adopt an approach based on the attacker's perspective: this approach consists of two practical examples in a \textit{Man in the Middle} (MitM) scenario to obtain, correlate, and understand all the types of information an attacker might need to plan an attack to alter the process while avoiding detection.
 	
 	The paper shows \textit{step-by-step} how to perform a ICS \textbf{reconnaissance}, which is fundamental to process comprenension and thus to the execution of MiTM attacks.
 	
-	\item[Ceccato et al.] Ceccato et al. \cite{ceccato} propose a methodology based on a \textit{black box dynamic analysis} of an ICS using a reverse engineering tool to derive from the scans performed on the memory registers of the exposed PLCs and network scans an approximate model of the physical process. This model is obtained by inferring statistical properties, business process and system invariants from data logs.
+	\item[\textit{Ceccato et al.}] Ceccato et al. \cite{ceccato} propose a methodology based on a \textit{black box dynamic analysis} of an ICS using a reverse engineering tool to derive from the scans performed on the memory registers of the exposed PLCs and network scans an approximate model of the physical process. This model is obtained by inferring statistical properties, business process and system invariants from data logs.
 	
 	The proposed methodology was tested on a non-trivial case study, using a testbed inspired by an industrial water treatment plant.
 	
@@ -87,18 +87,18 @@ Before describing the various phases of the methodology, let's take a look at th
 
 \bigskip
 \begin{description}
-	\item[Stage 1] At the first stage, a \textbf{tank} with a capacity of 80 gallons (identified by the code T-201) is filled with raw water by the P-101 pump: the MV-301 valve (where MV stands for \textit{motorized valve}), also connected to the T-201 tank, flushes out the water collected in the tank to send it to the second stage, first to the \textit{filtration unit} (here not identified by any sensor) and from there to a \textbf{second tank}, identified by the code T-202 and with a capacity of 20 gallons.
+	\item[\textit{Stage 1}] At the first stage, a \textbf{tank} with a capacity of 80 gallons (identified by the code T-201) is filled with raw water by the P-101 pump: the MV-301 valve (where MV stands for \textit{motorized valve}), also connected to the T-201 tank, flushes out the water collected in the tank to send it to the second stage, first to the \textit{filtration unit} (here not identified by any sensor) and from there to a \textbf{second tank}, identified by the code T-202 and with a capacity of 20 gallons.
 	
-	\item[Stage 2] At the second stage, water contained in T-202 flows into the \textit{reverse osmosit unit} (RO, which in this case also acts as a valve, extracting water continuously: however, it is not identified as a pump) to reduce organic impurities in the same water. The water then flows from the \textit{RO unit} to the third and last stage.
+	\item[\textit{Stage 2}] At the second stage, water contained in T-202 flows into the \textit{reverse osmosit unit} (RO, which in this case also acts as a valve, extracting water continuously: however, it is not identified as a pump) to reduce organic impurities in the same water. The water then flows from the \textit{RO unit} to the third and last stage.
 	
-	\item[Stage 3] At the third stage, the water from the \textit{RO unit} is divided according to whether standards are met: if the water is clean it will be fed into the distribution system, otherwise it will go to a \textit{backwash tank}, identified by code T-203 and a capacity of one gallon. The water in this tank will then be pumped back to the stage 2 \textit{filtration unit} through pump P-102.
+	\item[\textit{Stage 3}] At the third stage, the water from the \textit{RO unit} is divided according to whether standards are met: if the water is clean it will be fed into the distribution system, otherwise it will go to a \textit{backwash tank}, identified by code T-203 and a capacity of one gallon. The water in this tank will then be pumped back to the stage 2 \textit{filtration unit} through pump P-102.
 \end{description}
 
 \bigskip
 As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and PLC3, respectively. Let us briefly see the behavior of each of them:
 
 \begin{description}
-	\item[PLC1] PLC1 checks the level of tank T-201 distinguishing three cases:
+	\item[\textit{PLC1}] PLC1 checks the level of tank T-201 distinguishing three cases:
 	
 	\begin{itemize}
 		\item if T-201 reaches the \textit{low setpoint low1} (hardcoded in memory registers), pump \textbf{P-101 is opened} and valve \textbf{MV-301 is closed}, so that the tank can be filled
@@ -108,7 +108,7 @@ As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and P
 		\item in intermediate cases, \textbf{PLC1 waits for request from PLC2} to open/close valve MV-301: if a request to open the valve MV-301 arrives, water will flow from T-201 to T-202, otherwise the valve is closed. In both situations, pump P-101 remains closed 
 	\end{itemize}
 
-	\item[PLC2] PLC2 monitors the level of tank T-202, behaving accordingly depending on the level of water in it. Here again there are three cases to consider:
+	\item[\textit{PLC2}] PLC2 monitors the level of tank T-202, behaving accordingly depending on the level of water in it. Here again there are three cases to consider:
 	
 	\begin{itemize}
 		\item if the water level reaches the \textit{low setpoint low2} (also hardcoded in the memory registers), PLC2 sends a request to PLC1 via a Modbus channel to \textbf{open valve MV-301} in order to flow water from tank T-201 to tank T-202. The transmission channel is implemented by copying a boolean value from a memory register of PLC2 to a corresponding register of PLC1
@@ -118,7 +118,7 @@ As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and P
 		\item In intermediate cases, the valve remains open (closed) while the tank is filling (emptying)
 	\end{itemize}
 	
-	\item[PLC3] PLC3 monitors the level of the T-203 backwash tank, behaving accordingly. Here there are only two cases to consider: if the tank reaches the \textit{low setpoint low3}, pump \textbf{P103 is set to off}, so that the backwash tank can be filled: otherwise, if the \textit{high setpoint high3} is reached, pump \textbf{P103 is opened} and the entire content of the backwash tank pumped back to the filter unit of T-202.
+	\item[\textit{PLC3}] PLC3 monitors the level of the T-203 backwash tank, behaving accordingly. Here there are only two cases to consider: if the tank reaches the \textit{low setpoint low3}, pump \textbf{P103 is set to off}, so that the backwash tank can be filled: otherwise, if the \textit{high setpoint high3} is reached, pump \textbf{P103 is opened} and the entire content of the backwash tank pumped back to the filter unit of T-202.
 	 
 \end{description} 
 
@@ -166,13 +166,13 @@ There is actually no trace of this within the tool: \textit{graph analysis} and 
 	\centering
 	\begin{subfigure}{0.48\textwidth}
 		\includegraphics[width=\textwidth]{chap3/chartPlot_ceccato.png}
-		\caption{Chart plot for\\ PLC1\_InputRegisters\_IW01 register}
+		\caption{Chart plot for\\ \texttt{PLC1\_InputRegisters\_IW01} register}
 		\label{subfig:chart_plot_ceccato}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.48\textwidth}
 		\includegraphics[width=\textwidth]{chap3/histPlot_ceccato.png}
-		\caption{Histogram plot for\\ PLC1\_InputRegisters\_IW01 register}
+		\caption{Histogram plot for\\ \texttt{PLC1\_InputRegisters\_IW01} register}
 		\label{subfig:hist_plot_ceccato}
 	\end{subfigure}
 	\caption{Output graphs from graph analysis}
@@ -252,7 +252,42 @@ The methodology supports a \textbf{\textit{top-down} approach}: that is, we star
 According to what is described in the paper, the data gathering process lasted six hours, with a granularity of one data point per second (a full system cycle takes approximately 30 minutes). Each datapoint consists of 168 attributes (55 registers plus a special register concerning the tank slope of each PLC) after the enrichment. In addition, IP addresses are automatically replaced by an abstract name identified by the prefix PLC followed by a progressive integer (PLC1, PLC2, PLC3), in order to make reading easier.
 
 \paragraph{Graphs and Statistical Analysis}
+It is unclear from the paper where exactly the information that follows was derived (graph analysis? Statistical analysis? Human reading of the dataset?), however, three properties about the contents of the registers were discovered: 
 
+\begin{description}
+	\item[\textit{Property 1}] \texttt{PLC1\_MemoryRegisters\_MW0},  \texttt{PLC1\_MemoryRegisters\_MW1}, \\ \texttt{PLC2\_MemoryRegisters\_MW0},  \texttt{PLC2\_MemoryRegisters\_MW1}, \\ 
+	\texttt{PLC3\_MemoryRegisters\_MW0} and 
+	\texttt{PLC3\_MemoryRegisters\_MW1}
+ 
+	registers contain constant integer values (40, 80, 10, 20, 0, 10 respectively)\footnote{From my tests on the original tool and dataset, the \texttt{PLC3\_MemoryRegisters\_MW0} register is deleted during the \textit{pre-processing} phase, as it is recognized as an unused register because of the constant value "0" it takes on. This leads me to assume that the properties are derived from a human read of the dataset prior to the \textit{pre-processing} phase.}. We may speculate that they may be (relative) hardcoded \textbf{setpoints}.
+	
+	\item[\textit{Property 2}] \texttt{PLC1\_Coils\_QX01}, \texttt{PLC1\_Coils\_QX02}, \texttt{PLC2\_Coils\_QX01}, \\ \texttt{PLC2\_Coils\_QX02}, \texttt{PLC3\_Coils\_QX01} and \texttt{PLC3\_Coils\_QX03} contain mutable binary (Boolean) values.
+	We can assume that these registers can be associated with the \textbf{actuators} of the system.
+	
+	\item[\textit{Property 3}] \texttt{PLC1\_InputRegisters\_IW0},
+	\texttt{PLC2\_InputRegisters\_IW0} and \\ \texttt{PLC3\_InputRegisters\_IW0} registers contain mutable values.
+\end{description}
+
+\textit{Property 3} suggests that those registers might contain \textbf{values related to measurements}: it is therefore necessary to investigate further to see if the conjecture (referred to as \textit{Conjecture 1} in the paper) is correct.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.30]{chap3/graph_analysis_prop3_ceccato.png}
+	\caption{Execution traces of InputRegisters\_IW0 on the three PLCs}
+	\label{fig:graph_analysis_prop3}
+\end{figure}
+
+The graph analysis of the \texttt{InputRegisters\_IW0} registers of the three PLCs (summarized in Figure \ref{fig:graph_analysis_prop3} with a single plot) not only seems to confirm the conjecture, but also allows the measurements to be correlated with the contents of the \texttt{MemoryRegisters\_MW0} and \texttt{MemoryRegisters\_MW1} registers to the measurements, which represent the \textbf{relative setpoints of the measurements}.\\
+Hence, we have \textit{Conjecture 2} described by the paper referring to the relative setpoints:\newline \newline
+\emph{\textbf{Conjecture 2:}} 
+
+\begin{itemize}
+	\item 40 and 80 are the relative setpoints for \texttt{PLC1\_InputRegisters\_IW0}
+	\item 10 and 20 are the relative setpoints for \texttt{PLC2\_InputRegisters\_IW0}
+	\item 0 and 9 are the relative setpoints for \texttt{PLC3\_InputRegisters\_IW0}
+\end{itemize} 
+
+Further confirmation of this conjecture may come from statistical analysis. Indeed, in the example in Listing 3.1, some statistical data are given for the register \texttt{PLC1\_InputRegisters\_IW0}, including the maximum value and the minimum value: these values are, in fact, 80 and 40 respectively.
 
 \subsection{Limitations}
 \label{subsec:ceccato_limitations}
