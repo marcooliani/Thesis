@@ -93,6 +93,19 @@
 	xrightmargin=5mm
 }
 
+%% Box colorati per teoremi, congetture, regole e altro.
+%% Per aggiungere il bordo, usare l'opzione "frame" allo stesso
+%% modo di "center", standalone
+\usepackage{tcolorbox}
+\usepackage{adjustbox}
+\usepackage{varwidth}
+\newenvironment{rulebox}{%
+	\noindent
+	\adjustbox{innerenv={varwidth}[l]{0.9\linewidth},margin=\fboxsep+.25cm \fboxsep+.2cm,bgcolor=backcolour,center}\bgroup
+}{%
+\egroup
+}
+
 %% Elenchi puntati e affini
 \usepackage{enumitem}
 

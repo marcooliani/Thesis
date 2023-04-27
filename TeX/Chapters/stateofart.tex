@@ -166,13 +166,13 @@ There is actually no trace of this within the tool: \textit{graph analysis} and 
 	\centering
 	\begin{subfigure}{0.48\textwidth}
 		\includegraphics[width=\textwidth]{chap3/chartPlot_ceccato.png}
-		\caption{Chart plot for\\ \texttt{PLC1\_InputRegisters\_IW01} register}
+		\caption{Chart plot for\\ \textnormal{\texttt{PLC1\_InputRegisters\_IW01}} register}
 		\label{subfig:chart_plot_ceccato}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.48\textwidth}
 		\includegraphics[width=\textwidth]{chap3/histPlot_ceccato.png}
-		\caption{Histogram plot for\\ \texttt{PLC1\_InputRegisters\_IW01} register}
+		\caption{Histogram plot for\\ \textnormal{\texttt{PLC1\_InputRegisters\_IW01}} register}
 		\label{subfig:hist_plot_ceccato}
 	\end{subfigure}
 	\caption{Output graphs from graph analysis}
@@ -188,7 +188,7 @@ The first script plots the charts, one at the time, of certain registers entered
 
 \end{itemize}
 
-\begin{lstlisting}[language=Python,numbers=none,caption={Statistical data for PLC1\_InputRegisters\_IW0 register},label=lst:stats_anal]
+\begin{lstlisting}[language=Python,numbers=none,caption={Statistical data for \textnormal{\texttt{PLC1\_InputRegisters\_IW0}} register},label=lst:stats_anal]
 	Chi-squared test for uniformity
 	Distance      pvalue    Uniform?
 	12488.340   0.00000000    NO    
@@ -255,16 +255,16 @@ According to what is described in the paper, the data gathering process lasted s
 It is unclear from the paper where exactly the information that follows was derived (graph analysis? Statistical analysis? Human reading of the dataset?), however, three properties about the contents of the registers were discovered: 
 
 \begin{description}
-	\item[\textit{Property 1}] \texttt{PLC1\_MemoryRegisters\_MW0},  \texttt{PLC1\_MemoryRegisters\_MW1}, \\ \texttt{PLC2\_MemoryRegisters\_MW0},  \texttt{PLC2\_MemoryRegisters\_MW1}, \\ 
+	\item[\textnormal{\textit{\underline{Property 1:}}}] \texttt{PLC1\_MemoryRegisters\_MW0},  \texttt{PLC1\_MemoryRegisters\_MW1}, \\ \texttt{PLC2\_MemoryRegisters\_MW0},  \texttt{PLC2\_MemoryRegisters\_MW1}, \\ 
 	\texttt{PLC3\_MemoryRegisters\_MW0} and 
 	\texttt{PLC3\_MemoryRegisters\_MW1}
  
 	registers contain constant integer values (40, 80, 10, 20, 0, 10 respectively)\footnote{From my tests on the original tool and dataset, the \texttt{PLC3\_MemoryRegisters\_MW0} register is deleted during the \textit{pre-processing} phase, as it is recognized as an unused register because of the constant value "0" it takes on. This leads me to assume that the properties are derived from a human read of the dataset prior to the \textit{pre-processing} phase.}. We may speculate that they may be (relative) hardcoded \textbf{setpoints}.
 	
-	\item[\textit{Property 2}] \texttt{PLC1\_Coils\_QX01}, \texttt{PLC1\_Coils\_QX02}, \texttt{PLC2\_Coils\_QX01}, \\ \texttt{PLC2\_Coils\_QX02}, \texttt{PLC3\_Coils\_QX01} and \texttt{PLC3\_Coils\_QX03} contain mutable binary (Boolean) values.
+	\item[\textnormal{\textit{\underline{Property 2:}}}] \texttt{PLC1\_Coils\_QX01}, \texttt{PLC1\_Coils\_QX02}, \texttt{PLC2\_Coils\_QX01}, \\ \texttt{PLC2\_Coils\_QX02}, \texttt{PLC3\_Coils\_QX01} and \texttt{PLC3\_Coils\_QX03} contain mutable binary (Boolean) values.
 	We can assume that these registers can be associated with the \textbf{actuators} of the system.
 	
-	\item[\textit{Property 3}] \texttt{PLC1\_InputRegisters\_IW0},
+	\item[\textnormal{\textit{\underline{Property 3:}}}] \texttt{PLC1\_InputRegisters\_IW0},
 	\texttt{PLC2\_InputRegisters\_IW0} and \\ \texttt{PLC3\_InputRegisters\_IW0} registers contain mutable values.
 \end{description}
 
@@ -278,16 +278,70 @@ It is unclear from the paper where exactly the information that follows was deri
 \end{figure}
 
 The graph analysis of the \texttt{InputRegisters\_IW0} registers of the three PLCs (summarized in Figure \ref{fig:graph_analysis_prop3} with a single plot) not only seems to confirm the conjecture, but also allows the measurements to be correlated with the contents of the \texttt{MemoryRegisters\_MW0} and \texttt{MemoryRegisters\_MW1} registers to the measurements, which represent the \textbf{relative setpoints of the measurements}.\\
-Hence, we have \textit{Conjecture 2} described by the paper referring to the relative setpoints:\newline \newline
-\emph{\textbf{Conjecture 2:}} 
+Hence, we have \textit{Conjecture 2} described in the paper referring to the relative setpoints:\newline \newline
+\emph{\underline{Conjecture 2:}} 
 
-\begin{itemize}
-	\item 40 and 80 are the relative setpoints for \texttt{PLC1\_InputRegisters\_IW0}
-	\item 10 and 20 are the relative setpoints for \texttt{PLC2\_InputRegisters\_IW0}
-	\item 0 and 9 are the relative setpoints for \texttt{PLC3\_InputRegisters\_IW0}
-\end{itemize} 
+	- 40 and 80 are the relative setpoints for \texttt{PLC1\_InputRegisters\_IW0}
+	
+	- 10 and 20 are the relative setpoints for \texttt{PLC2\_InputRegisters\_IW0}
+	
+	- 0 and 9 are the relative setpoints for \texttt{PLC3\_InputRegisters\_IW0} 
 
+\bigskip
 Further confirmation of this conjecture may come from statistical analysis. Indeed, in the example in Listing 3.1, some statistical data are given for the register \texttt{PLC1\_InputRegisters\_IW0}, including the maximum value and the minimum value: these values are, in fact, 80 and 40 respectively.
+
+\paragraph{Business Process Mining and Analysis}
+With Business Process Mining, the authors aim to visualize and highlight relevant system behaviors by relating PLC states and Modbus commands.
+
+\bigskip
+Through analysis of the activity diagrams shown in Figure \ref{fig:business_process_cecccato}, drawn through Disco, we derive the following properties and conjectures:
+
+\begin{description}
+	\item[\textnormal{\textit{\underline{Property 4:}}}] PLC2 sends messages to PLC1 (see Figure \ref{subfig:pm_plc2}) which are recorded to \texttt{PLC1\_Coils\_QX02}.
+	
+	\item[\textnormal{\textit{\underline{Conjecture 3:}}}] \texttt{PLC2\_Coils\_QX00} determines the trend in tank T-202 (Figure \ref{subfig:pm_plc2}). \newline
+	When this register is set to \textit{True}, the input register \texttt{PLC2\_InputRegisters\_IW0} related to the tank controlled by PLC2 starts an \textbf{ascending trend}; vice versa, when the coil register is set to \textit{False}, the input register starts a \textbf{descending trend}.
+	
+	\item[\textnormal{\textit{\underline{Conjecture 4:}}}] If \texttt{PLC1\_Coils\_QX00} change his value to True, trend in tank T-201, related to \texttt{PLC1\_InputRegisters\_IW0} and controlled by PLC1, become \textbf{ascending} (see Figure \ref{subfig:pm_plc1})
+	
+\end{description}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.7\textwidth}
+		\includegraphics[width=\textwidth]{chap3/disco_plc1.png}
+		\caption{States in PLC1}
+		\label{subfig:pm_plc1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap3/disco_plc2.png}
+		\caption{States and Modbus command in PLC2}
+		\label{subfig:pm_plc2}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap3/disco_plc3.png}
+		\caption{States in PLC3}
+		\label{subfig:pm_plc3}
+	\end{subfigure}
+	\caption{Business process with states and Modbus commands for the three PLCs}
+	\label{fig:business_process_cecccato}
+\end{figure}
+\pagebreak
+
+\begin{description}
+	\item[\textnormal{\textit{\underline{Conjecture 5:}}}] \texttt{PLC3\_Coils\_QX00} starts a \textbf{decreasing trend} in tank T-203, related to \texttt{PLC3\_InputRegisters\_IW0} and controlled by PLC3, whereas \texttt{PLC3\_Coils\_QX02} starts an \textbf{increasing trend} on the tank (see Figure \ref{subfig:pm_plc3})
+\end{description}
+
+\paragraph{Invariants Inference and Analysis}
+The last phase of the analysis of the example industrial system is invariant analysis, performed through Daikon framework. At this stage, an attempt will be made to confirm what has been seen previously and to derive new properties of the system based on the results of the Daikon analysis.
+
+\bigskip
+To get gradually more and more accurate results, the authors presumably performed more than one analysis with Daikon, including certain rules within the \textit{splitter information file} (see Section \ref{subsec:ceccato_invariants} and Listing \ref{lst:spinfo}) based on specific conditions placed on the measurements, for example, the level of water contained in a tank. Given moreover the massive amount of invariants generated by Daikon's output, it is not easy to identify and correlate those that are actually useful for analysis: this must be done manually.
+
+\bigskip
+However, it was possible to have confirmation of the conjectures made in the previous stages of the analysis
 
 \subsection{Limitations}
 \label{subsec:ceccato_limitations}
