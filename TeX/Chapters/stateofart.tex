@@ -150,7 +150,7 @@ The tool furthermore offers the possibility, in parallel to the memory registers
 \end{lstlisting}
 
 \paragraph{Data Pre-processing} 
-The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all those memory registers that do not take values and are therefore useless within the system, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data %\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually}.
+The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all those memory registers that do not take values and are therefore useless within the system, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually inserted.}.
 
 \bigskip
 This process leads to the creation of two copies of the full dataset: one enriched with the additional data, but not timestamped, which will be used for the invariant analysis; the other unenriched, but timestamped, which will be used for business process mining.
@@ -255,16 +255,16 @@ According to what is described in the paper, the data gathering process lasted s
 It is unclear from the paper where exactly the information that follows was derived (graph analysis? Statistical analysis? Human reading of the dataset?), however, three properties about the contents of the registers were discovered: 
 
 \begin{description}
-	\item[\textnormal{\textit{\underline{Property 1:}}}] \texttt{PLC1\_MemoryRegisters\_MW0},  \texttt{PLC1\_MemoryRegisters\_MW1}, \\ \texttt{PLC2\_MemoryRegisters\_MW0},  \texttt{PLC2\_MemoryRegisters\_MW1}, \\ 
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Property 1:}}}] \texttt{PLC1\_MemoryRegisters\_MW0},  \texttt{PLC1\_MemoryRegisters\_MW1}, \\ \texttt{PLC2\_MemoryRegisters\_MW0},  \texttt{PLC2\_MemoryRegisters\_MW1}, \\ 
 	\texttt{PLC3\_MemoryRegisters\_MW0} and 
 	\texttt{PLC3\_MemoryRegisters\_MW1}
  
 	registers contain constant integer values (40, 80, 10, 20, 0, 10 respectively)\footnote{From my tests on the original tool and dataset, the \texttt{PLC3\_MemoryRegisters\_MW0} register is deleted during the \textit{pre-processing} phase, as it is recognized as an unused register because of the constant value "0" it takes on. This leads me to assume that the properties are derived from a human read of the dataset prior to the \textit{pre-processing} phase.}. We may speculate that they may be (relative) hardcoded \textbf{setpoints}.
 	
-	\item[\textnormal{\textit{\underline{Property 2:}}}] \texttt{PLC1\_Coils\_QX01}, \texttt{PLC1\_Coils\_QX02}, \texttt{PLC2\_Coils\_QX01}, \\ \texttt{PLC2\_Coils\_QX02}, \texttt{PLC3\_Coils\_QX01} and \texttt{PLC3\_Coils\_QX03} contain mutable binary (Boolean) values.
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Property 2:}}}] \texttt{PLC1\_Coils\_QX01}, \texttt{PLC1\_Coils\_QX02}, \texttt{PLC2\_Coils\_QX01}, \\ \texttt{PLC2\_Coils\_QX02}, \texttt{PLC3\_Coils\_QX01} and \texttt{PLC3\_Coils\_QX03} contain mutable binary (Boolean) values.
 	We can assume that these registers can be associated with the \textbf{actuators} of the system.
 	
-	\item[\textnormal{\textit{\underline{Property 3:}}}] \texttt{PLC1\_InputRegisters\_IW0},
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Property 3:}}}] \texttt{PLC1\_InputRegisters\_IW0},
 	\texttt{PLC2\_InputRegisters\_IW0} and \\ \texttt{PLC3\_InputRegisters\_IW0} registers contain mutable values.
 \end{description}
 
@@ -279,7 +279,7 @@ It is unclear from the paper where exactly the information that follows was deri
 
 The graph analysis of the \texttt{InputRegisters\_IW0} registers of the three PLCs (summarized in Figure \ref{fig:graph_analysis_prop3} with a single plot) not only seems to confirm the conjecture, but also allows the measurements to be correlated with the contents of the \texttt{MemoryRegisters\_MW0} and \texttt{MemoryRegisters\_MW1} registers to the measurements, which represent the \textbf{relative setpoints of the measurements}.\\
 Hence, we have \textit{Conjecture 2} described in the paper referring to the relative setpoints:\newline \newline
-\emph{\underline{Conjecture 2:}} 
+\colorbox{backcolourtext}{\emph{Conjecture 2:}} 
 
 	- 40 and 80 are the relative setpoints for \texttt{PLC1\_InputRegisters\_IW0}
 	
@@ -291,18 +291,18 @@ Hence, we have \textit{Conjecture 2} described in the paper referring to the rel
 Further confirmation of this conjecture may come from statistical analysis. Indeed, in the example in Listing 3.1, some statistical data are given for the register \texttt{PLC1\_InputRegisters\_IW0}, including the maximum value and the minimum value: these values are, in fact, 80 and 40 respectively.
 
 \paragraph{Business Process Mining and Analysis}
-With Business Process Mining, the authors aim to visualize and highlight relevant system behaviors by relating PLC states and Modbus commands.
+With Business Process Mining, the authors aim to \textbf{visualize and highlight relevant system behaviors} by relating PLC states and Modbus commands.
 
 \bigskip
 Through analysis of the activity diagrams shown in Figure \ref{fig:business_process_cecccato}, drawn through Disco, we derive the following properties and conjectures:
 
 \begin{description}
-	\item[\textnormal{\textit{\underline{Property 4:}}}] PLC2 sends messages to PLC1 (see Figure \ref{subfig:pm_plc2}) which are recorded to \texttt{PLC1\_Coils\_QX02}.
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Property 4:}}}] PLC2 sends messages to PLC1 (see Figure \ref{subfig:pm_plc2}) which are recorded to \texttt{PLC1\_Coils\_QX02}.
 	
-	\item[\textnormal{\textit{\underline{Conjecture 3:}}}] \texttt{PLC2\_Coils\_QX00} determines the trend in tank T-202 (Figure \ref{subfig:pm_plc2}). \newline
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 3:}}}] \texttt{PLC2\_Coils\_QX00} determines the trend in tank T-202 (Figure \ref{subfig:pm_plc2}). \newline
 	When this register is set to \textit{True}, the input register \texttt{PLC2\_InputRegisters\_IW0} related to the tank controlled by PLC2 starts an \textbf{ascending trend}; vice versa, when the coil register is set to \textit{False}, the input register starts a \textbf{descending trend}.
 	
-	\item[\textnormal{\textit{\underline{Conjecture 4:}}}] If \texttt{PLC1\_Coils\_QX00} change his value to True, trend in tank T-201, related to \texttt{PLC1\_InputRegisters\_IW0} and controlled by PLC1, become \textbf{ascending} (see Figure \ref{subfig:pm_plc1})
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 4:}}}] If \texttt{PLC1\_Coils\_QX00} change his value to True, trend in tank T-201, related to \texttt{PLC1\_InputRegisters\_IW0} and controlled by PLC1, become \textbf{ascending} (see Figure \ref{subfig:pm_plc1})
 	
 \end{description}
 
@@ -331,7 +331,7 @@ Through analysis of the activity diagrams shown in Figure \ref{fig:business_proc
 \pagebreak
 
 \begin{description}
-	\item[\textnormal{\textit{\underline{Conjecture 5:}}}] \texttt{PLC3\_Coils\_QX00} starts a \textbf{decreasing trend} in tank T-203, related to \texttt{PLC3\_InputRegisters\_IW0} and controlled by PLC3, whereas \texttt{PLC3\_Coils\_QX02} starts an \textbf{increasing trend} on the tank (see Figure \ref{subfig:pm_plc3})
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 5:}}}] \texttt{PLC3\_Coils\_QX00} starts a \textbf{decreasing trend} in tank T-203, related to \texttt{PLC3\_InputRegisters\_IW0} and controlled by PLC3, whereas \texttt{PLC3\_Coils\_QX02} starts an \textbf{increasing trend} on the tank (see Figure \ref{subfig:pm_plc3})
 \end{description}
 
 \paragraph{Invariants Inference and Analysis}
@@ -341,9 +341,80 @@ The last phase of the analysis of the example industrial system is invariant ana
 To get gradually more and more accurate results, the authors presumably performed more than one analysis with Daikon, including certain rules within the \textit{splitter information file} (see Section \ref{subsec:ceccato_invariants} and Listing \ref{lst:spinfo}) based on specific conditions placed on the measurements, for example, the level of water contained in a tank. Given moreover the massive amount of invariants generated by Daikon's output, it is not easy to identify and correlate those that are actually useful for analysis: this must be done manually.
 
 \bigskip
-However, it was possible to have confirmation of the conjectures made in the previous stages of the analysis
+However, it was possible to have confirmation of the conjectures made in the previous stages of the analysis: starting with the setpoints, analyzing the output of the invariants returned by Daikon\footnote{The invariants shown here are a manual summary and derivation of those actually returned in output by Daikon. I will discuss this more in Section \ref{subsec:ceccato_limitations}} reveals that \newline \newline
+\small\texttt{PLC1\_InputRegisters\_IW0 >= PLC1\_MemoryRegisters\_MW0 == 40.0}\\
+\texttt{PLC1\_InputRegisters\_IW0 <= PLC1\_MemoryRegisters\_MW1 == 80.0}\\
+\texttt{PLC2\_InputRegisters\_IW0 >= PLC2\_MemoryRegisters\_MW0 == 10.0}\\
+\texttt{PLC2\_InputRegisters\_IW0 <= PLC2\_MemoryRegisters\_MW1 == 20.0}\\
+\texttt{PLC3\_InputRegisters\_IW0 >= PLC3\_MemoryRegisters\_MW0 == 0.0}\\
+\texttt{PLC3\_InputRegisters\_IW0 <= PLC3\_MemoryRegisters\_MW1 == 9.0} \newline \newline
+\normalsize i.e., that the \texttt{MemoryRegisters\_MW0} and \texttt{MemoryRegisters\_MW1} registers of each PLC contain the \textbf{absolute minimum and maximum setpoints}, respectively (\textit{Property 5}).
+
+\bigskip
+There is also a confirmation regarding \textit{Property 4}: from the computed invariants it can be seen that \newline \newline
+\small\texttt{PLC1\_Coils\_QX01 == PLC1\_Coils\_QX02 == PLC2\_Coils\_QX00}\newline \newline
+\normalsize and from this derive that there is a \textbf{communication channel between PLC2 and PLC1}, where the value of \texttt{PLC2\_Coils\_QX00} is copied to \texttt{PLC1\_Coils\_QX01} and \texttt{PLC1\_Coils\_QX02} (\textit{Property 6}).
+
+\bigskip
+Regarding the \textbf{relationships between actuator state changes and measurement trends}, invariant analysis yields the results summarized in the following rules:
+
+\begin{description}
+	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 7:}}] Tank T-202 level \textit{increases} iif \texttt{PLC1\_Coils\_QX01 == True}. Otherwise, if \texttt{PLC1\_Coils\_QX01 == False} will be \textit{non-increasing}.
+\end{description}
+	This is because if the coil is \textit{True} the condition \newline \scriptsize\texttt{PLC2\_InputRegisters\_IW0 == PLC2\_MemoryRegisters\_MW0 == 20.0 \&\& PLC2\_slope > 0} \newline \normalsize is verified. 
+	On the opposite hand, if the coil is \textit{False}, the condition \newline \scriptsize\texttt{PLC2\_InputRegisters\_IW0 == PLC2\_MemoryRegisters\_MW0 == 20.0 \&\& PLC2\_slope <= 0}  \normalsize is verified. The \textit{slope} is an auxiliary attribute indicating the trend of the measurement: increasing if > 0, decreasing if < 0, stable otherwise.
+
+\begin{description}
+	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 8:}}] Tank T-201 level \textit{increases} iif \texttt{PLC1\_Coils\_QX00 == True}. On the other hand, if \texttt{PLC1\_Coils\_QX00 == False} and if \texttt{PLC1\_Coils\_QX01 == True} the level will be \textit{non-decreasing}.
+	
+	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 9:}}] Tank T-203 level \textit{decreases} iif \texttt{PLC3\_Coils\_QX00 == True}. It will be \textit{non-decreasing} if \texttt{PLC1\_Coils\_QX00 == False}.
+\end{description}
+
+The last two properties concern the \textbf{relationship between actuator state changes and the setpoints}: it is intended to check what happens to the actuators when the water level reaches one of these setpoints. From the analysis of the relevant invariants, the following properties are derived:
+
+\begin{description}
+	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 10:}}] Tank T-201 reaches the upper absolute setpoint when\\ \texttt{PLC1\_Coils\_QX00} changes its state from \textit{True} to \textit{False}. If the coil changes from \textit{False} to \textit{True}, the tank reaches its absolute lower setpoint.
+	
+	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 11:}}]
+	Tank T-203 reaches the upper absolute setpoint when\\ \texttt{PLC3\_Coils\_QX00} changes its state from \textit{True} to \textit{False}. If the coil changes from \textit{False} to \textit{True}, the tank reaches its absolute lower setpoint.	 
+\end{description}
 
 \subsection{Limitations}
 \label{subsec:ceccato_limitations}
+The methodology proposed by Ceccato et al. is certainly valid and offers a good starting point for approaching the reverse engineering of an industrial control system from the attacker's perspective, while also providing a tool to perform this task.
+
+\bigskip
+The limitations of this approach, however, all lie in the tool mentioned above and also in the testbed described in Section \ref{subsec:ceccato_testbed}. In this section I will explain which are the criticisms of each phase, while in Chapter 4 I will formulate proposals to improve and make this methodology more efficient.
+
+\paragraph{General Criticism}
+The general critical aspects of the application of this approach are many: the primary one concerns the fact that the proposed tool seems to be built specifically for the testbed used and that it is not applicable to other contexts, even to the same type of industrial control system (water treatment systems, in this case). 
+
+\bigskip
+What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the collection process: I will discuss this last aspect in more detail later.\newline
+Moreover, there is the presence of many \textit{hardcoded} variables and conditions within the scripts: this makes the system unconfigurable and unable to properly perform the various stages of the analysis as errors can occur due to incorrect data and mismatches with the system under analysis.
+
+Having considered, furthermore, only the Modbus protocol for network communications between the PLCs is another major limiting factor and does not help the methodology to be adaptable to different systems communicating with different protocols (sometimes even multiple ones on the same system). 
+
+\bigskip
+Let us now look at the limitations and critical aspects of each phase.
+
+\paragraph{Testbed}
+The testbed environment used by Ceccato et. al is entirely simulated, from the physical system to the control system. The PLCs were built with \textbf{OpenPLC} \cite{openplc} in the Docker environment, while the physics part was built through Simulink.
+
+\bigskip
+OpenPLC is an open source cross-platform software that simulates the hardware and software functionality of a physical PLC and also offers a complete editor for PLC program development with support for all standard languages: \textit{Ladder Logic} (LD), \textit{Function Block Diagram} (FBD), \textit{Instruction List} (IL), \textit{Structured Text} (ST), and \textit{Sequential Function Chart} (SFC).
+
+It is for sure an excellent choice for creating a zero-cost industrial or home automation and \textit{Internet of Things} (IoT) system that is easy to manage via a dedicated, comprehensive and functional web interface. In spite of these undoubted merits, however, there are (at the moment) \textbf{very few supported protocols}: the main one and also referred to in the official documentation is \textbf{Modbus}, while the other protocol is DNP3.
+
+\bigskip
+The biggest problem with the testbed, however, is not with the controller part, but with the physical part
+
+\paragraph{Pre-processing}
+
+\paragraph{Graphs and Statistical Analysis}
+
+\paragraph{Business Process Mining and Analysis}
+
+\paragraph{Invariants Inference and Analysis}
 
 \nolinenumbers
