@@ -387,10 +387,11 @@ The methodology proposed by Ceccato et al. is certainly valid and offers a good 
 The limitations of this approach, however, all lie in the tool mentioned above and also in the testbed described in Section \ref{subsec:ceccato_testbed}. In this section I will explain which are the criticisms of each phase, while in Chapter 4 I will formulate proposals to improve and make this methodology more efficient.
 
 \paragraph{General Criticism}
+\label{par:limit_ceccato_general}
 The general critical aspects of the application of this approach are many: the primary one concerns the fact that the proposed tool seems to be built specifically for the testbed used and that it is not applicable to other contexts, even to the same type of industrial control system (water treatment systems, in this case). 
 
 \bigskip
-What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the collection process: I will discuss this last aspect in more detail later.\newline
+What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the data gathering process: I will discuss this last aspect in more detail later.\newline
 Moreover, there is the presence of many \textit{hardcoded} variables and conditions within the scripts: this makes the system unconfigurable and unable to properly perform the various stages of the analysis as errors can occur due to incorrect data and mismatches with the system under analysis.
 
 Having considered, furthermore, only the Modbus protocol for network communications between the PLCs is another major limiting factor and does not help the methodology to be adaptable to different systems communicating with different protocols (sometimes even multiple ones on the same system). 
@@ -399,22 +400,52 @@ Having considered, furthermore, only the Modbus protocol for network communicati
 Let us now look at the limitations and critical aspects of each phase.
 
 \paragraph{Testbed}
-The testbed environment used by Ceccato et. al is entirely simulated, from the physical system to the control system. The PLCs were built with \textbf{OpenPLC} \cite{openplc} in the Docker environment, while the physics part was built through Simulink.
+\label{par:limit_ceccato_testbed}
+The testbed environment used by Ceccato et. al is entirely simulated, from the physical system to the control system. The PLCs were built with \textbf{OpenPLC} \cite{openplc} in a Docker environment \cite{docker}, while the physics part was built through \textbf{Simulink} \cite{simulink}.
 
 \bigskip
-OpenPLC is an open source cross-platform software that simulates the hardware and software functionality of a physical PLC and also offers a complete editor for PLC program development with support for all standard languages: \textit{Ladder Logic} (LD), \textit{Function Block Diagram} (FBD), \textit{Instruction List} (IL), \textit{Structured Text} (ST), and \textit{Sequential Function Chart} (SFC).
-
+OpenPLC is an open source cross-platform software that simulates the hardware and software functionality of a physical PLC and also offers a complete editor for PLC program development with support for all standard languages: \textit{Ladder Logic} (LD), \textit{Function Block Diagram} (FBD), \textit{Instruction List} (IL), \textit{Structured Text} (ST), and \textit{Sequential Function Chart} (SFC).\newline
 It is for sure an excellent choice for creating a zero-cost industrial or home automation and \textit{Internet of Things} (IoT) system that is easy to manage via a dedicated, comprehensive and functional web interface. In spite of these undoubted merits, however, there are (at the moment) \textbf{very few supported protocols}: the main one and also referred to in the official documentation is \textbf{Modbus}, while the other protocol is DNP3.
 
 \bigskip
-The biggest problem with the testbed, however, is not with the controller part, but with the physical part
+The biggest problem with the testbed, however, is not with the controller part, but with the \textbf{physical part}: first of all, it must be said that although this is something purely demonstrative even though it is fully functional, the implemented Simulink model is really \textbf{oversimplified} compared to the iTrust SWaT system, which itself is a scaled-down version of a real water treatment plant. In fact, in the entire system there are only three actuators, two of which are connected to the same tank and controlled by the same PLC, and sensors related only to the water level in the system's tanks: in a real system there are many more \textit{field devices}, which can monitor and control other aspects of the system beyond the mere contents of the tanks. Consider, for example, measuring and controlling the chemicals in the water, the pressure of the liquid in the filter unit, or more simply the amount of water flow at a given point or time.\newline
+All these must be considered and represent a number of additional variables that makes analysis and consequently reverse engineering of the system more difficult.
+
+\bigskip
+The second critical aspect concerns the \textbf{simulation of the physics of the liquid} inside the tanks: Simulink does not consider the fact that inside a tank that is filling (emptying) the liquid in it undergoes \textbf{fluctuations} which cause the level sensor not to see the water level constantly increasing (decreasing) or at most being stable at each point of detection. Figure \ref{fig:testbed_physics} exemplifies more clearly with an example the concept just expressed: these oscillations cause a \textbf{perturbation} in the data.\newline
+This issue leads to the difficulty, on a real physical system, of \textbf{correctly calculating the trend of a measurement} by using the slope attribute: if this was obtained with a too low granularity, the trend will be oscillating between increasing and decreasing even when in reality this would be in general increasing (decreasing) or stable; on the other hand, if the slope was obtained with a too high granularity there is a loss of information and the trend may be "flattened" with respect to reality.\newline
+In the present case, the slope in the Simulink model was calculated statically \textit{point-to-point}, thus with a granularity of one second: an averagely careful reader will have already guessed that this granularity is inapplicable to the real system in Figure \ref{subfig:real_physics}. As we will later see, we need to \textbf{operate on the data perturbations} to be able to obtain a suitable granularity and a correct calculation of the slope and consequently of the measurement trend.
+\vfill
+
+\pagebreak
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap3/simulink_physics.png}
+		\caption{}
+		\label{subfig:simulink_physics}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap3/real_physics.png}
+		\caption{}
+		\label{subfig:real_physics}
+	\end{subfigure}
+	\caption{Water physics compared: simulated physics in the Simulink model (a) and physics in a real system (iTrust SWaT) (b). Fluctuations in the tank level in (b), almost completely absent in (a), can be appreciated.}
+	\label{fig:testbed_physics}
+\end{figure}
 
 \paragraph{Pre-processing}
+\label{par:limit_ceccato_preproc}
 
 \paragraph{Graphs and Statistical Analysis}
+\label{par:limit_ceccato_graphs}
 
 \paragraph{Business Process Mining and Analysis}
+\label{par:limit_ceccato_pm}
 
 \paragraph{Invariants Inference and Analysis}
+\label{par:limit_ceccato_invariants}
 
+\vfill
 \nolinenumbers
