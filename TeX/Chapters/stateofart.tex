@@ -470,9 +470,23 @@ Since this is, as mentioned, an \textit{ad hoc} solution, only the Modbus protoc
 
 \bigskip
 The other limiting aspect of the business process mining phase is the \textbf{process mining software} used to generate the activity diagram. As mentioned in Section \ref{subsec:ceccato_businessprocess}, the process mining software used by Ceccato et al. is \textbf{Disco}: this is commercial software, with an academic license lasting only 30 days (although free of charge), released for Windows and MacOS operating systems only, which makes its use under Linux systems impossible except by using emulation environments such as Wine.\newline
-For what is my vision and training as a computer scientist, it would have been preferable to use a \textit{cross-platform}, \textit{freely licensed open source} software alternative to Disco: one such software could have been \textbf{ProM Tools} \cite{prom_tools}, a framework for process mining very similar to Disco in functionality, but fits the criteria just described, or use Python libraries such as \textbf{PM4PY} \cite{pm4py}, which offer ready-to-use algorithms suitable for various process mining needs.
+For what is my vision and training as a computer scientist, it would have been preferable to use a \textit{cross-platform}, \textit{freely licensed open source} software alternative to Disco: one such software could have been \textbf{ProM Tools} \cite{prom_tools}, a framework for process mining very similar to Disco in functionality, but fitting the criteria just described, or use Python libraries such as \textbf{PM4PY} \cite{pm4py}, which offer ready-to-use algorithms suitable for various process mining needs.
 
 \paragraph{Invariants Inference and Analysis}
-sss
+The limitation in this case is principally Daikon: this software is designed to compute the invariants of a software from its live execution or from a file containing its execution flow, not to find the invariants of a cyber physical system. Since there are currently no better consolidated alternatives for inferring invariants, however, an attempt was still made to use Daikon as best as possible.
+
+\bigskip
+The biggest problem with Daikon applied to the computation of invariants of an industrial system is the difficult reading of the resulting output: the software in fact returns a very long list of invariants, one invariant per line, many of no use and without correlating invariants that may have common features or deriving additional information from them. The process of screening and recognizing the significant invariants, as well as the correlation between them, must be done by a human: certainly not an easy task given the volume of invariants one could theoretically be faced with (hundreds and hundreds of invariants). An example of Daikon's output can be seen in Figure \ref{fig:daikon_output_ceccato}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap3/daikon_output_ceccato.png}
+	\caption{Example of Daikon's output}
+	\label{fig:daikon_output_ceccato}
+\end{figure}
+
+\bigskip
+The bash script used in this phase of the analysis does not help at all in deriving significant invariants more easily: it merely launches Daikon and saves its output to a text file by simply redirecting the stdout to file. No data reprocessing is done during this step. In addition, if a condition is to be specified to Daikon before performing the analysis, it is necessary each time to edit the .spinfo file by manually entering the desired rule, an inconvenient operation when multiple analyses are to be performed with different conditions each time. 
+
 \vfill
 \nolinenumbers
