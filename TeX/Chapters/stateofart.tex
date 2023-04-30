@@ -436,16 +436,43 @@ In the present case, the slope in the Simulink model was calculated statically \
 \end{figure}
 
 \paragraph{Pre-processing}
-\label{par:limit_ceccato_preproc}
+In the pre-processing phase, the authors make use of a Python script to merge all the datasets of the individual PLCs into a single dataset, remove the (supposedly) unused registers, and finally enrich the obtained dataset with additional attributes. These attributes are:
+
+\begin{itemize}
+	\item the previous value of all registers
+	
+	\item some additional relative setpoints named \texttt{PLC\textit{x}\_Max\_safety} and\\ 
+	\texttt{PLC\textit{x}\_Min\_safety} (where \textit{x} is the PLC number), which represent a kind of alert on reaching the maximum and minimum water levels of the tanks
+	
+	\item the measurement slope, that is, the trend of the water level in the system tanks along the system cycles.	
+\end{itemize}
+
+Merging the datasets of all individual PLCs into a single dataset to represent the entire system can be a sound practice if the system to be anlized is (very) small as is the testbed analyzed here, consisting of a few PLCs and especially a few registers. If, however, the complexity of the system increases, this type of merging can become counterproductive and make it difficult to analyze and understand the data obtained in subsequent steps. In short, there is no possibility to analyze only one of its subsystems and thus make the analysis faster and more understandable. Moreover, a data gathering can take up to days, and the analyst/attacker may need to make an analysis of the system isolating a precise time range, ignoring everything that happens before and/or after: all of this, with the tool we have seen, cannot be done.
+
+\bigskip
+Regarding the additional attributes, looking at the code of the script that performs the enrichment, I observed that \textbf{some attributes were manually inserted} after the merging phase: I am referring in particular to the attributes \texttt{PLC\textit{x}\_Max\_safety} and \texttt{PLC\textit{x}\_Min\_safety}, whose references were moreover hardcoded into the script, and the \textit{slope} whose calculation method I mentioned in the previous paragraph about the testbed limitations.\newline
+In the end, only the attribute \textit{prev} related to the value at the previous point of the detection is inserted automatically for all registers, moreover without the possibility to choose whether this attribute should be extended to all registers or only to a part.
 
 \paragraph{Graphs and Statistical Analysis}
-\label{par:limit_ceccato_graphs}
+Describing the behavior of graphical analysis in Section \ref{subsec:ceccato_graphanalysis} I had already mentioned that only one register plot at a time was shown and not, for example, a single window containing the charts of all registers entered by the user as input from the command line, such as in Figure \ref{fig:graph_analysis_prop3}.\newline
+While displaying charts for individual registers still provides useful information about the system such as the distinction between actuators and measurements and the general trend of the latter, single display does not allow one to catch, or at least makes it difficult, the relationship that exists between actuators and measurements, where it exists, because a view of the system as a whole is missing.\\
+In this way, the risk is to make conjectures about the behavior of the system that may prove to be at least imprecises, if not inaccurates.
+
+\bigskip
+On the other hand, regarding the statistical analysis, two observations need to be made: the first is that for the given system, I personally was unable to appreciate the usefulness of the generated histogram, as it does not provide any particular new information that has not already been obtained from the graphical analysis (except maybe something marginal); the second observation is that precisely the plot of the histogram "hides" the statistical informations obtained: these are in fact shown on the terminal from which the script is launched, but to an uncareful eye or one unfamiliar with the script's behavior they can easily be interpreted as simple debugging output, since at the same time the window containing the histogram plot is shown. In general, however, little statistical information is provided.
 
 \paragraph{Business Process Mining and Analysis}
-\label{par:limit_ceccato_pm}
+Concerning the data mining, this is a purely ad \textit{hoc solution}, designed to work under special conditions: first, the timestamped dataset of the physical process and the one obtained after the packet sniffing operation of Modbus traffic on the network need to be synchronized and have the same granularity, in this case one event per second.\newline
+It is relatively easy, therefore, to find correspondences between Modbus commands sent over the network and events occurring on the physical system, such as state changes in actuations, due in part to the fact that the number of communications over the network is really small (see Section \ref{subsec:ceccato_testbed}). In a real system, network communications are much more numerous and involve many more devices even in the same second: finding the exact correspondence with what is happening in the cyber physical system becomes much more difficult.
+
+\bigskip
+Since this is, as mentioned, an \textit{ad hoc} solution, only the Modbus protocol is being considered: as widely used as this industrial protocol is, other protocols that are widely used such as EtherNet/IP (see Section \ref{subsub:enip}) should be considered in order to extend the analysis to other industrial systems that use a different communication network.
+
+\bigskip
+The other limiting aspect of the business process mining phase is the \textbf{process mining software} used to generate the activity diagram. As mentioned in Section \ref{subsec:ceccato_businessprocess}, the process mining software used by Ceccato et al. is \textbf{Disco}: this is commercial software, with an academic license lasting only 30 days (although free of charge), released for Windows and MacOS operating systems only, which makes its use under Linux systems impossible except by using emulation environments such as Wine.\newline
+For what is my vision and training as a computer scientist, it would have been preferable to use a \textit{cross-platform}, \textit{freely licensed open source} software alternative to Disco: one such software could have been \textbf{ProM Tools} \cite{prom_tools}, a framework for process mining very similar to Disco in functionality, but fits the criteria just described, or use Python libraries such as \textbf{PM4PY} \cite{pm4py}, which offer ready-to-use algorithms suitable for various process mining needs.
 
 \paragraph{Invariants Inference and Analysis}
-\label{par:limit_ceccato_invariants}
-
+sss
 \vfill
 \nolinenumbers
