@@ -1,10 +1,77 @@
 \chapter{A framework to improve Ceccato et al.’s work.}
 \label{proposal}
 
-\section{Phase 1: Pre-processing}
+\linenumbers
+In Chapter \ref{state_of_art}, I presented the state of the art of \textit{process comprehension} of an Industrial Control System (ICS) focusing later on the methodology proposed by Ceccato et al. \cite{ceccato}[Section \ref{sec:ceccato_metodology}], explaining what it consists of, its practical application on a testbed, and most importantly highlighting its limitations and critical issues (see Section \ref{subsec:ceccato_limitations}).
+
+\bigskip
+In this chapter I will present \textbf{my proposals to improve the methodology} presented in the previous chapter, overcoming (or at least trying to do so) the criticalities mentioned above by almost completely rewriting the original framework, enhancing its functionalities and inserting new ones where possible, while keeping its general structure and approach: the system analysis will in fact consist of the same four steps as in the original methodology (Data Pre-processing, Graph and Statistical Analysis, Business Process Mining and Invariants Inference), but each of them will be deeply revised in order to provide a richer, clearer and more complete process comprehension of the industrial system to be analyzed and its behavior.
+
+\bigskip
+As it may have already been noted, my proposals do not involve improving the data gathering phase: this is due simply to the fact that the novel framework will not be tested on the same case study used by Ceccato et, al. (Section \ref{subsec:ceccato_testbed}), but on a different case study, the ITrust SWaT system \cite{swat_home}, of which (some) datasets containing the execution trace of the physical system and the network traffic scan are already provided by iTrust itself. For more details about this case study, see Chapter \ref{casestudy}.
+
+\section{Phase 0: General Improvements}
+\label{sec:improve_general}
+
+The implementation of the novel framework for ICSs analysis starts from several assumptions:
+
+\begin{enumerate}
+	\item it must be implemented in a \textbf{single programming language}
+	\item it must be \textbf{independent of the system} to be analyzed
+	\item It must provide greater \textbf{flexibility and ease of use} for the user at every stage
+\end{enumerate}
+In the following subsections, these three points will be discussed in more detail.
+
+\subsection{Single Programming Language}
+\label{subsec:framewirf_language}
+The original tool was implemented using various programming languages in each of the different phases: from Python up to Java, passing through Bash scripting. \newline
+In my opinion, this heterogeneity makes it more difficult and less intuitive for the user to operate on the tool: moreover, the use of multiple technologies makes it more difficult to maintain the code and add new features, particularly if only a single person is managing the code (he/she might be proficient in one language, but little of the others).
+
+\bigskip
+For these reasons, I decided to use a single programming language, to ensure homogeneity to the framework and ease of use and maintenance of the code for anyone who wants to manage it in the future: I chose to use Python, because of its simplicity and easy readability combined with its versatility and powerfulness: moreover, Python can count on a massive number of available libraries and packages that meet all kinds of needs.
+
+\vfill
+\subsection{System Independence}
+\label{subsec:framework_independence}
+One of the biggest limitations of Ceccato et al.'s tool that I highlighted in Section \ref{subsec:ceccato_limitations} is the fact that it is \textbf{highly dependent on the testbed used}: that is, it is \textit{not} possible to configure any of the tool's parameters to analyze different industrial systems.\newline
+To overcome this issue and make my framework independent of the system to be analyzed, also eliminating all references to hardcoded variables and values present in the previous tool, I decided to use a \textbf{general configuration file}, named \textit{config.ini}, in which the user can, at will, customize all the parameters necessary to perform the analysis of the targeted system.
+
+\paragraph{General Configuration File \textit{config.ini}} 
+The configuration file \textit{config.ini} for the framework I am presenting in this thesis is intended, as mentioned, to make it customizable in order to fit a variety of different systems and allow for their analysis. Here the user can configure general parameters and options, such as paths to read from or write files to, or related to individual analysis phases.\newline
+The file is divided into sections, each covering a different aspect of the configuration: each section contains user-customizable constants that will then be called within the Python scripts that constitute the framework. An example can be appreciated in Listing \ref{lst:config_ini_example}:\newline
+
+\begin{lstlisting}[language=bash, numbers=none, caption=Example of \textit{config.ini} file, label=lst:config_ini_example]	
+	[PATHS]
+	root_dir = /home/marcuzzo/UniVr/Tesi
+	project_dir = %(root_dir)s/PLC-RE
+	input_dataset_directory = %(root_dir)s/datasets_SWaT/2015
+	net_csv_path = %(root_dir)s/datasets_SWaT/2015/Network_CSV
+	
+	[DEFAULTS]
+	dataset_file = PLC_SWaT_Dataset.csv
+	granularity = 10
+	number_of_rows = 20000
+	skip_rows = 100000
+	
+	[DAIKON]
+	daikon_dir = daikon
+	daikon_invariants_dir = %(daikon_dir)s/Daikon_Invariants
+	daikon_results_dir = %(daikon_invariants_dir)s/results
+	daikon_results_file_original = daikon_results_full.txt
+	inv_conditions_file = Inv_conditions.spinfo
+	max_security_pct_margin = 1
+	min_security_pct_margin = 2
+	
+	...
+\end{lstlisting}
+
+\subsection{Flexibility and Ease on Use}
+\label{subsec:framework_flex}
+
+\section{Phase 1: Data Pre-processing}
 \label{sec:improve_preprocessing}
 
-\section{Phase 2: Graph Analysis}
+\section{Phase 2: Graphs and Statistical Analysis}
 \label{sec:improve_graphs}
 
 \section{Phase 3: Invariants Analysis}
@@ -18,3 +85,6 @@
 
 \section{Extra Information on the Physics}
 \label{sec:extra_info}
+
+\vfill
+\nolinenumbers
