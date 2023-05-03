@@ -447,7 +447,8 @@ In the pre-processing phase, the authors make use of a Python script to merge al
 	\item the measurement slope, that is, the trend of the water level in the system tanks along the system cycles.	
 \end{itemize}
 
-Merging the datasets of all individual PLCs into a single dataset to represent the entire system can be a sound practice if the system to be anlized is (very) small as is the testbed analyzed here, consisting of a few PLCs and especially a few registers. If, however, the complexity of the system increases, this type of merging can become counterproductive and make it difficult to analyze and understand the data obtained in subsequent steps. In short, there is no possibility to analyze only one of its subsystems and thus make the analysis faster and more understandable. Moreover, a data gathering can take up to days, and the analyst/attacker may need to make an analysis of the system isolating a precise time range, ignoring everything that happens before and/or after: all of this, with the tool we have seen, cannot be done.
+Merging the datasets of all individual PLCs into a single dataset representing the entire system can be a sound practice if the system to be anlized is (very) small as is the testbed analyzed here, consisting of a few PLCs and especially a few registers. If, however, the complexity of the system increases, this type of merging can become counterproductive and make it difficult to analyze and understand the data obtained in subsequent steps.\newline 
+In short, there is no possibility to analyze only a subsystem and thus make the analysis faster and more understandable. Moreover, a data gathering can take up to days, and the analyst/attacker may need to make an analysis of the system isolating a precise time range, ignoring everything that happens before and/or after: all of this, with the tool we have seen, cannot be done.
 
 \bigskip
 Regarding the additional attributes, looking at the code of the script that performs the enrichment, I observed that \textbf{some attributes were manually inserted} after the merging phase: I am referring in particular to the attributes \texttt{PLC\textit{x}\_Max\_safety} and \texttt{PLC\textit{x}\_Min\_safety}, whose references were moreover hardcoded into the script, and the \textit{slope} whose calculation method I mentioned in the previous paragraph about the testbed limitations.\newline
@@ -475,15 +476,14 @@ For what is my vision and training as a computer scientist, it would have been p
 \paragraph{Invariants Inference and Analysis}
 The limitation in this case is principally Daikon: this software is designed to compute the invariants of a software from its live execution or from a file containing its execution flow, not to find the invariants of a cyber physical system. Since there are currently no better consolidated alternatives for inferring invariants, however, an attempt was still made to use Daikon as best as possible.
 
-\bigskip
-The biggest problem with Daikon applied to the computation of invariants of an industrial system is the difficult reading of the resulting output: the software in fact returns a very long list of invariants, one invariant per line, many of no use and without correlating invariants that may have common features or deriving additional information from them. The process of screening and recognizing the significant invariants, as well as the correlation between them, must be done by a human: certainly not an easy task given the volume of invariants one could theoretically be faced with (hundreds and hundreds of invariants). An example of Daikon's output can be seen in Figure \ref{fig:daikon_output_ceccato}.
-
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.35]{chap3/daikon_output_ceccato.png}
 	\caption{Example of Daikon's output}
 	\label{fig:daikon_output_ceccato}
 \end{figure}
+
+The biggest problem with Daikon applied to the computation of invariants of an industrial system is the difficult reading of the resulting output: the software in fact returns a very long list of invariants, one invariant per line, many of no use and without correlating invariants that may have common features or deriving additional information from them. The process of screening and recognizing the significant invariants, as well as the correlation between them, must be done by a human: certainly not an easy task given the volume of invariants one could theoretically be faced with (hundreds and hundreds of invariants). An example of Daikon's output can be seen in Figure \ref{fig:daikon_output_ceccato}.
 
 \bigskip
 The bash script used in this phase of the analysis does not help at all in deriving significant invariants more easily: it merely launches Daikon and saves its output to a text file by simply redirecting the stdout to file. No data reprocessing is done during this step. In addition, if a condition is to be specified to Daikon before performing the analysis, it is necessary each time to edit the .spinfo file by manually entering the desired rule, an inconvenient operation when multiple analyses are to be performed with different conditions each time. 
