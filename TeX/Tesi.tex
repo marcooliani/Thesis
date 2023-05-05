@@ -9,7 +9,11 @@
 %% Imposto l'encoding dei caratteri. Specificando utf8 posso mettere
 %% direttamente le accentate senza errori
 \usepackage[utf8]{inputenc}
+\usepackage{pmboxdraw}
+
+%% Per generare una cosa tipo output del comando tree
 \usepackage[T1]{fontenc}
+\usepackage{inconsolata} % Font monospace (al posto di Courier)
 
 %% Uso il template di frontespizio di Gregorio
 %\usepackage{frontespizio}
@@ -63,6 +67,12 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \definecolor{backcolourtext}{rgb}{0.85,0.85,0.82}
 \lstset{ 
+	literate=
+	{└}{\textSFii}{1}%
+	{┐}{\textSFiii}{1}%
+	{├}{\textSFviii}{1}%
+	{─}{\textSFx}{1}%
+	{│}{\textSFxi}{1},
 	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 	language=Python,
 	backgroundcolor=\color{backcolour},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument

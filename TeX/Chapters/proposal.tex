@@ -10,9 +10,8 @@ In this chapter I will present \textbf{my proposals to improve the methodology} 
 \bigskip
 As it may have already been noted, my proposals do not involve improving the data gathering phase: this is due simply to the fact that the novel framework will not be tested on the same case study used by Ceccato et, al. (Section \ref{subsec:ceccato_testbed}), but on a different case study, the ITrust SWaT system \cite{swat_home}, of which (some) datasets containing the execution trace of the physical system and the network traffic scan are already provided by iTrust itself. For more details about this case study, see Chapter \ref{casestudy}.
 
-\section{Phase 0: General Improvements}
-\label{sec:improve_general}
-
+\section{The novel Framework}
+\label{sec:4_framework_presentation}
 The implementation of the novel framework for ICSs analysis starts from several assumptions:
 
 \begin{enumerate}
@@ -20,65 +19,130 @@ The implementation of the novel framework for ICSs analysis starts from several 
 	\item it must be \textbf{independent of the system} to be analyzed
 	\item It must provide greater \textbf{flexibility and ease of use} for the user at every stage
 \end{enumerate}
-In the following subsections, these three points will be discussed in more detail.
+In the following, these three points will be discussed in more detail.
 
-\subsection{Single Programming Language}
-\label{subsec:framewirf_language}
-The original tool was implemented using various programming languages in each of the different phases: from Python up to Java, passing through Bash scripting. \newline
-In my opinion, this heterogeneity makes it more difficult and less intuitive for the user to operate on the tool: moreover, the use of multiple technologies makes it more difficult to maintain the code and add new features, particularly if only a single person is managing the code (he/she might be proficient in one language, but little of the others).
-
-\bigskip
-For these reasons, I decided to use a single programming language, to ensure homogeneity to the framework and ease of use and maintenance of the code for anyone who wants to manage it in the future: I chose to use Python, because of its simplicity and easy readability combined with its versatility and powerfulness: moreover, Python can count on a massive number of available libraries and packages that meet all kinds of needs.
-
-\vfill
-\subsection{System Independence}
-\label{subsec:framework_independence}
-One of the biggest limitations of Ceccato et al.'s tool that I highlighted in Section \ref{subsec:ceccato_limitations} is the fact that it is \textbf{highly dependent on the testbed used}: that is, it is \textit{not} possible to configure any of the tool's parameters to analyze different industrial systems.\newline
-To overcome this issue and make my framework independent of the system to be analyzed, also eliminating all references to hardcoded variables and values present in the previous tool, I decided to use a \textbf{general configuration file}, named \textit{config.ini}, in which the user can, at will, customize all the parameters necessary to perform the analysis of the targeted system.
-
-\paragraph{General Configuration File \textit{config.ini}} 
-The configuration file \textit{config.ini} for the framework I am presenting in this thesis is intended, as mentioned, to make it customizable in order to fit a variety of different systems and allow for their analysis. Here the user can configure general parameters and options, such as paths to read from or write files to, or related to individual analysis phases.\newline
-The file is divided into sections, each covering a different aspect of the configuration: each section contains user-customizable constants that will then be called within the Python scripts that constitute the framework. An example can be appreciated in Listing \ref{lst:config_ini_example}:
-
-\begin{lstlisting}[language=bash, numbers=none, caption=Example of \textit{config.ini} file, label=lst:config_ini_example]	
-	[PATHS]
-	root_dir = /home/marcuzzo/UniVr/Tesi
-	project_dir = %(root_dir)s/PLC-RE
-	input_dataset_directory = %(root_dir)s/datasets_SWaT/2015
-	net_csv_path = %(root_dir)s/datasets_SWaT/2015/Network_CSV
+\begin{description}
+	\item[Single Programming Language] The original tool was implemented using various programming languages in each of the different phases: from Python up to Java, passing through Bash scripting. \newline
+	In my opinion, this heterogeneity makes it more difficult and less intuitive for the user to operate on the tool: moreover, the use of multiple technologies makes it more difficult to maintain the code and add new features, particularly if only a single person is managing the code (he/she might be proficient in one language, but little of the others).
 	
-	[DEFAULTS]
-	dataset_file = PLC_SWaT_Dataset.csv
-	granularity = 10
-	number_of_rows = 20000
-	skip_rows = 100000
+	\bigskip
+	For these reasons, I decided to use a single programming language, to ensure homogeneity to the framework and ease of use and maintenance of the code for anyone who wants to manage it in the future: I chose to use Python, because of its simplicity and easy readability combined with its versatility and powerfulness: moreover, Python can count on a massive number of available libraries and packages that meet all kinds of needs.
 	
-	[DAIKON]
-	daikon_dir = daikon
-	daikon_invariants_dir = %(daikon_dir)s/Daikon_Invariants
-	daikon_results_dir = %(daikon_invariants_dir)s/results
-	daikon_results_file_original = daikon_results_full.txt
-	inv_conditions_file = Inv_conditions.spinfo
-	max_security_pct_margin = 1
-	min_security_pct_margin = 2
+	\item[System Independence] One of the biggest limitations of Ceccato et al.'s tool that I highlighted in Section \ref{subsec:ceccato_limitations} is the fact that it is \textbf{highly dependent on the testbed used}: that is, it is \textit{not} possible to configure any of the tool's parameters to analyze different industrial systems.\newline
+	To overcome this issue and make my framework independent of the system to be analyzed, also eliminating all references to hardcoded variables and values present in the previous tool, I decided to use a \textbf{general configuration file}, named \textit{config.ini}, in which the user can, at will, customize all the parameters necessary to perform the analysis of the targeted system.
 	
-	...
-\end{lstlisting}
-
-\subsection{Flexibility and Ease on Use}
-\label{subsec:framework_flex}
-The lack of flexibility and ease of use in a tool can be a significant disadvantage, limiting its effectiveness and making it challenging for the user to get the desired outcomes. The original tool suffered from these limitations, with users having to run scripts from the command line, with little to no options or parameters available to customize the analysis. As a result, the tool was not user-friendly and lacked the flexibility to adapt to specific user needs. 
-
-\bigskip
-To settle these issues, I enhanced the command-line interface in the novel framework by adding new options and parameters. These new features provide the user with greater flexibility, enabling to specify parameters and options that allow for more in-depth analysis and focused results analyzing data more effectively and efficiently. With these enhancements, the framework has become more user-friendly, reducing the learning curve and making it more accessible to a wider range of users. \newline
-This, in turn, makes the framework more valuable and useful, increasing its adoption and effectiveness across a range of industries and applications. \newline
-Moreover, with new options and parameters users no longer have to rely solely on the command line interface, which can be challenging and intimidating for those with limited technical expertise. Instead, users can now access a range of customizable options and parameters, making the tool more intuitive and user-friendly. 
-
-\bigskip
+	\item[Flexibility and Ease on Use] The lack of flexibility and ease of use in a tool can be a significant disadvantage, limiting its effectiveness and making it challenging for the user to get the desired outcomes. The original tool suffered from these limitations, with users having to run scripts from the command line, with little to no options or parameters available to customize the analysis. As a result, the tool was not user-friendly and lacked the flexibility to adapt to specific user needs. 
+	
+	\bigskip
+	To settle these issues, I enhanced the command-line interface in the novel framework by adding new options and parameters. These new features provide the user with greater flexibility, enabling to specify parameters and options that allow for more in-depth analysis and focused results analyzing data more effectively and efficiently. With these enhancements, the framework has become more user-friendly, reducing the learning curve and making it more accessible to a wider range of users. \newline
+	This, in turn, makes the framework more valuable and useful, increasing its adoption and effectiveness across a range of industries and applications. \newline
+	Moreover, with new options and parameters users no longer have to rely solely on the command line interface, which can be challenging and intimidating for those with limited technical expertise. Instead, users can now access a range of customizable options and parameters, making the tool more intuitive and user-friendly. 
+\end{description}
 Overall, the enhancements made to the framework represent a significant step forward in making it more effective, efficient, and user-friendly.
 
-\section{Phase 1: Data Pre-processing}
-\label{sec:improve_preprocessing}
+
+%\paragraph{General Configuration File \textit{config.ini}} 
+%The configuration file \textit{config.ini} for the framework I am %presenting in this thesis is intended, as mentioned, to make it %customizable in order to fit a variety of different systems and allow 
+%for their analysis. Here the user can configure general parameters and %options, such as paths to read from or write files to, or related to %individual analysis phases.\newline
+%The file is divided into sections, each covering a different aspect of 
+%the configuration: each section contains user-customizable constants 
+%that will then be called within the Python scripts that constitute the %framework. An example can be appreciated in Listing %\ref{lst:config_ini_example}:
+
+%\begin{lstlisting}[language=bash, numbers=none, caption=Example of %\textit{config.ini} file, label=lst:config_ini_example]	
+%	[PATHS]
+%	root_dir = /home/marcuzzo/UniVr/Tesi
+%	project_dir = %(root_dir)s/PLC-RE
+%	input_dataset_directory = %(root_dir)s/datasets_SWaT/2015
+%	net_csv_path = %(root_dir)s/datasets_SWaT/2015/Network_CSV
+%	
+%	[DEFAULTS]
+%	dataset_file = PLC_SWaT_Dataset.csv
+%	granularity = 10
+%	number_of_rows = 20000
+%	skip_rows = 100000
+%	
+%	[DAIKON]
+%	daikon_dir = daikon
+%	daikon_invariants_dir = %(daikon_dir)s/Daikon_Invariants
+%	daikon_results_dir = %(daikon_invariants_dir)s/results
+%	daikon_results_file_original = daikon_results_full.txt
+%	inv_conditions_file = Inv_conditions.spinfo
+%	max_security_pct_margin = 1
+%	min_security_pct_margin = 2
+%	
+%	...
+%\end{lstlisting}
+
+\subsection{Framework Structure}
+\label{subsec:framework_struct}
+The structure of the novel framework mostly follows the structure of the original tool: it is divided into four main directories each representing the different phases of the analysis (data pre-processing, graphs and statistical analysis, process mining, and invariant analysis), and containing the relevant Python scripts that perform the analysis, as well as subdirectories and any input/output files necessary for the proper behavior of the framework.
+
+\begin{lstlisting}[language=bash, numbers=none, caption=Novel Framework structure, label=lst:4_tree_command]
+	.
+	├── config.ini
+	├── daikon
+	│   ├── Daikon_Invariants
+	│   ├── findActuators.py
+	│   ├── infoAct.py
+	│   └── runDaikon.py
+	├── network-analysis
+	│   ├── data
+	│   ├── export_pcap.csv
+	│   ├── export_pcap_data.py
+	│   └── swat_csv_extractor.py
+	├── pre-processing
+	│   ├── mergeDatasets.py
+	│   └── system_info.py
+	├── process-mining
+	│   ├── data
+	│   └── process_mining.py
+	└── statistical-graphs
+	    ├── histPlots_Stats.py
+	    └── runChartSubPlots.py
+\end{lstlisting}
+
+Ahead of these directories there is the most important part, that allows the framework to be independent of the industrial control system being analyzed: the \textit{config.ini} file. Here the user can configure general parameters and options, such as paths to read from or write files to, or related to individual analysis phases.\newline
+The file is divided into sections, each covering a different aspect of 
+the configuration: each section contains user-customizable parameters 
+that will then be called within the Python scripts that constitute the framework. Sections of \textit{config.ini} are:
+
+\begin{itemize}
+	\item \textbf{[PATHS]:} defines general paths such as the project root directory and some source directories for datasets
+	
+	\item \textbf{[PREPROC]:} contains some parameters needed for the pre-processing phase
+	
+	\item \textbf{[DAIKON]:} defines parameters needed for invariant analysis with Daikon
+	
+	\item \textbf{[DATASET]:} defines settings and parameters used during the dataset enrichment stage and possibly in further phases
+	
+	\item \textbf{[MINING]:} contains parameters used during the process mining phase
+	
+	\item \textbf{[NETWORK]:} Contains specific settings for extracting the data obtained from the packet sniffing phase on the ICS network and converting it to CSV format. It also defines the network protocols that are to be analyzed
+\end{itemize}
+
+\subsection{Python Libraries and External Tools}
+\label{subsec:tools_libraries}
+Since the framework has been entirely developed in Python, I have tried to make use of external tools as little as possible, with the idea of integrating all the various functionalities within the framework and making it independent of further software: the only external tool remaining from the old Ceccato et al. tool is Daikon, precisely because there is currently no better alternative or Python packages that performs the same functionalities.
+
+\bigskip
+Instead, large use of Python libraries is made for handling functionality and input data: the fundamental libraries upon which the framework is based are:
+
+\begin{itemize}
+	\item \textbf{Pandas}, also used in the previous tool for dataset management, but whose use here has been deepened and extended	
+	\item \textbf{NumPy}, often used together with Pandas to perform some operations to support it
+	
+	\item \textbf{MatPlotLib}, for managing and plotting graphical analysis
+	
+	\item other scientific libraries such as \textbf{SciPy}, \textbf{StatsModel} \cite{statsmodel} and \textbf{NetworkX} \cite{networkx}, for mathematical, statistical and analysis operations on the data
+	
+	\item \textbf{GraphViz}, for the creation of activity diagrams in the process mining phase
+\end{itemize}
+Having now seen the structure of the framework, in the next sections we will go into more detail describing my proposals and what I have done to improve the various stages of the analysis.
+
+\section{Analysis Phases}
+
+\subsection{Phase 1: Data Pre-processing}
+\label{subsec:improve_preprocessing}
 \textit{Data Pre-processing phase} is probably the most delicate and significant one: depending on how large the industrial system to be analyzed is, the data collected, and how it is enriched using the additional attributes, the subsequent system analysis will provide more or less accurate outcomes.
 
 \bigskip
@@ -86,12 +150,13 @@ The previous tool has many limitations, especially at this stage: it is not poss
 All this, combined with the fact that in the tool code many references to attributes and registers are hardcoded, makes the analysis of the system much more difficult and the obtained results less accurate in terms of quantity and quality.
 
 \bigskip
-In the novel framework these problems have been overcome by introducing the possibility, starting from the datasets of individual PLCs obtained from data gathering process, to select a subsystem from the command line both on a temporal basis and of the PLCs to be considered; I have also redesigned the whole process of enrichment of the resulting dataset, eliminating the manual entry of additional attributes and giving the user the possibility to be able to decide which type of additional attribute to associate with a given register.\newline
+In the novel framework these problems have been overcome by introducing the possibility, starting from the datasets of individual PLCs obtained from data gathering process, to select a subsystem from the command line both on a temporal basis and of the PLCs to be considered; I have also redesigned the whole process of enrichment of the resulting dataset, eliminating the manual entry of additional attributes and giving the user the possibility to be able to decide which type of additional attribute to associate with a given register.
 In addition to this, at the end of the pre-processing operation, it is possible to perform a brief preliminary analysis of the obtained dataset in order to estimate which registers are connected to actuators, which to measurements, and which represent hardcoded relative setpoints or constants: this operation also makes it possible to be able to refine the enrichment step by setting the relevant parameters in the \textit{config.ini} file\newline \newline 
 In the next sections we will look in more detail at what has been accomplished.
+\vfill
 
-\subsection{Subsystem Selection}
-\label{subsec:4_select_subsystem}
+\subsubsection{Subsystem Selection}
+\label{subsubsec:4_select_subsystem}
 
 In the previous tool, the datasets in CSV format referring to each single PLC are placed in a fixed directory (hardcoded in the script) from which the dedicated script later perform merge and enrichment of them all, resulting in a single dataset representing the entire process trace of the industrial system as an output. As mentioned, the script makes no provision to choose the individual PLCs to be analyzed, nor to decide on a temporal range over which to perform the analysis: in fact, it may happen that during the period of scanning and data gathering there is a so-called \textit{transient}, i.e., a general state in which the industrial system is still initializing before actually reaching full operation; or, more simply, there is the need to analyze the process of only a specific part of the industrial system in a certain period of interest: whatever the motivation, the lack of elasticity and options to provide to the user makes the analysis much more complex than it might be, affecting even the later phases, as the number of variables to be analyzed becomes enormously higher.\newline
 In addition, it is not possible to specify an output CSV file where to save the resulting dataset: at each dataset creation and enrichment operation, therefore, the resultant file will be overwritten. This is very awkward when making comparisons between two different execution traces, for example, unless the files are renamed manually.
@@ -128,27 +193,66 @@ Concurrently, the same options can be specified by the user via the command line
 	
 	\item \textbf{-o} or \textbf{{-}{-}output:} specifies the name of the file in which the obtained dataset will be saved. It must necessarily be a file in CSV format.
 	
-	\item \textbf{-g} or \textbf{{-}{-}granularity:} specifies a granularity that will be used to calculate the measurement slope during the dataset enrichment phase. We will discuss this later in Section \ref{subsec:4_dataset_enrichment}.
+	\item \textbf{-g} or \textbf{{-}{-}granularity:} specifies a granularity that will be used to calculate the measurement slope during the dataset enrichment phase. We will discuss this later in Section \ref{subsubsec:4_dataset_enrichment}.
 \end{itemize}
-\vfill
 
-\subsection{Dataset Enrichment}
-\label{subsec:4_dataset_enrichment}
+\subsubsection{Dataset Enrichment}
+\label{subsubsec:4_dataset_enrichment}
+After a step in which a function is applied to each PLC-related dataset that eliminates its registers that have not been used within the system (this is especially true if the Modbus register scan has been performed, in which ranges of registers are scanned: it is assumed that unused registers have constant value zero), the \textbf{dataset enrichment operation} is performed.
 
-\subsection{Brief Analysis of the Subystem}
-\label{subsec:4_brief_analysis}
+This operation differs from the previous version not only in the fact that it is performed on each individual dataset and not on the resulting dataset, but also in the additional attributes: not only are they greater in number, but they are automatically calculated and inserted by the \texttt{mergeDatasets.py} script into the dataset and, most importantly, it is possible to decide through the parameters in the \textit{config.ini} configuration file under the \texttt{[DATASET]} section to which registers these attributes should be assigned. \newline
+In Listing \ref{lst:4_enrich_params} we can see the list of additional attributes and how they should be associated with the registers of the dataset:
 
-\section{Phase 2: Graphs and Statistical Analysis}
-\label{sec:improve_graphs}
+\begin{lstlisting}[language=Python,numbers=none,caption={\texttt{config.ini} parameters for dataset enriching},label=lst:4_enrich_params]
+	[DATASET]
+	timestamp_col = Timestamp
+	max_prefix = max_
+	min_prefix = min_
+	max_min_cols_list = lit|ait|dpit
+	prev_cols_prefix = prev_
+	prev_cols_list = mv[0-9]{3}|p[0-9]{3}
+	trend_cols_prefix = trend_
+	trend_cols_list = lit
+	trend_period = 150
+	slope_cols_prefix = slope_
+	slope_cols_list = lit
+\end{lstlisting}
+Following is a brief explanation of the parameters just seen:
 
-\section{Phase 3: Invariants Analysis}
-\label{sec:improve_invariants}
+\begin{description}
+	\item[\texttt{timestap\_col}] indicates the name of the column that contains the data timestamps. This parameter is used not only in this phase, but is also referred to in the Process Mining phase. In the previous work, this parameter was hardcoded and not configurable (and thus causing errors if the system being analyzed changed)
+	
+	\item[\texttt{max\_prefix}, \texttt{min\_prefix}, \texttt{max\_min\_cols\_list}] refer to any relative maximum or minimum values (\textit{relative setpoints}) of one or more measures and that can be found and inserted as new columns within the dataset. The first two parameters indicate the prefix to be used in the column names affected by this additional attribute, while the third specifies of which type of registers we want to know the maximum and/or minimum value reached (several options can be specified using the logical operator \texttt{|} - or).\newline 
+	If, for example, we want to know the maximum value of the registers associated with the tanks, indicated in the iTrust SWaT system by the prefix \texttt{LIT}, we only need to specify the necessary parameter in the \textit{config.ini} file, so \texttt{max\_min\_cols\_list = lit}.\newline
+	The result will be to have in the dataset thus enriched a new column named \texttt{max\_P1\_LIT101}.
+	
+	\item[\texttt{prev\_cols\_prefix}, \texttt{prev\_cols\_list}]  refer to the values at the previous step of the registers specified in \texttt{prev\_cols\_list}. It is possible to specify registers using \textit{regex}, as in the example shown. It may be useful in some cases to have this value available to check, for example, when a change of state of a single given actuator occurs.  The behavior of these parameters is the same as described in the point above.
+	
+	\item[\texttt{slope\_cols\_prefix}, \texttt{slope\_cols\_list}] are related to the calculation of the slope of a specific register (usually a measure), that is, its trend. The slope can be ascending (if its value is greater than zero), descending (if less than zero) or stable (if approximately equal to zero).I will discuss the slope calculation in more detail in the next paragraph, as it is related to the attributes \texttt{trend\_cols\_prefix}, \texttt{trend\_cols\_list} and \texttt{trend\_period}
+\end{description}
+
+Initially, the parameters for registers to be associated with each additional attribute may be left blank, assuming that we do not know the system at all and therefore do not know which registers may be actuators, which measures, and which further. This informations can be obtained from the \textbf{brief analysis} following the datasets merging operation: this analysis, performed at the user's choice, indicates which may be likely sensors, which actuators, and further information of various kinds: these indications allow the user to be able to set the desired values in \textit{config.ini} file and hence refine the enrichment process by re-launching the\\ 
+\texttt{mergeDatasets.py} script again.
+
+\paragraph{Slope Calculation}
+
+\subsubsection{Datasets Merging}
+\label{subsubsec:4_dataset_merging}
+
+\subsubsection{Brief Analysis of the Subystem}
+\label{subsubsec:4_brief_analysis}
+
+\subsection{Phase 2: Graphs and Statistical Analysis}
+\label{subsec:improve_graphs}
+
+\subsection{Phase 3: Invariants Analysis}
+\label{subsec:improve_invariants}
 
 %\subsection{Automatic Detection of Actuators and Sensors}
-\subsection{Invariants Generation}
+\subsubsection{Invariants Generation}
 
-\section{Phase 4: Businness Process Analysis}
-\label{sec:improve_bpa}
+\subsection{Phase 4: Businness Process Analysis}
+\label{subsec:improve_bpa}
 
 %\section{Extra Information on the Physics}
 %\label{sec:extra_info}
