@@ -223,7 +223,6 @@ Some examples of invariants derived from the enriched dataset may be:
 	
 	\item state invariants of some actuator correspond to a specific trend in the evolution of the measurement (ascending, descending, or stable) or, vice versa, the measurement trend corresponds to a specific state invariant of some actuator
 \end{itemize}
-\vfill
 
 \subsection{Businness Process Mining and Analysis}
 \label{subsec:ceccato_businessprocess}
@@ -303,8 +302,11 @@ Through analysis of the activity diagrams shown in Figure \ref{fig:business_proc
 	When this register is set to \textit{True}, the input register \texttt{PLC2\_InputRegisters\_IW0} related to the tank controlled by PLC2 starts an \textbf{ascending trend}; vice versa, when the coil register is set to \textit{False}, the input register starts a \textbf{descending trend}.
 	
 	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 4:}}}] If \texttt{PLC1\_Coils\_QX00} change his value to True, trend in tank T-201, related to \texttt{PLC1\_InputRegisters\_IW0} and controlled by PLC1, become \textbf{ascending} (see Figure \ref{subfig:pm_plc1})
-	
+
+	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 5:}}}] \texttt{PLC3\_Coils\_QX00} starts a \textbf{decreasing trend} in tank T-203, related to \texttt{PLC3\_InputRegisters\_IW0} and controlled by PLC3, whereas \texttt{PLC3\_Coils\_QX02} starts an \textbf{increasing trend} on the tank (see Figure \ref{subfig:pm_plc3})
 \end{description}
+\vfill
+\pagebreak
 
 \begin{figure}[H]
 	\centering
@@ -328,11 +330,6 @@ Through analysis of the activity diagrams shown in Figure \ref{fig:business_proc
 	\caption{Business process with states and Modbus commands for the three PLCs}
 	\label{fig:business_process_cecccato}
 \end{figure}
-\pagebreak
-
-\begin{description}
-	\item[\colorbox{backcolourtext}{\textnormal{\textit{Conjecture 5:}}}] \texttt{PLC3\_Coils\_QX00} starts a \textbf{decreasing trend} in tank T-203, related to \texttt{PLC3\_InputRegisters\_IW0} and controlled by PLC3, whereas \texttt{PLC3\_Coils\_QX02} starts an \textbf{increasing trend} on the tank (see Figure \ref{subfig:pm_plc3})
-\end{description}
 
 \paragraph{Invariants Inference and Analysis}
 The last phase of the analysis of the example industrial system is invariant analysis, performed through Daikon framework. At this stage, an attempt will be made to confirm what has been seen previously and to derive new properties of the system based on the results of the Daikon analysis.

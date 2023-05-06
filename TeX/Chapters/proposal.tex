@@ -81,21 +81,21 @@ The structure of the novel framework mostly follows the structure of the origina
 	.
 	├── config.ini
 	├── daikon
-	│   ├── Daikon_Invariants
-	│   ├── findActuators.py
-	│   ├── infoAct.py
-	│   └── runDaikon.py
+	│   ├── Daikon_Invariants
+	│   ├── findActuators.py
+	│   ├── infoAct.py
+	│   └── runDaikon.py
 	├── network-analysis
-	│   ├── data
-	│   ├── export_pcap.csv
-	│   ├── export_pcap_data.py
-	│   └── swat_csv_extractor.py
+	│   ├── data
+	│   ├── export_pcap.csv
+	│   ├── export_pcap_data.py
+	│   └── swat_csv_extractor.py
 	├── pre-processing
-	│   ├── mergeDatasets.py
-	│   └── system_info.py
+	│   ├── mergeDatasets.py
+	│   └── system_info.py
 	├── process-mining
-	│   ├── data
-	│   └── process_mining.py
+	│   ├── data
+	│   └── process_mining.py
 	└── statistical-graphs
 	    ├── histPlots_Stats.py
 	    └── runChartSubPlots.py
@@ -235,6 +235,78 @@ Initially, the parameters for registers to be associated with each additional at
 \texttt{mergeDatasets.py} script again.
 
 \paragraph{Slope Calculation}
+The \textit{slope} is an attribute that indicates the trend of the measurement we are considering and is useful, in our context, during the inference and invariant analysis phase in order to derive information about this trend given specific conditions: this trend can be, in general, increasing (slope > 0), decreasing (slope < 0) or stable (slope = 0).\newline
+Normally, the slope is calculated through a simple mathematical formula: given an interval \textit{a}, \textit{b} relative to the measurement \textit{l}, the slope is given by the difference of these two values divided by the amount of time \textit{t} that the measurement takes to reach \textit{b} from \textit{a}:
+
+\[slope = \frac{l(b) -l(a)}{t(b) - t(a)}\]
+
+In the novel framework as in the old tool, this time interval (also called \textbf{\textit{granularity}}) can be either long or short, depending on the accuracy desired on the slope: the lower the granularity, the more the slope will reflect the actual measurement trend; the higher the granularity, on the other hand, the more the slope data will be flattened. Each time interval into which the measure is divided corresponds to a slope, the set of which inserted as an additional attribute in the dataset will later be used to define the trend of the measure itself in specific situations.
+
+\bigskip
+Calculating the slope directly from the raw measurement data may be an acceptable solution for those systems whose measurements are not significantly affected by \textbf{perturbations} (such as the oscillations of the liquid inside a tank during the filling and emptying phases, leading to fluctuating level readings): in this case, granularity can be kept low and thus obtain a very accurate overall trend calculation close to the actual measurement trend. This is the case, for example, with the tanks of the testbed used by Ceccato et al.\newline
+However, in the case where these perturbations significantly afflict the detections on the measurement, the slope calculation on the individual time intervals of the measurement may lead to an erroneous result in trend definition, regardless of the granularity used.
+
+\bigskip
+Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the LIT101 tank of the iTrust SWaT system; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It can be seen that in addition to the flattening of slope values as the granularity increases, in the time interval between seconds 1800 and 4200 the level of LIT101 has a generally increasing trend, but the slope values vary from positive to negative: the result is that in the invariant analysis the general increasing trend will not be detected thus losing the information.\newline
+The possibility of a having (strongly) perturbed data was not considered in the previous tool, so I was faced with this issue to solve.
+\vfill
+\pagebreak
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g30_2.png}
+		\caption{}
+		\label{subfig:4_slope_g30_nodecomp}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g60_2.png}
+		\caption{}
+		\label{subfig:4_slope_g60_nodecomp}
+	\end{subfigure}
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g120_2.png}
+		\caption{}
+		\label{subfig:4_slope_g120_nodecomp}
+	\end{subfigure}
+	\caption{Slope comparison with granularity 30 (a), 60 (b) and 120 seconds (c)}
+	\label{fig:4_slope_comparison}
+\end{figure}
+
+The solution to this problem is to try to remove as much "noise" as possible from the data, so as to get a more linear trend in the curve representing the measurement and consequently be able to calculate slopes more accurately.\newline
+There are several ways to smooth out the noise, but two of them seemed to me to be the most suitable and that I considered and evaluated: using \textbf{polynomial regression}, thus creating a kind of filter on the noise, or a \textbf{seasonal decomposition}, and more specifically the part concerning the \textbf{trending}.\newline
+With regard to polynomial regression, I evaluated the \textit{Savitzky-Golay} algorithm \cite{savgol}, and with regard to seasonal decomposition, I evaluated \textit{Seasonal-Trend decomposition using LOESS} (STL) \cite{stl_decomp}.\newline
+For reasons of the length of this paper I cannot describe these two solutions in detail (for this, I refer to the bibliographical notes): Figure \ref{fig:4_smoothing_comparison}, however, shows a quick graphical comparison of them compared with the original data. The solution chosen is the STL decomposition, which is more effective in attenuating noise than the Savitzky-Golay filter although at the cost of more delay (still present in all algorithms of this kind) in some parts.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/confronto_decomp_3.png}
+		\caption{}
+		\label{subfig:4_smoothing1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/confronto_decomp_4.png}
+		\caption{}
+		\label{subfig:4_smoothing2}
+	\end{subfigure}
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/confronto_decomp_5.png}
+		\caption{}
+		\label{subfig:4_smoothing3}
+	\end{subfigure}
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/confronto_decomp_6.png}
+		\caption{}
+		\label{subfig:4_smoothing4}
+	\end{subfigure}
+	\caption{Savitzky-Golay filter (blue) line and STL decomposition (green) comparison}
+	\label{fig:4_smoothing_comparison}
+\end{figure}
+
+test
 
 \subsubsection{Datasets Merging}
 \label{subsubsec:4_dataset_merging}
@@ -245,7 +317,7 @@ Initially, the parameters for registers to be associated with each additional at
 \subsection{Phase 2: Graphs and Statistical Analysis}
 \label{subsec:improve_graphs}
 
-\subsection{Phase 3: Invariants Analysis}
+\subsection{Phase 3: Invariant Analysis}
 \label{subsec:improve_invariants}
 
 %\subsection{Automatic Detection of Actuators and Sensors}
