@@ -274,8 +274,8 @@ The possibility of a having (strongly) perturbed data was not considered in the 
 	\label{fig:4_slope_comparison}
 \end{figure}
 
-The solution to this problem is to try to remove as much "noise" as possible from the data, so as to get a more linear trend in the curve representing the measurement and consequently be able to calculate slopes more accurately.\newline
-There are several ways to smooth out the noise, but two of them seemed to me to be the most suitable and that I considered and evaluated: using \textbf{polynomial regression}, thus creating a kind of filter on the noise, or a \textbf{seasonal decomposition}, and more specifically the part concerning the \textbf{trending}.\newline
+The solution to this problem is trying to remove as much "noise" as possible from the data, in order to get a more linear trend in the curve representing the measurement and consequently be able to calculate slopes more accurately.\newline
+There are several ways to smooth out the noise, but two of them seemed to me to be the most suitable and that I considered and evaluated: using \textbf{polynomial regression}, thus creating a filter on the noise, or a \textbf{seasonal decomposition}, and more specifically the part concerning the \textbf{trending}.\newline
 With regard to polynomial regression, I evaluated the \textit{Savitzky-Golay} algorithm \cite{savgol}, and with regard to seasonal decomposition, I evaluated \textit{Seasonal-Trend decomposition using LOESS} (STL) \cite{stl_decomp}.\newline
 For reasons of the length of this paper I cannot describe these two solutions in detail (for this, I refer to the bibliographical notes): Figure \ref{fig:4_smoothing_comparison}, however, shows a quick graphical comparison of them compared with the original data. The solution chosen is the STL decomposition, which is more effective in attenuating noise than the Savitzky-Golay filter although at the cost of more delay (still present in all algorithms of this kind) in some parts.
 
@@ -302,20 +302,126 @@ For reasons of the length of this paper I cannot describe these two solutions in
 		\caption{}
 		\label{subfig:4_smoothing4}
 	\end{subfigure}
-	\caption{Savitzky-Golay filter (blue) line and STL decomposition (green) comparison}
+	\caption{Savitzky-Golay filter (blue line) and STL decomposition (green) comparison}
 	\label{fig:4_smoothing_comparison}
 \end{figure}
 
-test
+The application of the STL decomposition results in a significant improvement in slope calculation even when using low granularity: in Figure \ref{fig:4_STL_decomp_results} it can be seen that, with the same granularity used for the example in Figure \ref{subfig:4_slope_g30_nodecomp}, the slope values, although with unavoidable fluctuations, remain within the same trend, corresponding to the trend of the data curve net of the introduced lag caused by the periodicity set for the decomposition.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap4/slope_STL_g30_2.png}
+	\caption{Slope after the application of the STL decomposition}
+	\label{fig:4_STL_decomp_results}
+\end{figure}
+This periodicity, which indicates the sampling time window for decomposition and thus the level of noise smoothing, can be set in the \textit{config.ini} configuration file in the \texttt{trend\_period} directive.\newline
+The slope calculation will then be performed on the data from the additional measurement trend attributes specified in the \texttt{trend\_cols\_list} directive in the configuration file, and no longer on the original unfiltered data.
+
+\bigskip
+Finally, to enable Daikon to correctly interpret the slope data, the decimal values corresponding to each calculated slope are converted into three numerical values -1, 0, and 1, which correspond to the decreasing (if the slope is less than zero), stable (if it is equal to zero), and increasing (if it is greater than zero) trends, respectively. In Figure \ref{fig:4_slope_daikon}, the new slope can be seen, along with the curve obtained from the STL decomposition:
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap4/slope_STL_bin_g30_2b.png}
+	\caption{The new slope representation (green line) and the smoothed measurement data obtaind with the STL decomposition (red)}
+	\label{fig:4_slope_daikon}
+\end{figure}
 
 \subsubsection{Datasets Merging}
 \label{subsubsec:4_dataset_merging}
+In this step the individual datasets are merged, obtaining two new distinct datasets: one without the enrichment and that will be use in the process mining phase, and the other, containing the additional attributes but with the timestamp column removed, intended for inference and invariant analysis.
 
-\subsubsection{Brief Analysis of the Subystem}
+\bigskip
+The first of the two datasets obtained will be saved in CSV format by default in the \texttt{\$(project-dir)/process-mining/data} directory while the second one in the \texttt{\$(project-dir)/daikon/Daikon\_Invariants} directory (both paths are however configurable via \textit{config.ini}).\newline
+The dataset name is specified in \textit{config.ini} or via the \texttt{-o} command-line option: in the case of the dataset intended for process mining, the script will automatically add a \texttt{\_TS} suffix to the filename, indicating the fact that the dataset includes the timestamp.\newline
+The opportunity for the user to specify a different filename for the output each time allows the user to save the execution trace of the selected subsystem without overwriting the previous ones and thus to use all of them in the subsequent phases of the analysis.
+
+\subsubsection{Brief Analysis of the Obtained Subsystem}
 \label{subsubsec:4_brief_analysis}
+
+At the end of the datasets merging and saving step, the user is asked whether to perform a brief optional analysis of the final resulting dataset to extract preliminary data, with the purpose of obtaining basic information about the (sub)system and possibly refining the enrichment.\newline
+If the user responds affirmatively to the request, \texttt{mergeDatasets.py} launches within it a further Python script located in the same\\ \texttt{\$(project-dir)/pre-processing} directory, called \texttt{system\_info.py}. This script, using a combination of Daikon and Pandas analysis, performs a quick analysis of the dataset contents trying to \textbf{recognize}, however roughly, \textbf{the register types}, with possible maximum and minimum values and hardcoded setpoints. In addition, using the additional attribute \texttt{prev\_}, it is capable of deriving measurement values in correspondence with state changes of individual actuators.\newline 
+Listing \ref{lst:4_brief_infos} shows an example of this brief analysis elated to PLC1 of the iTrust SWaT system (for brevity, only one measurement is reported in the analysis of actuator state changes):
+
+\begin{lstlisting}[language=bash,numbers=none,caption={Example of preliminar system analysis},label=lst:4_brief_infos]
+	Do you want to perform a brief analysis of the dataset? [y/n]: y
+	
+	Actuators: 
+	P1_MV101 [0.0, 1.0, 2.0]
+	P1_P101 [1.0, 2.0]
+	
+	Sensors: 
+	P1_FIT101 {'max_lvl': 2.7, 'min_lvl': 0.0}
+	P1_LIT101 {'max_lvl': 815.1, 'min_lvl': 489.6}
+	
+	Hardcoded setpoints or spare actuators: 
+	P1_P102 [1.0]
+	
+	       P1_LIT101  P1_MV101  prev_P1_MV101
+	669     800.7170         0              2
+	1850    499.0203         0              1
+	4876    800.5992         0              2
+	6052    498.9026         0              1
+	9071    800.7170         0              2
+	10260   499.1381         0              1
+	13268   801.3058         0              2
+	14435   498.4315         0              1
+	17423   801.4628         0              2
+	18603   498.1567         0              1
+	
+	P1_LIT101  P1_MV101  prev_P1_MV101
+	677     805.0741         1              0
+	4885    805.7414         1              0
+	9079    805.7806         1              0
+	13276   805.1133         1              0
+	17432   804.4068         1              0
+	
+	P1_LIT101  P1_MV101  prev_P1_MV101
+	1858    495.4483         2              0
+	6060    497.9998         2              0
+	10269   495.9586         2              0
+	14443   495.8016         2              0
+	18611   494.5847         2              0
+	
+	       P1_LIT101  P1_P101  prev_P1_P101
+	118     536.0356        1             2
+	4322    533.3272        1             2
+	8537    542.1591        1             2
+	12721   534.8581        1             2
+	16883   540.5890        1             2
+	
+	P1_LIT101  P1_P101  prev_P1_P101
+	1190    813.0031        2             1
+	5395    813.0031        2             1
+	9597    811.8256        2             1
+	13776   812.7283        2             1
+	17938   813.3171        2             1
+\end{lstlisting}
+
+From these results we can see that: 
+
+\begin{itemize}
+	\item the probable actuators are \texttt{P1\_MV101}, which assumes three states identified by the values 0, 1 and 2, and \texttt{P1\_P101}, which instead assumes two states identified by the values 1 and 2
+	
+	\item there are two probable measures: \texttt{P1\_FIT101} whose values range from 2.7 to 0.0, and \texttt{P1\_LIT101} whose values range from 815.1 to 489.6. One conjecture could already be made about the topology of the system: \texttt{P1\_LIT101} represents a tank
+		
+	\item apparently there are no related \textit{hardcoded setpoints}, but a probable spare actuator, \texttt{P1\_P102}, whose value is always 1. From this data, another conjecture can be made: the value 1 is the close state for that particular type of actuators, while 2 represents the open state
+	
+	\item from the analysis of state changes, in summary, we derive some \textit{relative setpoints}: for example, we know that \texttt{P1\_P101} changes state from value 1 to value 2 when the level of \texttt{P1\_LIT101} is about 813, while it changes from value 2 to 1 when the level of \texttt{P1\_LIT101} is about 535. We can deduce that \texttt{P1\_P101} is responsible for emptying the tank	
+\end{itemize}
+
+The information obtained here can be used, as mentioned above, to refine the enrichment of the dataset by setting directives in the \texttt{[DATASET]} section of the \textit{config.ini} file, should this be empty or only partially set, or to make the first conjectures about the system, as we have just seen.
+
+\bigskip
+The \texttt{system\_info.py} file can also run in standalone mode if needed: it takes as command-line arguments the dataset to be analyzed, a list of actuators, and a list of sensors. For analysis related to state changes, the dataset must mandatorily be of the enriched type.
 
 \subsection{Phase 2: Graphs and Statistical Analysis}
 \label{subsec:improve_graphs}
+
+The new \textit{graph analysis} arises from the need to give the user an overview of the (sub)system obtained in the previous pre-processing phase, identifying more easily the typology of the registers and grasping more effectively the relationships and the dynamics that may exist between the registers controlled by one or more PLCs, confirming the initial conjectures if the brief analysis described in the previous section has been performed, or making new ones thanks to the visual graph support. 
+
+\bigskip
+In the previous tool, as already pointed out in Section \ref{subsec:ceccato_limitations}, it is possible to view the chart of one only register at a time: this certainly makes it possible to identify, or at least to hypothesize, the type of that register, but it makes it very complicated to be able to relate it to the other components of the system and thus to derive conjectures about the behavior of the latter, conjectures to be possibly confirmed in the later phases. Hence the need to create a tool that was better than the previous one and that provided more information in an easier way.
 
 \subsection{Phase 3: Invariant Analysis}
 \label{subsec:improve_invariants}
