@@ -102,6 +102,7 @@ class MergeDatasets:
         # Genero e aggiungo le colonne slope_
         for col in cols:
             data_var = data_set[self.config['DATASET']['trend_cols_prefix'] + col]
+            #data_var = data_set[col]
 
             mean_slope = [None for _ in range(len(data_var))]
 

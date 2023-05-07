@@ -172,7 +172,7 @@ def main():
     si.find_actuators_list()
     si.find_sensors()
     si.find_setpoints_spares()
-    # si.actuator_status_change()
+    si.actuator_status_change()
 
 
 if __name__ == '__main__':
