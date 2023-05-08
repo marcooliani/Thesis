@@ -423,6 +423,84 @@ The new \textit{graph analysis} arises from the need to give the user an overvie
 \bigskip
 In the previous tool, as already pointed out in Section \ref{subsec:ceccato_limitations}, it is possible to view the chart of one only register at a time: this certainly makes it possible to identify, or at least to hypothesize, the type of that register, but it makes it very complicated to be able to relate it to the other components of the system and thus to derive conjectures about the behavior of the latter, conjectures to be possibly confirmed in the later phases. Hence the need to create a tool that was better than the previous one and that provided more information in an easier way.
 
+\bigskip
+The first thing I thought was that an approach similar to Figure \ref{fig:graph_analysis_prop3}, with all the graphs contained within a single plot, might be the most suitable one: unfortunately, I quickly realized that this solution presented several issues, which are highlighted in figure \ref{fig:4_plot_comparison_1}. 
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/wrong_plot_1.png}
+		\caption{}
+		\label{subfig:4_wrong_plot}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap4/wrong_plot_2.png}
+		\caption{}
+		\label{subfig:4_wrong_plot_zoom}
+	\end{subfigure}
+	\caption{Plotting registers on the same y-axis}
+	\label{fig:4_plot_comparison_1}
+\end{figure}
+In figure \ref{subfig:4_wrong_plot} it can be seen that the biggest issue is the use of the same y-axis, related to the values of the individual registers, for all charts: if the range between register values is wide, the risk of some charts resembling a single flat line, or at any rate being in fact indistinguishable and very difficult to read immediately; furthermore, as shown in Figure \ref{subfig:4_wrong_plot_zoom}, if registers have similar values to each other, the respective graphs may be confusing to each other, making them more difficult to understand.
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap4/graph_analysis_plot_1.png}
+		\caption{Example of plotting charts of a PLC registers using subplots}
+		\label{subfig:4_graph_analysis_1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.9\textwidth}
+		\includegraphics[width=\textwidth]{chap4/graph_analysis_plot_2.png}
+		\caption{Zooming on a particular zone of the charts}
+		\label{subfig:4_graph_analysis_2}
+	\end{subfigure}
+	\caption{Example of the new graph analysis}
+	\label{fig:4_graph_analysis}
+\end{figure}
+
+The solution to this problem is as simple as it is effective, and it is the \textbf{use of subplots}: each register corresponds to a chart subplot, which shares with the other subplots the temporal axis (the x-axis) while keeping the y-axis of the values of each register independent: this allows us to maintain the readability and comprehensibility of the charts shown and at the same time to be able to grasp with immediacy the relationships between them. Furthermore, thanks to the sharing of the time axis, it is possible to zoom in on a particular area of one of the subplots and automatically the other ones will be zoomed in as well so that no information and no connection between registers is lost. Figure \ref{fig:4_graph_analysis} illustrates more clearly what has just been explained: the charts refer to the PLC1 registers of the iTrust SWaT system.
+
+\bigskip
+To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the brief analysis from the previous step:
+
+\begin{itemize}
+	\item the chart of \texttt{P1\_FIT101} seems to confirm that this register can be associated with a \textbf{measurement}; moreover, we can see that the trend of this register is closely related to the periods in which \texttt{P1\_LIT101} has an increasing trend and to the evolution of \texttt{P1\_MV101}. Its values, between about 0 and 2.5, are too narrow to say that this register represents the tank, and the general trend also leads in that direction: we can therefore assume that it is a \textbf{pressure or flow sensor}
+	
+	\item \texttt{P1\_LIT101}, because of the above, would therefore seem to \textbf{represent a tank}, as already assumed in the brief analysis
+	
+	\item \texttt{P1\_MV101} assumes value 2 at the beginning of the ascending trend of \texttt{P1\_LIT101}, while it has value 1 in correspondence with the \textit{plateau} that is seen when the measurement is about 800 and when the trend of it is descending. Thus, we can have a confirmation of the initial conjecture: 1 represents the OFF state of the sensor, 2 the ON state, and \texttt{P1\_MV101} is the \textbf{actuator responsible for the rising level} of \texttt{P1\_LIT101}
+	
+	\item \texttt{P1\_MV101} switches and stays in the 0 state for a very few seconds and acts as a kind of "transient" between states 1 and 2. It can be assumed that that is the period of time it actually takes for the actuator to change state
+	
+	\item \texttt{P1\_P101} assumes value 2 at the beginning of the descending trend of \texttt{P1\_LIT101}, after the \textit{plateu}, and returns to value 1 at the change of slope of the (likely) tank increase: taken by itself this fact is not very clear, so it needs to be compared with \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its behavior: it can be seen that when \texttt{P1\_101} and \texttt{P1\_MV101} are in state 1 the water level remains stable, whereas, when \texttt{P1\_P101} changes to state 2 the level of the measurement drops rapidly; when \texttt{P1\_MV101} then also returns to state 2, the level of the measurement slowly starts rising again and then has a sudden rise at the change of state of \texttt{P1\_P101} from 2 to 1. We can therefore infer that \texttt{P1\_P101} is the \textbf{actuator responsible for emptying} the (presumed) tank: state 1 represents the OFF state, while state 2 represents the ON state
+	
+	\item \texttt{P1\_P102} seems to play no role in the system, since its state remains at 1 all the time. It seems improbable that it could be a relative setpoint, so it can be assumed, according to the brief analysis, that it may be a \textbf{spare actuator}
+\end{itemize}
+
+\bigskip
+As you have probably already noticed, the vast majority of the graphs shown in the previous sections and chapters were generated precisely using the new graph analysis script.\newline
+The script that performs the new graph analysis is \texttt{runChartsSubPlots.py}, located in the \texttt{\$(project-dir)/statistical-graphs} directory, which is written in Python and makes use, like the previous one, of the \textit{matplotlib} libraries to generate the graph plots.\newline
+The script accepts the following command-line parameters:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the dataset, in csv format, from which to read the data. The dataset must be located within the directory containing the enriched datasets for the invariant analysis phase. If subsequent parameters are not specified, the script will show all registers in the dataset, except for additional attributes
+	
+	\item \textbf{-r} or \textbf{{-}{-}registers}: specifies one or more specific registers to be displayed
+	
+	\item \textbf{-a} or \textbf{{-}{-}addregisters}: adds one or more registers to the default visualization. This option is useful in case an additional attribute such as slope is to be analyzed
+	
+	\item \textbf{-e} or \textbf{{-}{-}excluderegisters}: excludes one or more specific registers from the default visualization. This option is useful to avoid displaying hardcoded setpoints or spare registers
+\end{itemize}
+This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
+
+\paragraph{Statistical Analysis} A brief mention of the statistical analysis part: after careful evaluation, I decided \textbf{not to include this aspect} of the previous tool within my framework, because I saw no real practical use for it. The actual statistical information can be easily integrated into the brief analysis immediately following the pre-processing phase, while the histogram has relative utility and, in my opinion, is outdated by the new graph analysis I implemented. 
+
+\bigskip
+However, the Python \texttt{histPlots\_Stats.py} script remains in the directory, essentially unchanged from the one developed by Ceccato et al., in case future use is needed. 
+
 \subsection{Phase 3: Invariant Analysis}
 \label{subsec:improve_invariants}
 
