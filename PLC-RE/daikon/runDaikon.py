@@ -91,7 +91,8 @@ class RunDaikon:
                 section_output.append(invariant)
             elif invariant.find('one of') != -1:
                 section_output.append(invariant)
-            elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') == -1:
+            # elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') == -1:
+            elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') != -1:
                 a, b = invariant.split(' != ')
                 if a not in not_equal:
                     not_equal[a] = []

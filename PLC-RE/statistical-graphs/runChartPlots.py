@@ -6,7 +6,7 @@ import sys
 import statistics
 
 #df = pd.read_csv('../daikon/Daikon_Invariants/PLC_Dataset.csv')
-df = pd.read_csv('../daikon/Daikon_Invariants/PLC_Dataset.csv')
+df = pd.read_csv('../daikon/Daikon_Invariants/TestTest.csv')
 
 for x in range(1,len(sys.argv)):
   plt.plot(pd.DataFrame(df,columns=[str(sys.argv[x])]), label=str(sys.argv[x]))

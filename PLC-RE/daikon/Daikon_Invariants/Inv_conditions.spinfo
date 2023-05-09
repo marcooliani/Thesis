@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-PLC1_InputRegisters_IW0 > 60
+P1_P101 == 2.0 && P1_LIT101 < max_P1_LIT101 - 16 && P1_LIT101 > min_P1_LIT101 + 15 
