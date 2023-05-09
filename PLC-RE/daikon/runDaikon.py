@@ -86,13 +86,14 @@ class RunDaikon:
         for invariant in section:
             # find() trova l'indice della stringa cercata: se non la trova,
             # allora -1
-            if invariant.find('<==>') != -1 or invariant.find(' ==>') != -1:
+            if (invariant.find('<==>') != -1 or invariant.find(' ==>') != -1) \
+                    and invariant.find(self.config["DATASET"]["prev_cols_prefix"]) == -1 \
+                    and invariant.find(self.config["DATASET"]["trend_cols_prefix"]) == -1:
                 invariant = invariant.replace('(', '').replace(')', '')
                 section_output.append(invariant)
-            elif invariant.find('one of') != -1:
+            elif invariant.find('one of') != -1 and invariant.find(self.config["DATASET"]["prev_cols_prefix"]) == -1:
                 section_output.append(invariant)
-            # elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') == -1:
-            elif invariant.find('!=') != -1 and invariant.find('self.config["DATASET"]["prev_cols_prefix"]') != -1:
+            elif invariant.find('!=') != -1 and invariant.find(self.config["DATASET"]["prev_cols_prefix"]) == -1:
                 a, b = invariant.split(' != ')
                 if a not in not_equal:
                     not_equal[a] = []

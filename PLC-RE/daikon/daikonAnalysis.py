@@ -196,6 +196,8 @@ class DaikonAnalysis:
                 if a not in actuators_list:
                     print(f"Actuator {a} does not exist. Aborting")
                     exit(0)
+        else:
+            input_actuators = actuators_list
 
         return input_actuators
 
