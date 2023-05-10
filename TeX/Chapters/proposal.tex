@@ -461,7 +461,7 @@ In figure \ref{subfig:4_wrong_plot} it can be seen that the biggest issue is the
 	\label{fig:4_graph_analysis}
 \end{figure}
 
-The solution to this problem is as simple as it is effective, and it is the \textbf{use of subplots}: each register corresponds to a chart subplot, which shares with the other subplots the temporal axis (the x-axis) while keeping the y-axis of the values of each register independent: this allows us to maintain the readability and comprehensibility of the charts shown and at the same time to be able to grasp with immediacy the relationships between them. Furthermore, thanks to the sharing of the time axis, it is possible to zoom in on a particular area of one of the subplots and automatically the other ones will be zoomed in as well so that no information and no connection between registers is lost. Figure \ref{fig:4_graph_analysis} illustrates more clearly what has just been explained: the charts refer to the PLC1 registers of the iTrust SWaT system.
+The solution to this issue is simple and effective: the use of \textbf{subplots}. Basically, each register corresponds to a subplot of the graph that shares the time axis (the x-axis) with the other subplots, but keeps the y-axis of the values of each register independent. This maintains the readability and comprehensibility of the charts, while simultaneously being able to immediately grasp the relationships between them. In addition, by sharing the time axis, it is possible to zoom in on a particular area of one of the charts and automatically the other ones will be zoomed in as well, thus not losing any information and no connection between registers. Figure \ref{fig:4_graph_analysis} illustrates more clearly what has just been explained: the charts refer to the PLC1 registers of the iTrust SWaT system.
 
 \bigskip
 To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the brief analysis from the previous step:
@@ -496,22 +496,15 @@ The script accepts the following command-line parameters:
 \end{itemize}
 This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
 
-\paragraph{Statistical Analysis} A brief mention of the statistical analysis part: after careful evaluation, I decided \textbf{not to include this aspect} of the previous tool within my framework, because I saw no real practical use for it. The actual statistical information can be easily integrated into the brief analysis immediately following the pre-processing phase, while the histogram has relative utility and, in my opinion, is outdated by the new graph analysis I implemented. 
-
-\bigskip
+\paragraph{Statistical Analysis} A quick mention of the statistical analysis part: after careful evaluation, I decided \textbf{not to include this aspect} of the previous tool within the framework, because I saw no real practical use for it. The actual statistical information can be easily integrated into the brief analysis immediately following the pre-processing phase, while the histogram has relative utility and, in my opinion, is outdated by the new graph analysis I implemented. \newline
 However, the Python \texttt{histPlots\_Stats.py} script remains in the directory, essentially unchanged from the one developed by Ceccato et al., in case future use is needed. 
 
-\subsection{Phase 3: Invariant Analysis}
+\subsection{Phase 3: Invariant Inference and Analysis}
 \label{subsec:improve_invariants}
 
-%\subsection{Automatic Detection of Actuators and Sensors}
-\subsubsection{Invariants Generation}
 
 \subsection{Phase 4: Businness Process Analysis}
 \label{subsec:improve_bpa}
-
-%\section{Extra Information on the Physics}
-%\label{sec:extra_info}
 
 \vfill
 \nolinenumbers
