@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-import subprocess
 
-import numpy as np
 import os
-import sys
 import pandas as pd
+import numpy as np
 import glob
 import csv
 import argparse
 import configparser
+import subprocess
 import math
-
-from statsmodels.tsa.seasonal import seasonal_decompose, STL
+from rdp import rdp
 
 
 class MergeDatasets:
@@ -21,7 +19,7 @@ class MergeDatasets:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-g', "--granularity", type=int, default=self.config['PREPROC']['granularity'],
+        parser.add_argument('-e', "--epsilon", type=int,
                             help="choose granularity in seconds (for slopes)")
         parser.add_argument('-s', "--skiprows", type=int, default=self.config['PREPROC']['skip_rows'],
                             help="skip seconds from start")
@@ -36,7 +34,7 @@ class MergeDatasets:
         parser.add_argument('-p', "--plcs", nargs='+', default=[], help="PLCs to include (w/o path)")
         self.args = parser.parse_args()
 
-        self.granularity = self.args.granularity
+        self.epsilon = self.args.epsilon
         self.nrows = self.args.nrows
         # La read_csv() vuole un array con tutte le righe da skippare
         self.skiprows = [row for row in range(1, self.args.skiprows)]
@@ -86,40 +84,37 @@ class MergeDatasets:
 
         return data_set
 
-    def __add_trends(self, data_set, cols):
-        for col in cols:
-            # decomposition = seasonal_decompose(np.array(data_set[col]), model='additive',
-            # period=int(self.config['DATASET']['trend_period']))
-            stl = STL(data_set[col], period=int(self.config['DATASET']['trend_period']), robust=True)
-            decomposition = stl.fit()
-            col_trend = [x for x in decomposition.trend]
-
-            data_set.insert(len(data_set.columns), self.config['DATASET']['trend_cols_prefix'] + col, col_trend)
-
-        return data_set
+    @staticmethod
+    def truncate_float(num, dec):
+        if num > 0:
+            return math.floor(num * 10 ** dec) / 10 ** dec
+        elif num < 0:
+            return math.ceil(num * 10 ** dec) / 10 ** dec
 
     def __add_slopes(self, data_set, cols):
         # Genero e aggiungo le colonne slope_
+
+        slope = [None for _ in range(len(data_set))]
+
         for col in cols:
-            data_var = data_set[self.config['DATASET']['trend_cols_prefix'] + col]
-            # data_var = data_set[col]
+            ind = [i for i in data_set[col].index]
+            vals = data_set[col].values.tolist()
 
-            mean_slope = [None for _ in range(len(data_var))]
+            points = np.column_stack([ind, vals])
+            points_rdp = rdp(points, epsilon=self.epsilon)
 
-            for i in range(len(data_var)):
-                if i % self.granularity == 0 and i + self.granularity <= len(data_var) - 1:
-                    for j in range(i, (i + self.granularity)):
-                        # mean_slope[j] = round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2)
-                        if round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) > 0:
-                            # mean_slope[j] = math.ceil(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            mean_slope[j] = 1
-                        elif round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2) < 0:
-                            # mean_slope[j] = math.floor(round((data_var[i + self.granularity] - data_var[i]) / self.granularity, 2))
-                            mean_slope[j] = -1
-                        else:
-                            mean_slope[j] = 0
+            for i in range(1, len(points_rdp)):
+                s = (points_rdp[i][1] - points_rdp[i-1][1]) / (points_rdp[i][0] - points_rdp[i-1][0])
+                print(points_rdp[i-1][0], points_rdp[i][0], self.truncate_float(s, 2))
+                for j in range(int(points_rdp[i-1][0]), int(points_rdp[i][0])):
+                    if self.truncate_float(s, 2) > 0:
+                        slope[j] = 1
+                    elif self.truncate_float(s, 2) < 0:
+                        slope[j] = -1
+                    else:
+                        slope[j] = 0
 
-            data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, mean_slope)
+            data_set.insert(len(data_set.columns), self.config['DATASET']['slope_cols_prefix'] + col, slope)
 
         return data_set
 
@@ -144,17 +139,13 @@ class MergeDatasets:
 
         data_set = None
         val_cols_max_min = None
-        val_cols_trends = None
         val_cols_slopes = None
         val_cols_prevs = None
 
         if self.config['DATASET']['max_min_cols_list']:
             val_cols_max_min = dataset.columns[
                 dataset.columns.str.contains(pat=self.config['DATASET']['max_min_cols_list'], case=False, regex=True)]
-        if self.config['DATASET']['trend_cols_list']:
-            val_cols_trends = dataset.columns[
-                dataset.columns.str.contains(pat=self.config['DATASET']['trend_cols_list'], case=False, regex=True)]
-        if self.config['DATASET']['slope_cols_list'] and self.config['DATASET']['trend_cols_list']:
+        if self.config['DATASET']['slope_cols_list']:
             val_cols_slopes = dataset.columns[
                 dataset.columns.str.contains(pat=self.config['DATASET']['slope_cols_list'], case=False, regex=True)]
         if self.config['DATASET']['prev_cols_list']:
@@ -163,12 +154,7 @@ class MergeDatasets:
 
         if self.config['DATASET']['max_min_cols_list']:
             data_set = self.__add_setpoints(dataset, val_cols_max_min)
-        if self.config['DATASET']['trend_cols_list']:
-            if data_set is not None:
-                data_set = self.__add_trends(data_set, val_cols_trends)
-            else:
-                data_set = self.__add_trends(dataset, val_cols_trends)
-        if self.config['DATASET']['slope_cols_list'] and self.config['DATASET']['trend_cols_list']:
+        if self.config['DATASET']['slope_cols_list']:
             if data_set is not None:
                 data_set = self.__add_slopes(data_set, val_cols_slopes)
             else:
@@ -245,7 +231,6 @@ class MergeDatasets:
     def save_mining_dataset(self, datasets_list):
         mining_datasets = self.__concat_datasets(datasets_list)
         # Save dataset with the timestamp for the process mining.
-        mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
         mining_datasets.to_csv(
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"], self.output_file.split(".")[0])}_TS.csv',
             index=False)
@@ -259,19 +244,11 @@ class MergeDatasets:
             daikon_datasets = daikon_datasets.drop(self.config['DATASET']['timestamp_col'], axis=1, errors='ignore')
 
         # Drop first rows (Daikon does not process missing values)
-        # Taglio anche le ultime righe, che hanno lo slope = 0
-        # daikon_datasets = daikon_datasets.iloc[::mg.granularity, :] # Prendo solo le n-granularities righe
-        daikon_datasets = daikon_datasets.iloc[1:-self.granularity, :]
+        daikon_datasets = daikon_datasets.iloc[1:-1, :]
         daikon_datasets.to_csv(
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["DAIKON"]["daikon_invariants_dir"], self.output_file)}',
             index=False)
         # print(daikon_datasets)  # Debug
-
-    @staticmethod
-    def add_zeros_column(dataframe):
-        print(f'Add zeros column to dataframe')
-        zero_col = [0 for _ in range(dataframe.shape[0])]
-        dataframe.insert(len(dataframe.columns), "zero_col", zero_col)
 
 
 def main():

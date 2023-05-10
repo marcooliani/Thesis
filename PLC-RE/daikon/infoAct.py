@@ -6,6 +6,7 @@ import argparse
 import configparser
 import subprocess
 import re
+import tslearn
 
 
 class ActuatorsBehaviour:

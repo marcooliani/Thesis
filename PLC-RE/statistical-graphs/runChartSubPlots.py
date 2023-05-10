@@ -16,7 +16,7 @@ class RunChartsSubPlots:
 
         parser = argparse.ArgumentParser()
         parser.add_argument('-f', "--filename", type=str,
-                            default=self.config['DEFAULTS']['dataset_file'], help="CSV file to analyze")
+                            default=self.config['PREPROC']['dataset_file'], help="CSV file to analyze")
         parser.add_argument('-r', "--registers", nargs='+', help="registers to include", required=False)
         parser.add_argument('-e', "--excluderegisters", nargs='+', help="registers to exclude", required=False)
         parser.add_argument('-a', "--addregisters", nargs='+', help="registers to add", required=False)
@@ -33,7 +33,6 @@ class RunChartsSubPlots:
             registers = [x for x in df_cols if not x.startswith(self.config['DATASET']['max_prefix'])
                          and not x.startswith(self.config['DATASET']['min_prefix'])
                          and not x.startswith(self.config['DATASET']['prev_cols_prefix'])
-                         and not x.startswith(self.config['DATASET']['trend_cols_prefix'])
                          and not x.startswith(self.config['DATASET']['slope_cols_prefix'])]
 
             if self.args.excluderegisters:
