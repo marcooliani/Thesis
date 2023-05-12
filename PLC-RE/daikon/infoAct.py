@@ -24,7 +24,7 @@ class ActuatorsBehaviour:
 
         self.args = parser.parse_args()
 
-        self.dataset = self.config['DEFAULTS']['dataset_file']
+        self.dataset = self.config['PREPROC']['dataset_file']
         self.actuators = dict()
         self.setpoints = list()
 

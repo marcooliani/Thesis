@@ -107,7 +107,7 @@ class MergeDatasets:
                 s = (points_rdp[i][1] - points_rdp[i-1][1]) / (points_rdp[i][0] - points_rdp[i-1][0])
                 print(points_rdp[i-1][0], points_rdp[i][0], self.truncate_float(s, 2))
                 for j in range(int(points_rdp[i-1][0]), int(points_rdp[i][0])):
-                    if self.truncate_float(s, 2) > 0:
+                    if self.truncate_floati(s, 2) > 0:
                         slope[j] = 1
                     elif self.truncate_float(s, 2) < 0:
                         slope[j] = -1

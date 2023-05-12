@@ -20,12 +20,15 @@ class DaikonAnalysis:
         parser.add_argument('-s', "--simpleanalysis", type=bool, default=False,
                             help="simple Daikon analysis on single actuators")
         parser.add_argument('-c', "--customanalysis", type=bool, default=False,
-                            help="Daikon analysis on actuators based on state changes")
+                            help="Daikon analysis based on actuators state changes")
         parser.add_argument('-u', "--uppermargin", type=int, default=self.config['DAIKON']['max_security_pct_margin'],
                             help="Upper safety margin (percent)")
         parser.add_argument('-l', "--lowermargin", type=int, default=self.config['DAIKON']['min_security_pct_margin'],
                             help="Lower safety margin (percent)")
         self.args = parser.parse_args()
+
+        if not (self.args.simpleanalysis or self.args.customanalysis):
+            parser.error('At least one between -c and -s is required')
 
         if self.args.filename.split('.')[-1] != "csv":
             print("Invalid file format (must be .csv). Aborting")
@@ -133,28 +136,6 @@ class DaikonAnalysis:
                 edge_list.append((b, a))
 
         self.make_dfs(edge_list, self.setpoints)
-
-    def print_info(self):
-        print("### Probable Actuators ### ")
-        print("---------------------------")
-        print("Name\t|  Values")
-        print('---------------------------')
-        for key, val in self.actuators.items():
-            print(f'{key} \t|  {" - ".join(map(str, val))}')
-        print("---------------------------")
-        print()
-
-        print('### Constants / Relative Setpoints ###')
-        print('---------------------------')
-        for i in self.constants:
-            print(' = '.join(map(str, i)))
-        print('---------------------------')
-        print()
-
-        print('### Other Relative Setpoints ###')
-        print('---------------------------')
-        for i in self.setpoints:
-            print(' = '.join(map(str, i)))
 
     def __find_min_max(self, sensor):
         str_max = self.config['DATASET']['max_prefix'] + sensor

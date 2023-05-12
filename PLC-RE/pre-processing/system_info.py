@@ -138,6 +138,31 @@ class SystemInfo:
             print(f'{k} {v}')
         print()
 
+    def actuator_status_period(self):
+        actuators_list = [k for k, v, in self.actuators.items()]
+        df = pd.read_csv(self.dataset, encoding='utf-8', usecols=actuators_list)
+
+        print("Actuators period:")
+        for actuator in actuators_list:
+            vals_act = [x for x in df[actuator]]
+
+            for v in self.actuators[actuator]:
+                period = list()
+                count_vals = 0
+                for i in range(1, len(vals_act)):
+                    if vals_act[i] == v and vals_act[i-1] != v:
+                        count_vals += 1
+                    elif vals_act[i] == v and vals_act[i-1] == v:
+                        count_vals += 1
+                    elif vals_act[i] != v and vals_act[i-1] == v:
+                        count_vals += 1
+                        period.append(count_vals)
+                        count_vals = 0
+
+                print(f'{actuator} == {v}')
+                print('  '.join(map(str, period)))
+            print()
+
     def actuator_status_change(self):
         actuators = defaultdict(dict)
         sensors = defaultdict(dict)
@@ -156,6 +181,7 @@ class SystemInfo:
         else:
             sensors = self.sensors
 
+        print("Actuator change states:")
         for actuator, _ in actuators.items():
             for sensor, _ in sensors.items():
                 df = pd.read_csv(self.dataset,
@@ -173,6 +199,7 @@ def main():
     si.find_sensors()
     si.find_setpoints_spares()
     si.actuator_status_change()
+    si.actuator_status_period()
 
 
 if __name__ == '__main__':
