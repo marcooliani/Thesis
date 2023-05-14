@@ -142,7 +142,7 @@ class SystemInfo:
         actuators_list = [k for k, v, in self.actuators.items()]
         df = pd.read_csv(self.dataset, encoding='utf-8', usecols=actuators_list)
 
-        print("Actuators period:")
+        print("Actuator state durations:")
         for actuator in actuators_list:
             vals_act = [x for x in df[actuator]]
 
@@ -161,7 +161,7 @@ class SystemInfo:
 
                 print(f'{actuator} == {v}')
                 print('  '.join(map(str, period)))
-            print()
+                print()
 
     def actuator_status_change(self):
         actuators = defaultdict(dict)
@@ -181,7 +181,7 @@ class SystemInfo:
         else:
             sensors = self.sensors
 
-        print("Actuator change states:")
+        print("Actuator state changes:")
         for actuator, _ in actuators.items():
             for sensor, _ in sensors.items():
                 df = pd.read_csv(self.dataset,
