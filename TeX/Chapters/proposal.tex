@@ -230,7 +230,7 @@ Following is a brief explanation of the parameters just seen:
 	\item[\texttt{slope\_cols\_prefix}, \texttt{slope\_cols\_list}] are related to the calculation of the slope of a specific register (usually a measure), that is, its trend. The slope can be ascending (if its value is greater than zero), descending (if less than zero) or stable (if approximately equal to zero).I will discuss the slope calculation in more detail in the next paragraph, as it is related to the attributes \texttt{trend\_cols\_prefix}, \texttt{trend\_cols\_list} and \texttt{trend\_period}
 \end{description}
 
-Initially, the parameters for registers to be associated with each additional attribute may be left blank, assuming that we do not know the system at all and therefore do not know which registers may be actuators, which measures, and which further. This informations can be obtained from the \textbf{brief analysis} following the datasets merging operation: this analysis, performed at the user's choice, indicates which may be likely sensors, which actuators, and further information of various kinds: these indications allow the user to be able to set the desired values in \textit{config.ini} file and hence refine the enrichment process by re-launching the\\ 
+Initially, the parameters for registers to be associated with each additional attribute may be left blank, assuming that we do not know the system at all and therefore do not know which registers may be actuators, which measures, and which further. This information can be obtained from the \textbf{brief analysis} following the datasets merging operation: this analysis, performed at the user's choice, indicates which may be likely sensors, which actuators, and further information of various kinds: these indications allow the user to be able to set the desired values in \textit{config.ini} file and hence refine the enrichment process by re-launching the\\ 
 \texttt{mergeDatasets.py} script again.
 
 \paragraph{Slope Calculation}
@@ -658,7 +658,7 @@ These two types of analysis will be handled by the Python script\\ \texttt{daiko
 The script accepts the following command-line arguments:
 
 \begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. The dataset must be located within the directory containing the enriched datasets specified in the \textit{config.ini} file.
+	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. The dataset must be located within the directory containing the enriched datasets specified in the \textit{config.ini} file (by default \texttt{\$(project\_dir)/daikon/Daikon\_Invariants}).
 	
 	\item \textbf{-s} or \textbf{{-}{-}simpleanalysis}: performs the analysis on the states of individual actuators
 	
@@ -736,19 +736,23 @@ An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_sy
 	P1_FIT101 > P1_MV101
 	P1_FIT101 > P1_P101
 \end{lstlisting}
-Compared to Listing \ref{lst:4_daikon_new_output_plc1}, this time in the general invariants section we can observe the presence of implications, which were previously absent (the remaining generic invariants have been omitted for reasons of space). Such implications can provide very useful information, as in this case: for example, the invariant on line 18 tells us that if the value of \texttt{P1\_MV101} is greater than that of \texttt{P1\_P101} then the value of the slope is 1, that is, the tank level is increasing. Consequently, we have further confirmation that the state \texttt{P1\_MV101 == 2} is the ON state for that actuator and that it is the actuator responsible for filling the tank \texttt{P1\_LIT101}. Comparing the other analysis outcomes, we will discover that \texttt{P1\_P101} is instead responsible for emptying the tank and that its ON and OFF states are 2 and 1, respectively.\newline
+Compared to Listing \ref{lst:4_daikon_new_output_plc1}, this time we can observe in the general invariants section the presence of implications, which were previously absent (the remaining generic invariants have been omitted for reasons of space). Such implications can provide very useful information, as in this case: for example, the invariant on line 18 tells us that if the value of \texttt{P1\_MV101} is greater than that of \texttt{P1\_P101} then the value of the slope is 1, that is, the tank level is increasing. Consequently, we have further confirmation that the state \texttt{P1\_MV101 == 2} is the ON state for that actuator and that it is the actuator responsible for filling the tank \texttt{P1\_LIT101}. Comparing the other analysis outcomes, we will discover that \texttt{P1\_P101} is instead responsible for emptying the tank and that its ON and OFF states are 2 and 1, respectively.\newline
 In addition, the invariant at line 8 also indicates that when the actuator \texttt{P1\_MV101} is in state 2 and \texttt{P1\_P101} is in state 1 then the value of \texttt{P1\_FIT101} is greater than 2: consequently, it follows that the corresponding sensor is measuring something relative to the tank \texttt{P1\_LIT101}.\newline
 The above is confirmed by the invariants related to the analysis condition: at line 24 we have that the slope is indeed equal to 1 (thus increasing) and that \texttt{P1\_FIT101}, at line 26, takes values greater than 2 when \texttt{P1\_MV101} is equal to 2.
 
 \paragraph{Refining the Analysis}
-In some cases, it may happen that the outcomes provided by the semiautomatic analyses are not satisfactory to the user (e.g., the value of the slope may not emerge clearly) or simply the user wants to investigate a particular aspect of the system in more detail by trying to discover additional invariants that did not emerge previously: in this case, it is possible to run a new and more specific invariant analysis using the Python script \texttt{runDaikon.py}, which allows for more punctual analyses of the system.\newline
+In some cases, it may happen that the outcomes provided by the semi-automated analyses are not satisfactory to the user (e.g., the value of the slope may not emerge clearly) or simply the user wants to investigate a particular aspect of the system in more detail by trying to discover additional invariants that did not emerge previously: in this case, it is possible to run a new and more specific invariant analysis using the Python script \texttt{runDaikon.py}, which allows for more punctual analyses of the system.\newline
 The script, also contained in the default directory \texttt{\$(project\_dir)/daikon}, accepts three command-line parameters:
 
 \begin{itemize}
 	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. Even in this case, the dataset must be located within the directory containing the enriched datasets
-	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the .spinfo file. It is possible to specify more than one condition, but it is recommended to use the logical operator \&\&
+	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the \textit{.spinfo} file. It is possible to specify more than one condition, but it is recommended to use the logical operator \texttt{\&\&}
 	\item \textbf{-r} or \textbf{{-}{-}register}: specifies the directory where to save the text file with the outcomes
 \end{itemize}
+Performing this single analysis will produce a single output file containing the invariants discovered, file that will be saved in the directory specified by the user via the \texttt{-r} command-line option (by default the file will be saved in the directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}) to be examined later by the user.
+
+\bigskip
+In conclusion, the two types of analysis presented, along with the possibility of allowing for more refined analysis at a later date and Daikon's redefined output, make this stage much more complete, clear, and powerful than before
 
 \subsection{Phase 4: Businness Process Analysis}
 \label{subsec:4_improve_bpa}
