@@ -69,6 +69,7 @@ class SwatCSVExtractor:
         self.df.insert(loc=0, column=self.config['DATASET']['timestamp_col'], value=timestamp)
         self.df = self.df.drop(['time', 'date'], axis=1, errors='ignore')
         self.df.rename({'Modbus_Function_Description': 'service'}, axis=1, inplace=True)
+        self.df.rename({'SCADA_Tag': 'register'}, axis=1, inplace=True)
 
         if self.csv_timerange:
             self.df = self.df.loc[self.df[self.config['DATASET']['timestamp_col']].between(self.csv_timerange[0],
@@ -97,25 +98,52 @@ class SwatCSVExtractor:
         self.df['Modbus_Value'] = self.df['Modbus_Value'].str.split('; ').str[0]
         self.df['Modbus_Value'] = self.df['Modbus_Value'].str.replace('0x', '').str.replace(' ', '')
 
+        '''
         for row in range(len(self.df)):
             if pd.isna(self.df['Modbus_Value'].iloc[row]):
                 continue
             if "Response" in self.df['service'].iloc[row]:
                 converted_val = self.__get_cip_data(self.df['Modbus_Value'].iloc[row])
                 self.df['Modbus_Value'].iloc[row] = converted_val
+        '''
 
         # print(self.df)
+
         sources = sorted(self.df['src'].unique())
         destinations = sorted(self.df['dst'].unique())
-        ips = list(set(sources).intersection(destinations))
-        print(ips)
-        # print(sources)
 
-        '''
+        #### Test chi comunica con chi e in che modo
+        comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
+        print(comm2)
+        comm = self.df[['src', 'dst']].drop_duplicates().values.tolist()
+        # print(comm)
+        plc_comm_dir = list()
+        for i in comm[:]:
+            for j in comm[:]:
+                if j == i:
+                    continue
+
+                if sorted(j) == sorted(i):
+                    #print(i, j)
+                    plc_comm_dir.append((sorted(j), 'b'))
+                    comm.remove(j)
+                    comm.remove(i)
+                    break
+        if len(comm) > 0:
+            for x in comm:
+                plc_comm_dir.append((x, 'u'))
+
+        print(plc_comm_dir)
+        ### Fine test
+
+        #ips = sorted(list(set(sources).intersection(destinations)))
+        ips = sources
+        #print(sources)
+        #print(destinations)
+
         for i in range(len(ips)):
             self.df['src'] = self.df['src'].replace(ips[i], 'P' + str(i + 1))
             self.df['dst'] = self.df['dst'].replace(ips[i], 'P' + str(i + 1))
-        '''
 
         self.df.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"])}/test_net2015.csv',
                        index=False)

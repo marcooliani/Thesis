@@ -103,6 +103,7 @@ class ExportPCAPData:
         df.rename({'ip.src': 'src'}, axis=1, inplace=True)
         df.rename({'ip.dst': 'dst'}, axis=1, inplace=True)
         df.rename({'_ws.col.Protocol': 'Protocol'}, axis=1, inplace=True)
+        df.rename({'cip.symbol': 'register'}, axis=1, inplace=True)
         df.rename({'frame.time_epoch': self.config['DATASET']['timestamp_col']}, axis=1, inplace=True)
         df[self.config['DATASET']['timestamp_col']] = pd.to_datetime(df[self.config['DATASET']['timestamp_col']],
                                                                      unit='s')
