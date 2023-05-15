@@ -1,2 +1,36 @@
 \chapter{Case study: the iTrust SWaT System}
 \label{casestudy}
+
+\linenumbers
+\lettrine[lines=2]{H}{aving} introduced the innovative framework and highlighted its potential in the preceding chapter, we now turn our attention to the case study where we will apply this framework. As previously mentioned in Chapter \ref{chap:proposal} and demonstrated through various examples in the same chapter, our focus will be on the \textbf{iTrust SWaT system} \cite{swat_home}, developed by the University of Singapore for Technology and Design \cite{itrust_site}. The acronym SWaT represents \textit{\textbf{S}ecure \textbf{Wa}ter \textbf{T}reatment}.
+
+\bigskip
+The iTrust SWaT system is a testbed that replicates on a small scale a real water treatment plant arises to support research in the area of cyber security of industrial control systems and has been operational since March 2015: it is still being used by students at the University of Singapore for educational and training purposes and is available to organizations to train their operators on cyber physical incidents.
+
+\section{Architecture}
+\label{sec:5_swat_architecture}
+Unlike the testbed seen in Chapter 3 for Ceccato et al., iTrust's SWaT system is not virtualized, but rather consists entirely of physical hardware elements, from field devices to PLCs via the HMI and ending with the SCADA workstations and SCADA server (otherwise known as \textit{historian}, where data from filed devices are recorded for subsequent analysis).\newline
+In the next sections we will describe in more detail the architecture of the physical process and the communication network.
+
+\subsection{Physical Process} 
+\label{subsec:5_swat_physical_architecture}
+The physical process of the SWaT consists of six stages, denoted P1 through P6. These stages are \cite{swat_tecnical_pdf}:
+
+\begin{enumerate}
+	\item taking in raw water: 
+	\item chemical dosing:
+	\item Ultra Filtration (UF) system:
+	\item dechlorination:
+	\item Reverse Osmosis (RO):
+	\item backwash process:
+\end{enumerate}
+
+\subsection{Control and Communication Network}
+\label{subsec:5_swat_network_architecture}
+
+\section{Datasets}
+\label{sec:5_swat_datasets}
+
+
+\vfill
+\nolinenumbers
