@@ -1,5 +1,0 @@
-This is makeindex, version 2.16 [TeX Live 2022] (kpathsea + Thai support).
-Scanning style file ./Tesi.ist...........................done (27 attributes redefined, 0 ignored).
-Scanning input file Tesi.acn...done (0 entries accepted, 0 rejected).
-Nothing written in Tesi.acr.
-Transcript written in Tesi.alg.
