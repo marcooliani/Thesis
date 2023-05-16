@@ -2,14 +2,14 @@
 \label{state_of_art}
 \linenumbers
 
-\lettrine[lines=2]{I}{n traditional IT}, an attacker aims to understand the behavior of a program through various techniques so as to bring attacks aimed at changing its execution flow, functionalities or bypassing limits imposed by the licensing of such software. These attack techniques include a \textbf{preliminary study} of the program: a \textit{static analysis} (i.e., a preliminary analysis of the software without it running) and a \textit{dynamic analysis} (i.e., an analysis performed with the program running).\\
-The result of these two preliminary investigation techniques is a \textbf{reverse engineering} of the software, which is useful for identifying any weaknesses or bugs and therefore planning an attack.
+\lettrine[lines=2]{I}{n coventional IT}, the objective of an attacker is to comprehend the behavior of a program using diverse techniques in order to launch attacks that alter its execution flow, functionalities, or bypass limitations imposed by software licensing. These attack techniques involve an initial examination of the program, consisting of \textit{static analysis} (i.e., analyzing the software without running it) and \textit{dynamic analysis} (i.e., analyzing the program while it is running).\newline 
+The outcome of these two investigative techniques is the reverse engineering of the software, which serves the purpose of identifying vulnerabilities or bugs and subsequently strategizing an attack.
 
 \bigskip
-In the OT context, however, the concept of \textit{reverse engineering} is also associated with that of \textit{\textbf{process comprehension}}, a term coined by Green et al.'s \cite{green_et_al} to describe the understanding of the characteristics of the system and the physical elements of within it, that are responsible for its proper functioning.
+In the context of OT, the notion of \textit{reverse engineering} is not limited to its conventional definition, but also includes the concept of \textbf{process comprehension}. This term, introduced by Green et al. \cite{green_et_al}, refers to gaining a comprehensive understanding of the system's characteristics and the physical components responsible for its proper functioning.
 
 \bigskip
-Not much knowledge exists in the literature regarding the collection and analysis of information concerning the understanding and operation of an ICS: in Section \ref{sec:related_work} we will look at a quick overview of some of the existing literature on the subject and in the following sections we will focus in particular on one of the papers exposed.
+There is limited literature available concerning the gathering and analysis of information related to the comprehension and operation of an Industrial Control System (ICS). In Section \ref{sec:related_work}, we will provide a brief overview of the existing literature on this topic, and in the subsequent sections, we will specifically focus on one of the presented papers.
 
 \vfill
 
@@ -44,28 +44,27 @@ Not much knowledge exists in the literature regarding the collection and analysi
 
 \section{Ceccato et al.’s methodology for analyzing water-tank systems}
 \label{sec:ceccato_metodology}
-As mentioned earlier, the paper proposes a methodology based on a black box dynamic analysis of an ICS by identifying potential PLCs on the network and scanning the memory registers of the identified controllers to obtain an approximate model of the controlled physical process.
+As previously mentioned, the paper introduces a methodology that relies on black box dynamic analysis of an Industrial Control System (ICS). This methodology involves identifying potential Programmable Logic Controllers (PLCs) within the network and scanning the memory registers of these identified controllers. The purpose of this process is to obtain an approximate model of the controlled physical process.
 
 \bigskip
-The first objective of this black box analysis is to associate the various memory registers of the target PLCs with a correspondence to the basic concepts of an ICS such as sensors (otherwise known as measurements), actuators, setpoints (range of values of a physical variable), network communications, and so on.\\
-This is performed by analyzing the different types of memory registers associated with the Modbus protocol and trying to figure out what type of data they may contain.
-
-The second objective is to put in relation the runtime evolution of these basic concepts.
+The primary goal of this black box analysis is to establish a correlation between the different memory registers of the targeted PLCs and fundamental concepts of an ICS such as sensors (i.e., measurements), actuators, setpoints (i.e., range of values of a physical variable), network communications, among others.\newline 
+To accomplish this, the various types of memory registers associated with the Modbus protocol are analyzed, and attempts are made to determine the nature of the data they might contain.\newline
+The second goal is to establish a relationship between the dynamic evolution of these fundamental concepts.
 
 \bigskip
-To achieve this, Ceccato et al. developed a prototype tool \cite{plc_re} that performs reverse engineering of the physical system through four phases:
+To accomplish this, Ceccato et al. have developed a prototype tool \cite{plc_re} that facilitates the reverse engineering of the physical system. This tool goes through four distinct phases:
 
 \begin{enumerate}
-	\item \textbf{scanning of the system and data pre-processing}: data gathering is performed to generate the data logs of PLCs registers
+	\item \textbf{scanning of the system and data pre-processing}: this phase involves gathering data to generate data logs for the registers of PLCs.
 	
-	\item \textbf{graphs and statistical analysis}: provides information about the memory registers using graphs and statistical data derived from the gathered data
+	\item \textbf{graphs and statistical analysis}: The collected data is utilized to provide insights into the memory registers by leveraging graphs and statistical data. This analysis approach offers valuable information about the characteristics and patterns of the memory registers.
 	
-	\item \textbf{invariants inference and analysis}: generates system invariants and allows user to view invariants related to a given sensor or actuator
+	\item \textbf{invariants inference and analysis}: generates system invariants, which are used to identify specific patterns and regularities within the system. Additionally, this phase provides users with the capability to view invariants related to a particular sensor or actuator.
 	
-	\item \textbf{business process mining and analysis}: reconstructs, from event logs, the business process that shows how process is carried out
+	\item \textbf{business process mining and analysis}: Using event logs, this phase involves reconstructing the business process that depicts how a process is executed. This step enables a thorough understanding of the sequence of events that occur in the system and how they are interrelated, ultimately leading to a comprehensive overview of the business process.
 \end{enumerate}
 
-In Figure \ref{fig:ceccato_overview} we have a schematic representation of the workflow related to this work. We will cover all these phases in detail in the next sections of this chapter. 
+Figure \ref{fig:ceccato_overview} presents a schematic representation of the workflow associated with this work. In the subsequent sections of this chapter, we will provide a detailed exploration of each of these phases, offering a comprehensive understanding of the entire process. 
 
 \begin{figure}[ht]
 	\centering
@@ -76,7 +75,8 @@ In Figure \ref{fig:ceccato_overview} we have a schematic representation of the w
 
 \subsection{Testbed}
 \label{subsec:ceccato_testbed}
-Before describing the various phases of the methodology, let's take a look at the testbed on which this methodology will be tested. The testbed used to test this methodology is a (very) simplified version of the iTrust SWaT system \cite{swat_home} implemented by Lanotte et al. \cite{lanotte_et_al}: in Figure 3.2 we can see a graphical representation of the testbed. This simplified version consists of three stages, each controlled by a dedicated PLC: 
+Before delving into the description of the methodology's different phases, let's first examine the testbed utilized to evaluate this approach. The testbed employed for testing purposes is a (very) simplified rendition of the iTrust SWaT system \cite{swat_home}, as implemented by Lanotte et al. \cite{lanotte_et_al}. Figure \ref{fig:univr_testbed} provides a graphical representation of the testbed. This simplified version comprises three stages, each governed by a dedicated PLC.
+
 
 \begin{figure}[ht]
 	\centering
@@ -87,40 +87,47 @@ Before describing the various phases of the methodology, let's take a look at th
 
 \bigskip
 \begin{description}
-	\item[\textit{Stage 1}] At the first stage, a \textbf{tank} with a capacity of 80 gallons (identified by the code T-201) is filled with raw water by the P-101 pump: the MV-301 valve (where MV stands for \textit{motorized valve}), also connected to the T-201 tank, flushes out the water collected in the tank to send it to the second stage, first to the \textit{filtration unit} (here not identified by any sensor) and from there to a \textbf{second tank}, identified by the code T-202 and with a capacity of 20 gallons.
+	\item[\textit{Stage 1}] During the initial stage, a \textbf{tank} referred to as T-201 with a capacity of 80 gallons is filled with raw water using the P-101 pump. Connected to the T-201 tank, the MV-301 motorized valve flushes out the accumulated water from the tank, directing it to the next stage. Initially, the water flows from the T-201 tank to the \textit{filtration unit} (which is not specifically identified by any sensor), and subsequently to a \textbf{second tank} denoted as T-202, with a capacity of 20 gallons.
 	
-	\item[\textit{Stage 2}] At the second stage, water contained in T-202 flows into the \textit{reverse osmosit unit} (RO, which in this case also acts as a valve, extracting water continuously: however, it is not identified as a pump) to reduce organic impurities in the same water. The water then flows from the \textit{RO unit} to the third and last stage.
+	\item[\textit{Stage 2}] At the second stage, the water stored in tank T-202 flows into the \textit{reverse osmosis unit} (RO), which serves as both a valve and a continuous water extractor. The purpose of the RO unit is to reduce organic impurities present in the water. Subsequently, the water flows from the \textit{RO unit} to the third and final stage of the system.
 	
-	\item[\textit{Stage 3}] At the third stage, the water from the \textit{RO unit} is divided according to whether standards are met: if the water is clean it will be fed into the distribution system, otherwise it will go to a \textit{backwash tank}, identified by code T-203 and a capacity of one gallon. The water in this tank will then be pumped back to the stage 2 \textit{filtration unit} through pump P-102.
+	\item[\textit{Stage 3}] At the third stage, the water coming from the \textit{RO unit} undergoes division based on whether it meets the required standards. If the water is deemed clean and meets the standards, it is directed into the distribution system. However, if the water fails to meet the standards, it is redirected to a \textit{backwash tank} identified as T-203, which has a capacity of one gallon. The water stored in this tank is then pumped back to the stage 2 \textit{filtration unit} using pump P-102.
 \end{description}
 
 \bigskip
-As mentioned, each stage corresponds to a PLC that controls it, PLC1, PLC2 and PLC3, respectively. Let us briefly see the behavior of each of them:
+As previously mentioned, each stage of the system corresponds to a dedicated PLC, namely PLC1, PLC2, and PLC3, which are responsible for controlling their respective stages. Let's briefly explore the behavior of each PLC:
 
 \begin{description}
-	\item[\textit{PLC1}] PLC1 checks the level of tank T-201 distinguishing three cases:
+	\item[\textit{PLC1}] PLC1 monitors the level of tank T-201 and distinguishes three different cases based on the level readings:
 	
-	\begin{itemize}
-		\item if T-201 reaches the \textit{low setpoint low1} (hardcoded in memory registers), pump \textbf{P-101 is opened} and valve \textbf{MV-301 is closed}, so that the tank can be filled
+	\begin{enumerate}
+		\item when the level of tank T-201 reaches the defined \textit{low setpoint low1} (which is hardcoded in the memory registers), PLC1 \textbf{opens pump P-101} and \textbf{closes valve MV-301}. This configuration allows the tank to be filled with water.
 		
-		\item if T-201 reaches \textit{high setpoint high1} (also hardcoded in the memory registers), pump \textbf{P-101 is closed}
+		\item if the level of T-201 reaches the \textit{high setpoint high1} (which is also hardcoded in the memory registers), then the pump \textbf{P-101 is closed}.
 		
-		\item in intermediate cases, \textbf{PLC1 waits for request from PLC2} to open/close valve MV-301: if a request to open the valve MV-301 arrives, water will flow from T-201 to T-202, otherwise the valve is closed. In both situations, pump P-101 remains closed 
-	\end{itemize}
+		\item in cases where the level of T-201 is between the \textit{low setpoint low1} and the \textit{high setpoint high1}, PLC1 waits for a request from PLC2 to open or close the valve MV-301. If a request to open the valve MV-301 is received, water will flow from T-201 to T-202. However, if no request is received, the valve remains closed. In both situations, the pump P-101 remains closed.
+	\end{enumerate}
 
-	\item[\textit{PLC2}] PLC2 monitors the level of tank T-202, behaving accordingly depending on the level of water in it. Here again there are three cases to consider:
+	\item[\textit{PLC2}] PLC2 monitors the level of tank T-202 and adjusts its behavior based on the water level. There are three cases to consider:
 	
-	\begin{itemize}
-		\item if the water level reaches the \textit{low setpoint low2} (also hardcoded in the memory registers), PLC2 sends a request to PLC1 via a Modbus channel to \textbf{open valve MV-301} in order to flow water from tank T-201 to tank T-202. The transmission channel is implemented by copying a boolean value from a memory register of PLC2 to a corresponding register of PLC1
+	\begin{enumerate}
+		\item when the water level in tank T-202 reaches \textit{low setpoint low2} (also hardcoded in the memory registers), PLC2 sends a request to PLC1 through a Modbus channel to \textbf{open valve MV-301}. This request is made in order to allow the water to flow from tank T-201 to tank T-202. The transmission channel between the PLCs is established by copying a boolean value from a memory register of PLC2 to a corresponding register of PLC1.
 		
-		\item if the water level reaches the \textit{high setpoint high2} instead (hardcoded in the memory registers as the previous setpoints), PLC2 sends PLC1 a \textbf{close request} for valve MV-301
+		\item when the water level in tank T-202 reaches the \textit{high setpoint high2} value (also hardcoded in the memory registers), PLC2 sends a \textbf{close request to PLC1 for valve MV-301}. This request prompts PLC1 to close the valve, stopping the flow of water from tank T-201 to tank T-202.
 		
-		\item In intermediate cases, the valve remains open (closed) while the tank is filling (emptying)
-	\end{itemize}
+		\item In cases where the water level in tank T-202 is between the low and high setpoints, the valve MV-301 remains in its current state (open or closed) while the tank is either filling or emptying.
+	\end{enumerate}
 	
-	\item[\textit{PLC3}] PLC3 monitors the level of the T-203 backwash tank, behaving accordingly. Here there are only two cases to consider: if the tank reaches the \textit{low setpoint low3}, pump \textbf{P103 is set to off}, so that the backwash tank can be filled: otherwise, if the \textit{high setpoint high3} is reached, pump \textbf{P103 is opened} and the entire content of the backwash tank pumped back to the filter unit of T-202.
-	 
+	\item[\textit{PLC3}] PLC3 monitors the level of the T-203 backwash tank and adjusts its behavior accordingly. There are two cases to consider:
+	
+	\begin{enumerate}
+		\item If the water level in the backwash tank reaches the \textit{low setpoint low3}, \textbf{PLC3 sets pump P103 to off}. This allows the backwash tank to be filled.
+		
+		\item If the water level in the backwash tank reaches the \textit{high setpoint high3}, \textbf{PLC3 opens pump P103}. This action triggers the pumping of the entire content of the backwash tank back to the filter unit of T-202.
+	\end{enumerate}
 \end{description} 
+
+%%% SONO ARRIVATO QUI CON CHATGPT %%%
 
 \subsection{Scanning of the System and Data Pre-processing}
 \label{subsec:ceccato_scan}
