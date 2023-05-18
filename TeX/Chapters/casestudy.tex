@@ -2,7 +2,7 @@
 \label{casestudy}
 
 \linenumbers
-\lettrine[lines=2]{H}{aving} introduced the innovative framework and highlighted its potential in the preceding chapter, we now turn our attention to the case study where we will apply this framework. As previously mentioned in Chapter \ref{chap:proposal} and demonstrated through various examples in the same chapter, our focus will be on the \textbf{iTrust SWaT system} \cite{swat_home}, developed by the University of Singapore for Technology and Design \cite{itrust_site}. The acronym SWaT represents \textit{\textbf{S}ecure \textbf{Wa}ter \textbf{T}reatment}.
+\lettrine[lines=2]{H}{aving} introduced the innovative framework and highlighted its potential in the preceding chapter, we now turn our attention to the case study where we will apply this framework. As previously mentioned in Chapter \ref{chap:proposal} and demonstrated through various examples in the same chapter, our focus will be on the \textbf{iTrust SWaT system} \cite{swat_home}, developed by the iTrust -- Center for Research in Cyber Security of University of Singapore for Technology and Design \cite{itrust_site}. The acronym SWaT represents \textit{\textbf{S}ecure \textbf{Wa}ter \textbf{T}reatment}.
 
 \bigskip
 The iTrust SWaT system is a testbed that replicates on a small scale a real water treatment plant arises to support research in the area of cyber security of industrial control systems and has been operational since March 2015: it is still being used by students at the University of Singapore for educational and training purposes and is available to organizations to train their operators on cyber physical incidents.
@@ -92,6 +92,68 @@ Figure \ref{fig:5_swat_network_arch} provides a clearer visualization of the zon
 
 \section{Datasets}
 \label{sec:5_swat_datasets}
+
+To facilitate the study and testing of technologies related to cyber security in Industrial Control Systems and critical infrastructure, iTrust offers researchers worldwide the opportunity to access a range of datasets \cite{swat_datasets}. These datasets consist of a collection of data obtained from the SWaT system, encompassing information on both the physical processes and network communications. The data is organized into different years, and researchers can request access to these datasets for their analysis and experimentation purposes.
+
+\bigskip
+\paragraph{Physical Process Datasets}
+The datasets containing information about the physical processes are provided in CSV format files. These files encompass data collected during different time intervals, which can vary from a few hours to entire days. The granularity of the data is typically at a one-second interval, although there may be some exceptions. The collected data primarily consists of timestamped sensor measurements and actuator status values for each PLC, describing the physical properties of the testbed in operational mode.
+
+\paragraph{Network Communications Datasets}
+Network communications are typically available in the form of \textit{Packet Capture} format (PCAP) files. These files contain captures of communication network traffic, allowing researchers to analyze and examine the network interactions. In some instances, CSV files are provided instead of PCAP files, featuring different characteristics for the collected data.
+
+\subsection{Our Case Study: the 2015 Dataset}
+\label{subsec:5_2015_datasets}
+The dataset selected as a case study to apply the framework discussed in the previous chapter is specifically the dataset from the year 2015. The main reason for this choice is the unique characteristics found in the physical process dataset that are not present in datasets from subsequent years.
+
+\paragraph{Physical Process Data}
+The data collection process lasted 11 consecutive days, 24 hours per day. During the first 7 days, the system operated normally without any recorded attacks. However, attacks were observed during the remaining 4 days. The collected data reflects the impact of these attacks, leading to the creation of two separate CSV files: one containing the recorded data of SWaT during the system's regular operations, and the other containing data recorded during the days of the attacks. To ensure accurate information about the system, the dataset pertaining to the normal operations, which spans seven days, was chosen for analysis.
+
+\bigskip
+Data collection occurs at a frequency of one data point per second, with the assumption that significant attacks cannot occur within a shorter time frame. Additionally, the firmware of the PLCs remains unchanged throughout the data collection period.\newline
+At the beginning of data gathering the tanks are empty and the system must be initialized in order to then reach full operation: it typically takes around five hours for all tanks to be fully filled and for the system to stabilize and reach the appropriate operational state.\newline \newline
+In total, the dataset consists of more than 900 thousand records related to 51 attributes.
+
+\paragraph{Network Traffic}
+The network traffic was collected using an appliance from a well-known network hardware manufacturer and was made available only in CSV format and not PCAP format. Unfortunately, the data provided are partial as it only includes readings from sensors and does not include information on actuator status.
+
+\bigskip
+\begin{longtable}[c]{| c | c |}
+	\hline
+	\textbf{Category} & \textbf{Description} \\ [0.5ex] 
+	\hline
+	Date & Date of Log \\
+	\hline 
+	Time & Time of Log \\
+	\hline
+	Origin & IP of server \\
+	\hline 
+	Source IP & IP address of source \\ 
+	\hline
+	Destination IP & IP address of destination \\ 
+	\hline
+	Protocol & Network protocol \\ 
+	\hline
+	Application Name & Name of application \\ 
+	\hline
+	Modbus Function Code & Function Code \\ 
+	\hline
+	Modbus Function Description & Description of function \\ 
+	\hline
+	Modbus Transaction ID & Transaction ID \\ 
+	\hline
+	SCADA Tag & Sensor or actuator ID \\ 
+	\hline
+	Modbus Value & Value transmitted \\ 
+	\hline
+	Service / Destination Port & Port number of destination IP \\ 
+	\hline
+	Source Port & Port number of source IP \\ 
+	\hline
+	
+	\caption{SWaT network traffic data}
+	\label{table:5_swat_network_traffic_data}
+\end{longtable}
 
 \vfill
 \nolinenumbers
