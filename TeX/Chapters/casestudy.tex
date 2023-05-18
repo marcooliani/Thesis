@@ -64,7 +64,7 @@ The SWaT system's network architecture follows the principles of layering and zo
 Five layers are present starting from the highest to the lowest: 
 
 \begin{itemize}
-	\item \textbf{Layer 3.5} -- Demilitarised Zone (DMZ)
+	\item \textbf{Layer 3.5} -- Demilitarized Zone (DMZ)
 	\item \textbf{Layer 3} -- Operation Management (Historian)
 	\item \textbf{Layer 2} -- Supervisory Control (Touch Panel, Engineering Workstation, HMI Control Clients)
 	\item \textbf{Layer 1} -- Plant Control Network (PLCs) (Star Network)
@@ -90,6 +90,33 @@ Figure \ref{fig:5_swat_network_arch} provides a clearer visualization of the zon
 	\label{fig:5_swat_network_arch}
 \end{figure}
 
+A specific IP address is associated with each device: in Table \ref{table:5_swat_ip_addresses} we report the addresses for the PLCs, historian, and Touch Panel in the \textit{Plant Control Network} (PCN) zone:
+
+\begin{longtable}[c]{| c | c |}
+	\hline
+	\textbf{IP Address} & \textbf{Device} \\ [0.5ex] 
+	\hline
+	192.168.1.10 & PLC1 \\
+	\hline 
+	192.168.1.20 & PLC2 \\
+	\hline
+	192.168.1.30 & PLC3 \\
+	\hline
+	192.168.1.40 & PLC4 \\
+	\hline
+	192.168.1.50 & PLC5 \\
+	\hline
+	192.168.1.60 & PLC6 \\
+	\hline
+	192.168.1.100 & {Touch Panel (PCN)} \\
+	\hline
+	192.168.1.200 & Historian Server \\
+	\hline
+	
+	\caption{main IP addresses of the six PLCs and SCADA in SWaT}
+	\label{table:5_swat_ip_addresses}
+\end{longtable}
+
 \section{Datasets}
 \label{sec:5_swat_datasets}
 
@@ -104,20 +131,41 @@ Network communications are typically available in the form of \textit{Packet Cap
 
 \subsection{Our Case Study: the 2015 Dataset}
 \label{subsec:5_2015_datasets}
-The dataset selected as a case study to apply the framework discussed in the previous chapter is specifically the dataset from the year 2015. The main reason for this choice is the unique characteristics found in the physical process dataset that are not present in datasets from subsequent years.
+The dataset selected as a case study to apply the framework discussed in the previous chapter is specifically the dataset from the year 2015 \cite{swat_dataset2015}. The main reason for this choice is the unique characteristics found in the physical process dataset that are not present in datasets from subsequent years.
 
 \paragraph{Physical Process Data}
 The data collection process lasted 11 consecutive days, 24 hours per day. During the first 7 days, the system operated normally without any recorded attacks. However, attacks were observed during the remaining 4 days. The collected data reflects the impact of these attacks, leading to the creation of two separate CSV files: one containing the recorded data of SWaT during the system's regular operations, and the other containing data recorded during the days of the attacks. To ensure accurate information about the system, the dataset pertaining to the normal operations, which spans seven days, was chosen for analysis.
 
 \bigskip
 Data collection occurs at a frequency of one data point per second, with the assumption that significant attacks cannot occur within a shorter time frame. Additionally, the firmware of the PLCs remains unchanged throughout the data collection period.\newline
-At the beginning of data gathering the tanks are empty and the system must be initialized in order to then reach full operation: it typically takes around five hours for all tanks to be fully filled and for the system to stabilize and reach the appropriate operational state.\newline \newline
-In total, the dataset consists of more than 900 thousand records related to 51 attributes.
+At the beginning of data gathering the tanks are empty and the system must be initialized in order to then reach full operation: it typically takes around five hours for all tanks to be fully filled and for the system to stabilize and reach the appropriate operational state (see Figure \ref{fig:5_swat_stabilization}).
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap5/stabilizzazione_P1.png}
+		\caption{Stabilization of \texttt{P1\_LIT101}}
+		\label{subfig:5_stab_lit101}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap5/stabilizzazione_P3.png}
+		\caption{Stabilization of \texttt{P3\_LIT301}}
+		\label{subfig:5_stab_lit301}
+	\end{subfigure}
+	\begin{subfigure}{0.48\textwidth}
+		\includegraphics[width=\textwidth]{chap5/stabilizzazione_P4.png}
+		\caption{Stabilization of \texttt{P4\_LIT401}}
+		\label{subfig:5_stab_lit401}
+	\end{subfigure}
+	\caption{SWaT stabilization}
+	\label{fig:5_swat_stabilization}
+\end{figure}
+In total, the dataset consists of thousand and thousand of samples related to 51 attributes.
 
 \paragraph{Network Traffic}
-The network traffic was collected using an appliance from a well-known network hardware manufacturer and was made available only in CSV format and not PCAP format. Unfortunately, the data provided are partial as it only includes readings from sensors and does not include information on actuator status.
+The network traffic was collected using an appliance from a well-known network hardware manufacturer and was made available only in CSV format and not PCAP format. Table \ref{table:5_swat_network_traffic_data} shows some of the main data captured:
 
-\bigskip
 \begin{longtable}[c]{| c | c |}
 	\hline
 	\textbf{Category} & \textbf{Description} \\ [0.5ex] 
@@ -154,6 +202,14 @@ The network traffic was collected using an appliance from a well-known network h
 	\caption{SWaT network traffic data}
 	\label{table:5_swat_network_traffic_data}
 \end{longtable}
+Unfortunately, the data provided are partial as it only includes readings from sensors and does not include information on actuator status.\newline \newline
+Do not mislead by the word \textit{Modbus} in the captured data fields: this is most likely a feature of the sniffing appliance, which may have encapsulated EtherNet/IP-CIP protocol packets in Modbus frames, as described by T. A. Snide in \cite{cip_in_modbus}.\newline
+To provide evidence that the protocol being used is CIP over EtherNet/IP, we can examine the "Source / Destination port" field in the captured data. The presence of TCP port 44818 as the destination port aligns with the TCP port used for transporting \textbf{explicit messages} in the EtherNet/IP protocol, as explained in Section \ref{subsub:enip}. Additionally, the "Application name", "Modbus Function Code" and "Modbus Function Description" fields further support this conclusion. The "Application name" explicitly states "CIP\_read\_tag\_service," while the "Modbus Function Code" field contains a decimal value of 76, which does not correspond to any known Modbus Function Calls. When converted to hexadecimal, this value is \texttt{4C}, matching the CIP protocol read tag request code as indicated in the "Modbus Function Description" field.
+
+\bigskip
+In summary, the datasets for subsequent years were not selected due to certain limitations. In the case of the year 2017, the physical system data had a wide granularity, resulting in significant information loss. Additionally, in some cases, the datasets were considered "spurious" as there was no clear differentiation between data obtained during normal SWaT operations and data associated with attacks.\newline
+Regarding network traffic data, there were instances where the data was either missing or fragmented into large PCAP files weighing several gigabytes (more than 6 GB each!), despite containing only a few minutes' worth of data. This made it impractical to manage such files given the available resources.\newline
+Despite their large quantity, the CSV files associated with network traffic for the year 2015 are comparatively smaller in size, just slightly over 100 MB each. These files cover a more extensive time period, which facilitates easier management and analysis. Prioritizing the physical process dataset as crucial, I have selected the year 2015 as a case study, even though the network data may be incomplete.
 
 \vfill
 \nolinenumbers
