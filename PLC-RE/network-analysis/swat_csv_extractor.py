@@ -69,7 +69,10 @@ class SwatCSVExtractor:
         self.df.insert(loc=0, column=self.config['DATASET']['timestamp_col'], value=timestamp)
         self.df = self.df.drop(['time', 'date'], axis=1, errors='ignore')
         self.df.rename({'Modbus_Function_Description': 'service'}, axis=1, inplace=True)
+        self.df.rename({'Protocol': 'protocol'}, axis=1, inplace=True)
+        self.df.rename({'Modbus_Transaction_ID': 'transaction_ID'}, axis=1, inplace=True)
         self.df.rename({'SCADA_Tag': 'register'}, axis=1, inplace=True)
+        self.df.rename({'Modbus_Value': 'data'}, axis=1, inplace=True)
 
         if self.csv_timerange:
             self.df = self.df.loc[self.df[self.config['DATASET']['timestamp_col']].between(self.csv_timerange[0],
@@ -82,9 +85,9 @@ class SwatCSVExtractor:
         for p in protocols:
             conditions.append((self.df['appi_name'].str.contains(p) == 1))
 
-        self.df['Protocol'] = np.select(conditions, protocols)
-        col_proto = self.df.pop('Protocol')
-        self.df.insert(loc=3, column='Protocol', value=col_proto)
+        self.df['protocol'] = np.select(conditions, protocols)
+        col_proto = self.df.pop('protocol')
+        self.df.insert(loc=3, column='protocol', value=col_proto)
 
         self.df = self.df.drop(self.df[self.df.appi_name != 'CIP_read_tag_service'].index)
         self.df = self.df.drop('appi_name', axis=1, errors='ignore')
@@ -93,18 +96,21 @@ class SwatCSVExtractor:
         mp = {'src': 'dst', 'dst': 'src'}
         self.df.update(self.df.loc[cond].rename(mp, axis=1))
 
+        self.df["service"] = np.where(self.df["service"].str.contains("Response"), "Response", "Request")
+        # self.df["data"] = np.where(self.df["data"].str.contains("Number of"), "")
+
         # Potrei in realtà eliminare gli ultimi due elementi: il penultimo non so cosa sia, ma è un decimale,
         # l'ultimo invece è la ripetizione del valore letto all'inizio...
-        self.df['Modbus_Value'] = self.df['Modbus_Value'].str.split('; ').str[0]
-        self.df['Modbus_Value'] = self.df['Modbus_Value'].str.replace('0x', '').str.replace(' ', '')
+        self.df['data'] = self.df['data'].str.split('; ').str[0]
+        self.df['data'] = self.df['data'].str.replace('0x', '').str.replace(' ', '')
 
         '''
         for row in range(len(self.df)):
-            if pd.isna(self.df['Modbus_Value'].iloc[row]):
+            if pd.isna(self.df['data'].iloc[row]):
                 continue
             if "Response" in self.df['service'].iloc[row]:
-                converted_val = self.__get_cip_data(self.df['Modbus_Value'].iloc[row])
-                self.df['Modbus_Value'].iloc[row] = converted_val
+                converted_val = self.__get_cip_data(self.df['data'].iloc[row])
+                self.df['data'].iloc[row] = converted_val
         '''
 
         # print(self.df)
@@ -112,40 +118,18 @@ class SwatCSVExtractor:
         sources = sorted(self.df['src'].unique())
         destinations = sorted(self.df['dst'].unique())
 
-        #### Test chi comunica con chi e in che modo
-        comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
-        print(comm2)
-        comm = self.df[['src', 'dst']].drop_duplicates().values.tolist()
-        # print(comm)
-        plc_comm_dir = list()
-        for i in comm[:]:
-            for j in comm[:]:
-                if j == i:
-                    continue
-
-                if sorted(j) == sorted(i):
-                    #print(i, j)
-                    plc_comm_dir.append((sorted(j), 'b'))
-                    comm.remove(j)
-                    comm.remove(i)
-                    break
-        if len(comm) > 0:
-            for x in comm:
-                plc_comm_dir.append((x, 'u'))
-
-        print(plc_comm_dir)
-        ### Fine test
-
         #ips = sorted(list(set(sources).intersection(destinations)))
         ips = sources
         #print(sources)
         #print(destinations)
 
+        '''
         for i in range(len(ips)):
             self.df['src'] = self.df['src'].replace(ips[i], 'P' + str(i + 1))
             self.df['dst'] = self.df['dst'].replace(ips[i], 'P' + str(i + 1))
+        '''
 
-        self.df.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"])}/test_net2015.csv',
+        self.df.to_csv(f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["data_dir"])}/test_net2015.csv',
                        index=False)
 
 

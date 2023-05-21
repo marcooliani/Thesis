@@ -3,13 +3,11 @@
 import os
 import pandas as pd
 import numpy as np
-import csv
 import argparse
 import configparser
 import graphviz
-
-import binascii
-import struct
+import pygraphviz as pgv  # apt-get install graphviz graphviz-dev
+from PIL import Image
 
 
 class NetworkAnalysis:
@@ -31,41 +29,98 @@ class NetworkAnalysis:
                                       self.file))
 
         # comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
-        comm = df[['src', 'dst']].drop_duplicates().values.tolist()
-        req = df[['src', 'dst', 'SCADA_Tag']].drop_duplicates().values.tolist()
-        print(req)
+        comm = df[['src', 'dst', 'protocol', 'service', 'register']].drop_duplicates().values.tolist()
         plc_comm_dir = list()
-        for i in comm[:]:
-            for j in comm[:]:
-                if j == i:
-                    continue
+        for c in comm:
+            c = ['missing data' if x is np.nan else x for x in c]
+            plc_comm_dir.append(c)
 
-                if sorted(j) == sorted(i):
-                    # print(i, j)
-                    plc_comm_dir.append((sorted(j), 'b'))
-                    comm.remove(j)
-                    comm.remove(i)
-                    break
-        if len(comm) > 0:
-            for x in comm:
-                plc_comm_dir.append((x, 'u'))
-
-        print(plc_comm_dir)
+        # print("\n".join(map(str, plc_comm_dir)))
         return plc_comm_dir
 
-    def draw_network_diagram(self, plc_comm):
+    @staticmethod
+    def draw_network_diagram(plc_comm):
+        G = pgv.AGraph(strict=False, directed=True)
+        G.graph_attr["label"] = "Communication Network diagram"
+        G.graph_attr["fontsize"] = "12"
+        G.graph_attr["format"] = "png"
+        G.graph_attr["size"] = "10,15!"
+        G.graph_attr["ratio"] = "expand"
+        G.node_attr["shape"] = "box"
+        G.node_attr["color"] = "lightblue2"
+        G.node_attr["style"] = "rounded, filled"
+        G.node_attr["fontsize"] = "10"
+        G.edge_attr["fontfamily"] = "Courier"
+        G.edge_attr["fontsize"] = "8"
+
+        for plc in plc_comm:
+            src = plc[0]
+            dst = plc[1]
+            protocol = plc[2]
+            service = plc[3]
+            register = plc[4]
+
+            arrow_style = "solid"
+            color = "black"
+            labelfontcolor = "black"
+
+            if register == "missing data":
+                arrow_style = "dotted"
+                color = "dimgrey"
+                labelfontcolor = "dimgrey"
+
+            if service == "Request":
+                color = "red"
+
+            G.add_node(src, label=src)
+            G.add_node(dst, label=dst)
+            G.add_edge(src, dst, label=f'{protocol} {service}\n{register}', style=arrow_style, color=color,
+                       labelfontcolor=labelfontcolor)
+
+        G.unflatten("-f -l 200")
+        G.layout(prog="dot")
+        # G.draw(f'data/network.svg')
+        G.draw(f'data/network.png')
+        G.draw(f'/tmp/network.png')
+
+        img = Image.open('/tmp/network.png')
+        img.show()
+
+    @staticmethod
+    def draw_network_diagram_OLD(plc_comm):
+
         dot = graphviz.Digraph(name=f'Network Diagram',
                                node_attr={'color': 'lightblue2', 'style': 'rounded, filled',
                                           'shape': 'box', 'fontsize': '10'},
                                edge_attr={'fontfamily': 'Courier', 'fontsize': '8'},
-                               format='png',
+                               format='svg',
+                               engine='dot',
                                directory='graphs')
         dot.attr(rankdir='LR')
+        arrow_style = "solid"
+
+        for plc in plc_comm:
+            src = plc[0]
+            dst = plc[1]
+            protocol = plc[2]
+            service = plc[3]
+            register = plc[4]
+
+            if register == "missing data":
+                arrow_style = "dotted"
+
+            dot.node(src, f'{src}')  # Creo nodo
+            dot.node(dst, f'{dst}')  # Creo nodo
+            dot.edge(src, dst, f'{protocol} {service}\n{register}', style=arrow_style)
+
+        dot.unflatten(stagger=8)
+        dot.view()
 
 
 def main():
     na = NetworkAnalysis()
-    na.find_communications()
+    comm = na.find_communications()
+    na.draw_network_diagram(comm)
 
 
 if __name__ == '__main__':

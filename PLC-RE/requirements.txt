@@ -11,3 +11,7 @@ sranodec~=0.0.1
 scapy~=2.5.0
 pyshark~=0.5.3
 graphviz~=0.20.1
+tslearn~=0.5.3.2
+rdp~=0.8
+pygraphviz~=1.10
+Pillow~=9.4.0
