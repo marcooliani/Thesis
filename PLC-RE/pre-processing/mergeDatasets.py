@@ -29,7 +29,9 @@ class MergeDatasets:
                             help="number of seconds to consider")
         parser.add_argument('-t', "--timerange", nargs=2,
                             help="time range selection (date format YYYY-MM-DD HH:MM:SS")
-        parser.add_argument('-d', "--directory", type=str, default=self.config['PATHS']['input_dataset_directory'],
+        parser.add_argument('-d', "--directory", type=str,
+                            default=os.path.join(self.config['PATHS']['root_dir'],
+                                                 self.config['PREPROC']['raw_dataset_directory']),
                             help="directory containing CSV files")
         parser.add_argument('-o', "--output", type=str, default=self.config['PREPROC']['dataset_file'],
                             help="output file")
@@ -245,7 +247,7 @@ class MergeDatasets:
     def save_mining_dataset(self, datasets_list):
         mining_datasets = self.__concat_datasets(datasets_list)
         # Save dataset with the timestamp for the process mining.
-        mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
+        # mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
         mining_datasets.to_csv(
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"], self.output_file.split(".")[0])}_TS.csv',
             index=False)

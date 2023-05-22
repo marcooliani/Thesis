@@ -43,9 +43,9 @@ class NetworkAnalysis:
         G = pgv.AGraph(strict=False, directed=True)
         G.graph_attr["label"] = "Communication Network diagram"
         G.graph_attr["fontsize"] = "12"
-        G.graph_attr["format"] = "png"
-        G.graph_attr["size"] = "10,15!"
-        G.graph_attr["ratio"] = "expand"
+        G.graph_attr["format"] = "svg"
+        G.graph_attr["size"] = "15,20!"
+        # G.graph_attr["ratio"] = "expand"
         G.node_attr["shape"] = "box"
         G.node_attr["color"] = "lightblue2"
         G.node_attr["style"] = "rounded, filled"
