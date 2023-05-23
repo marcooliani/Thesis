@@ -52,10 +52,10 @@ Overall, the enhancements made to the framework represent a significant step for
 %	[PATHS]
 %	root_dir = /home/marcuzzo/UniVr/Tesi
 %	project_dir = %(root_dir)s/PLC-RE
-%	input_dataset_directory = %(root_dir)s/datasets_SWaT/2015
 %	net_csv_path = %(root_dir)s/datasets_SWaT/2015/Network_CSV
 %	
-%	[DEFAULTS]
+%	[PREPROC]
+%	raw_dataset_directory = datasets_SWaT/2015
 %	dataset_file = PLC_SWaT_Dataset.csv
 %	granularity = 10
 %	number_of_rows = 20000
@@ -75,7 +75,7 @@ Overall, the enhancements made to the framework represent a significant step for
 
 \subsection{Framework Structure}
 \label{subsec:4_framework_struct}
-The structure of the novel framework mostly follows the structure of the original tool: it is divided into four main directories each representing the different phases of the analysis (data pre-processing, graphs and statistical analysis, process mining, and invariant analysis), and containing the relevant Python scripts that perform the analysis, as well as subdirectories and any input/output files necessary for the proper behavior of the framework.
+The proposed framework follows a similar structure to the original tool, with a division into five main directories representing different phases of the analysis: \textbf{data pre-processing}, \textbf{graphs and statistical analysis}, \textbf{process mining}, and \textbf{invariant analysis}. A new phase is added compared to the original, concerning the \textbf{analysis of the network traffic}. These directories contain the corresponding Python scripts responsible for performing the analysis, along with any necessary subdirectories and input/output files to ensure the proper functioning of the framework.
 
 \begin{lstlisting}[language=bash, numbers=none, caption=Novel Framework structure and Python scripts, label=lst:4_tree_command]
 	.
@@ -106,17 +106,17 @@ the configuration: each section contains user-customizable parameters
 that will then be called within the Python scripts that constitute the framework. Sections of \textit{config.ini} are:
 
 \begin{itemize}
-	\item \textbf{[PATHS]:} defines general paths such as the project root directory and some source directories for datasets;
+	\item \textbf{[PATHS]:} defines general paths such as the project root directory;
 	
-	\item \textbf{[PREPROC]:} contains some parameters needed for the pre-processing phase;
+	\item \textbf{[PREPROC]:} includes parameters needed for the \textbf{pre-processing phase}, like the directory containing the raw datasets of the individual PLCs and \textit{granularity} for the slope calculation. Granularity is the time interval over which the slope is calculated;
 	
-	\item \textbf{[DATASET]:} defines settings and parameters used during the dataset enrichment stage and possibly in further phases;
+	\item \textbf{[DATASET]:} defines settings and parameters used during the \textbf{dataset enrichment} stage, for example the additional attributes;
 	
-	\item \textbf{[DAIKON]:} defines parameters needed for invariant analysis with Daikon;
+	\item \textbf{[DAIKON]:} defines parameters needed for \textbf{invariant analysis} with Daikon, e.g. directories and files containing the outcomes of the analysis;
 	
-	\item \textbf{[MINING]:} contains parameters used during the process mining phase;
+	\item \textbf{[MINING]:} contains parameters used during the \textbf{process mining} phase, such as data directory;
 	
-	\item \textbf{[NETWORK]:} Contains specific settings for extracting the data obtained from the packet sniffing phase on the ICS network and converting it to CSV format. It also defines the network protocols that are to be analyzed.
+	\item \textbf{[NETWORK]:} includes specific settings for extracting the data obtained from the packet sniffing phase on the ICS network and converting it to CSV format. It also defines the \textbf{network protocols} that are to be analyzed.
 \end{itemize}
 
 \subsection{Python Libraries and External Tools}
@@ -225,7 +225,7 @@ Following is a brief explanation of the parameters just seen:
 	
 	\item[\texttt{prev\_cols\_prefix}, \texttt{prev\_cols\_list}]  refer to the values at the previous time instant of the registers specified in \texttt{prev\_cols\_list}. It is possible to specify registers using \textit{regex}, as in the example shown. It may be useful in some cases to have this value available to check, for example, when a change of state of a single given actuator occurs.  The behavior of these parameters is the same as described in the point above.
 	
-	\item[\texttt{slope\_cols\_prefix}, \texttt{slope\_cols\_list}] are related to the calculation of the slope of a specific register (usually a measure), that is, its trend. The slope can be \textbf{ascending} (if its value is greater than zero), \textbf{descending} (if less than zero) or \textbf{stable} (if approximately equal to zero). We will delve into the details of slope calculation in the following paragraph, as it pertains to the attributes \texttt{trend\_cols\_prefix}, \texttt{trend\_cols\_list}, and \texttt{trend\_period}.
+	\item[\texttt{slope\_cols\_prefix}, \texttt{slope\_cols\_list}] are related to the calculation of the slope of a specific register that contains numeric values (usually a measure), that is, its trend. Slope calculation makes little sense on booleans. The slope can be \textbf{ascending} (if its value is greater than zero), \textbf{descending} (if less than zero) or \textbf{stable} (if approximately equal to zero). We will delve into the details of slope calculation in the following paragraph, as it pertains to the attributes \texttt{trend\_cols\_prefix}, \texttt{trend\_cols\_list}, and \texttt{trend\_period}.
 \end{description}
 
 Initially, the parameters for registers to be associated with each additional attribute may be left blank, as we may not have prior knowledge about the system and are unsure about which registers correspond to actuators, measurements, or other attributes. This information can be obtained from the brief analysis that follows the merging of datasets. The analysis, performed based on user's choice, provides indications on potential sensors, actuators, and other relevant information. These indications help the user set the desired values in the \textit{config.ini} file and refine the enrichment process by re-launching the \texttt{mergeDatasets.py} script.
@@ -243,7 +243,7 @@ Calculating the slope directly from the raw measurement data can be a suitable a
 However, if perturbations significantly affect the measurement readings, calculating the slope on individual time intervals may result in an inaccurate trend definition, irrespective of the chosen granularity. In such cases, the fluctuating nature of the measurements due to perturbations can introduce errors in the slope calculation, making it less reliable as an indicator of the actual trend.
 
 \bigskip
-Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the LIT101 tank of the iTrust SWaT system; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of LIT101 exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.\newline \newline
+Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the \texttt{P1\_LIT101} tank of the iTrust SWaT system; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of \texttt{P1\_LIT101} exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.\newline \newline
 The previous tool did not take into account the possibility of having strongly perturbed data, which presented a challenge that we needed to address in the development of the proposed framework.
 \vfill
 \pagebreak
@@ -271,39 +271,41 @@ The previous tool did not take into account the possibility of having strongly p
 \end{figure}
 
 The solution to this problem involves applying techniques to reduce the "noise" in the data, aiming to achieve a more linear trend in the measurement curve. By minimizing the effects of perturbations, we can calculate slopes more accurately.\newline
-There are various methods available for smoothing out noise in the data. In our framework, we focused on two commonly used approaches found in the literature: \textbf{polynomial regression} and \textbf{seasonal decomposition}.\newline \newline
-\textit{Polynomial regression} is a technique that allows us to create a filter to reduce the impact of noise on the data. By fitting a polynomial function to the measurements, we can obtain a smoother curve that captures the underlying trend while minimizing the effects of perturbations.\newline
-\textit{Seasonal decomposition}, specifically the part related to trending, is another method we explored. It involves decomposing the time series into different components, such as trend, seasonality, and residual. By isolating the trend component, we can obtain a cleaner representation of the underlying pattern in the data.\newline
-Regarding polynomial regression, we evaluated the use of the \textbf{Savitzky-Golay filter} \cite{savgol} as a smoothing technique. For seasonal decomposition, we explored the \textbf{Seasonal-Trend decomposition using LOESS} (STL) method \cite{stl_decomp}.\newline \newline
-For lacking of space we are unable to provide a detailed description of the polynomial regression and seasonal decomposition techniques in this context. We recommend referring to the bibliographical notes or relevant literature for a more comprehensive understanding of these methods: Figure \ref{fig:4_smoothing_comparison}, however, shows a quick graphical comparison of them compared with the original data. The solution adopted is the \textit{STL decomposition} method, which effectively reduces noise compared to the Savitzky-Golay filter. However, it should be noted that this method may introduce some delay in certain parts of the data, as is typically observed in similar algorithms.
+There are various methods available for smoothing out noise in the data. In our framework, we focused on two commonly used approaches found in the literature: \textbf{polynomial regression} and \textbf{seasonal decomposition}. In addition to these two methods, we also explored the use of a \textbf{line simplification algorithm}.\newline \newline
+\textit{Polynomial regression} \cite{polynomial_regression} is a technique that allows us to create a filter to reduce the impact of noise on the data. By fitting a polynomial function to the measurements, we can obtain a smoother curve that captures the underlying trend while minimizing the effects of perturbations.\newline
+\textit{Seasonal decomposition} \cite{seasonal_decomposition}, specifically the part related to trending, is another method we explored. It involves decomposing the time series into different components, such as trend, seasonality, and residual. By isolating the trend component, we can obtain a cleaner representation of the underlying pattern in the data.\newline
+\textit{Line simplification algorithms} \cite{line_simplification_algo} aim to reduce the complexity of a polyline or curve by approximating it with a simplified version composed of fewer points. By selectively removing redundant or less significant points, line simplification algorithms help reduce storage space and computational requirements while preserving the overall shape and characteristics of the original line.\newline
+Regarding polynomial regression, we evaluated the use of the \textbf{Savitzky-Golay filter} \cite{savgol} as a smoothing technique. For seasonal decomposition, we explored the \textbf{Seasonal-Trend decomposition using LOESS} (STL) method \cite{stl_decomp}. For the line simplification algorithm, we specifically considered the \textbf{Ramer-Douglas-Peucker} (RDP) algorithm \cite{ramer-douglas-peucker}.\newline \newline
+%For lacking of space we are unable to provide a detailed description of the polynomial regression and seasonal decomposition techniques in this context. We recommend referring to the bibliographical notes or relevant literature for a more comprehensive understanding of these methods. 
+Figure \ref{fig:4_smoothing_comparison} shows a quick graphical comparison of these techniques compared with the original data. The solution adopted is the \textit{STL decomposition} method, which effectively reduces noise compared to the Savitzky-Golay filter. However, it should be noted that this method may introduce some delay in certain parts of the data, as is typically observed in similar algorithms. Despite its apparent effectiveness, the RDP algorithm fails to accurately approximate sections where the measurement level remains relatively stable. Consequently, it yields incorrect slope estimations, causing a loss of valuable information about the system.
 
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{0.48\textwidth}
-		\includegraphics[width=\textwidth]{chap4/confronto_decomp_3.png}
+		\includegraphics[width=\textwidth]{chap4/confronto_RDP_SavGol_STL_1.png}
 		\caption{}
 		\label{subfig:4_smoothing1}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.48\textwidth}
-		\includegraphics[width=\textwidth]{chap4/confronto_decomp_4.png}
+		\includegraphics[width=\textwidth]{chap4/confronto_RDP_SavGol_STL_2.png}
 		\caption{}
 		\label{subfig:4_smoothing2}
 	\end{subfigure}
 	\begin{subfigure}{0.48\textwidth}
-		\includegraphics[width=\textwidth]{chap4/confronto_decomp_5.png}
+		\includegraphics[width=\textwidth]{chap4/confronto_RDP_SavGol_STL_3.png}
 		\caption{}
 		\label{subfig:4_smoothing3}
 	\end{subfigure}
+	\hfill
 	\begin{subfigure}{0.48\textwidth}
-		\includegraphics[width=\textwidth]{chap4/confronto_decomp_6.png}
+		\includegraphics[width=\textwidth]{chap4/confronto_RDP_SavGol_STL_4.png}
 		\caption{}
 		\label{subfig:4_smoothing4}
 	\end{subfigure}
-	\caption{Savitzky-Golay filter (blue line) and STL decomposition (green) comparison}
+	\caption{Savitzky-Golay filter (blue line), STL decomposition (green) and RDP algorithm (orange) comparison}
 	\label{fig:4_smoothing_comparison}
 \end{figure}
-
 By applying the STL decomposition, we observe a notable enhancement in slope calculation even when using a low granularity. Figure \ref{fig:4_STL_decomp_results} demonstrates that, with the same granularity as shown in Figure \ref{subfig:4_slope_g30_nodecomp}, the slope values, albeit exhibiting fluctuations, consistently align with the underlying trend of the data curve. The introduced lag resulting from the decomposition's periodicity is responsible for the observed delay.
 
 \begin{figure}[ht]
@@ -312,11 +314,11 @@ By applying the STL decomposition, we observe a notable enhancement in slope cal
 	\caption{Slope after the application of the STL decomposition}
 	\label{fig:4_STL_decomp_results}
 \end{figure}
-The periodicity, determining the sampling time window for decomposition and noise smoothing level, can be specified in the \texttt{trend\_period} directive of the \textit{config.ini} configuration file.\newline
-The slope calculation will be applied to the data from the additional measurement trend attributes, which are defined in the \texttt{trend\_cols\_list} directive of the configuration file, rather than the original unfiltered data.
+The periodicity, which defines the sampling time window for decomposition and the level of noise smoothing, can be configured using the \texttt{trend\_period} directive in the \textit{config.ini} file.\newline
+During the slope calculation, the analysis will be performed on the data from the additional measurement trend attributes specified in the \texttt{trend\_cols\_list} directive of the configuration file, rather than on the original unfiltered data.
 
 \bigskip
-To ensure proper interpretation by Daikon, the decimal values representing the calculated slopes are converted into three numerical values: -1, 0, and 1. These values correspond to decreasing (if the slope is less than zero), stable (if it is equal to zero), and increasing (if it is greater than zero) trends, respectively. Figure \ref{fig:4_slope_daikon} displays the modified slopes along with the curve obtained from the STL decomposition:
+To ensure proper interpretation by Daikon, the decimal values representing the calculated slopes are converted into \textbf{three numerical values}: -1, 0, and 1. These values correspond to \textit{decreasing} (if the slope is less than zero), \textit{stable} (if it is equal to zero), and \textit{increasing} (if it is greater than zero) trends, respectively. Figure \ref{fig:4_slope_daikon} displays the modified slopes along with the curve obtained from the STL decomposition:
 
 \begin{figure}[ht]
 	\centering
@@ -336,7 +338,8 @@ By default, the enriched dataset will be saved in CSV format in the \texttt{\$(p
 \label{subsubsec:4_brief_analysis}
 
 After merging the datasets, the user has the option to perform an \textbf{optional analysis} of the resulting dataset to extract preliminary data. This analysis aims to gather basic information about the (sub)system and potentially refine the enrichment process. If the user chooses to proceed with the analysis, the \texttt{mergeDatasets.py} script invokes another Python script located in the \texttt{\$(project-dir)/pre-processing} directory called \texttt{system\_info.py}.\newline
-Relying on an analysis based on a combination of Daikon and Pandas this script performs a quick analysis of the dataset allowing to \textbf{estimate}, albeit approximately, the \textbf{type of registers} (sensors, actuators, ...), also identifying possible maximum and minimum values of measurements and hardcoded setpoints. Furthermore, leveraging the use of the additional attribute \texttt{prev\_}, the \texttt{system\_info.py} script is capable of deriving measurement values corresponding to state changes of individual actuators. This allows for the identification of specific measurements associated with the activation or deactivation of certain actuators within the system.\newline 
+Relying on an analysis based on a combination of Daikon and Pandas this script performs a quick analysis of the dataset allowing to \textbf{estimate}, albeit approximately, the \textbf{type of registers} (sensors, actuators, ...), also identifying possible maximum and minimum values of measurements and hardcoded setpoints. Furthermore, leveraging the use of the additional attribute \texttt{prev\_}, the \texttt{system\_info.py} script is capable of deriving measurement values corresponding to state changes of individual actuators. This allows for the identification of specific measurements associated with the activation or deactivation of certain actuators within the system.\newline
+As the last information we have duration of actuator states for each cycle of the system: this information can be useful for making assumptions and conjectures about the behavior of an actuator in a specific state or, by observing the duration values of each cycle, highlighting anomalies in the system. \newline
 Listing \ref{lst:4_brief_infos} shows an example of this brief analysis related to PLC1 of the iTrust SWaT system (for brevity, only one measurement is reported in the analysis of actuator state changes):
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Example of preliminar system analysis},label=lst:4_brief_infos]
@@ -422,8 +425,7 @@ From these results we can draw the following conjectures:
 	
 	\item from the analysis of state changes we can derive some \textbf{relative setpoints}. For example, we observe that \texttt{P1\_P101} changes state from value 1 (OFF) to value 2 (ON) when the level of \texttt{P1\_LIT101} is approximately 813, and it changes from value 2 (ON) to 1 (OFF) when the level of \texttt{P1\_LIT101} is around 535. We can deduce that \texttt{P1\_P101} is responsible for emptying the tank;
 	
-	\item as the last information we have duration of actuator states for each cycle of the system: this information can be useful for making assumptions and conjectures about the behavior of an actuator in a specific state or, by observing the duration values of each cycle, highlighting anomalies in the system.\newline
-	In the specific case, the very short duration of \texttt{P1\_MV101} in state 0 is observable: since we are unable, at this preliminary stage, to make assumptions about this, we will try to understand the behavior of the system in this actuator state in the next stages of the analysis
+	\item Regarding the actuators states duration, the very short duration of \texttt{P1\_MV101} in state 0 is observable: since we are unable, at this preliminary stage, to make assumptions about this, we will try to understand the behavior of the system in this actuator state in the next stages of the analysis.
 \end{itemize}
 
 The information obtained here can be used, as mentioned above, to refine the enrichment of the dataset by setting directives in the \texttt{[DATASET]} section of the \textit{config.ini} file, should this be empty or only partially set, or to make the first conjectures about the system, as we have just seen.
@@ -484,22 +486,21 @@ The solution to this issue is simple and effective: the use of \textbf{subplots}
 To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the brief analysis from the previous step:
 
 \begin{itemize}
-	\item the chart of \texttt{P1\_FIT101} seems to confirm that this register can be associated with a \textbf{measurement}; moreover, we can see that the trend of this register is closely related to the periods in which \texttt{P1\_LIT101} has an increasing trend and to the evolution of \texttt{P1\_MV101}. Its values, between about 0 and 2.5, are too narrow to say that this register represents the tank, and the general trend also leads in that direction: we can therefore assume that it is a \textbf{pressure or flow sensor}
+	\item the chart of \texttt{P1\_FIT101} seems to confirm that this register can be associated with a \textbf{measurement}; moreover, we can see that the trend of this register is closely related to the periods in which \texttt{P1\_LIT101} has an increasing trend and to the evolution of \texttt{P1\_MV101}. Its values, between about 0 and 2.5, are too narrow to say that this register represents the tank, and the general trend also leads in that direction: we can therefore assume that it is a \textbf{pressure or flow sensor};
 	
-	\item \texttt{P1\_LIT101}, because of the above, would therefore seem to \textbf{represent a tank}, as already assumed in the brief analysis
+	\item \texttt{P1\_LIT101}, because of the above, would therefore seem to \textbf{represent a tank}, as already assumed in the brief analysis;
 	
-	\item \texttt{P1\_MV101} assumes value 2 at the beginning of the ascending trend of \texttt{P1\_LIT101}, while it has value 1 in correspondence with the \textit{plateau} that is seen when the measurement is about 800 and when the trend of it is descending. Thus, we can have a confirmation of the initial conjecture: 1 represents the OFF state of the sensor, 2 the ON state, and \texttt{P1\_MV101} is the \textbf{actuator responsible for the rising level} of \texttt{P1\_LIT101}
+	\item \texttt{P1\_MV101} assumes value 2 at the beginning of the ascending trend of \texttt{P1\_LIT101}, while it has value 1 in correspondence with the \textit{plateau} that is seen when the measurement is about 800 and when the trend of it is descending. Thus, we can have a confirmation of the initial conjecture: 1 represents the OFF state of the sensor, 2 the ON state, and \texttt{P1\_MV101} is the \textbf{actuator responsible for the rising level} of \texttt{P1\_LIT101};
 	
-	\item \texttt in the brief analysis we observed the short duration of \texttt{P1\_MV101} in state 0, but we were not able to speculate on the reason for this. Graph analysis shows that {P1\_MV101} switches and stays in the 0 state acting as a kind of "transient" between states 1 and 2. It can be assumed that that is the period of time it actually takes for the actuator to change state
+	\item \texttt in the brief analysis we observed the short duration of \texttt{P1\_MV101} in state 0, but we were not able to speculate on the reason for this. Graph analysis shows that {P1\_MV101} switches and stays in the 0 state acting as a kind of "transient" between states 1 and 2. It can be assumed that that is the period of time it actually takes for the actuator to change state;
 	
-	\item \texttt{P1\_P101} assumes value 2 at the beginning of the descending trend of \texttt{P1\_LIT101}, after the \textit{plateu}, and returns to value 1 at the change of slope of the (likely) tank increase: taken by itself this fact is not very clear, so it needs to be compared with \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its behavior: it can be seen that when \texttt{P1\_101} and \texttt{P1\_MV101} are in state 1 the water level remains stable, whereas, when \texttt{P1\_P101} changes to state 2 the level of the measurement drops rapidly; when \texttt{P1\_MV101} then also returns to state 2, the level of the measurement slowly starts rising again and then has a sudden rise at the change of state of \texttt{P1\_P101} from 2 to 1. We can therefore infer that \texttt{P1\_P101} is the \textbf{actuator responsible for emptying} the (presumed) tank: state 1 represents the OFF state, while state 2 represents the ON state
+	\item \texttt{P1\_P101} assumes value 2 at the beginning of the descending trend of \texttt{P1\_LIT101}, after the \textit{plateu}, and returns to value 1 at the change of slope of the (likely) tank increase: taken by itself this fact is not very clear, so it needs to be compared with \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its behavior: it can be seen that when \texttt{P1\_101} and \texttt{P1\_MV101} are in state 1 the water level remains stable, whereas, when \texttt{P1\_P101} changes to state 2 the level of the measurement drops rapidly; when \texttt{P1\_MV101} then also returns to state 2, the level of the measurement slowly starts rising again and then has a sudden rise at the change of state of \texttt{P1\_P101} from 2 to 1. We can therefore infer that \texttt{P1\_P101} is the \textbf{actuator responsible for emptying} the (presumed) tank: state 1 represents the OFF state, while state 2 represents the ON state;
 	
-	\item \texttt{P1\_P102} seems to play no role in the system, since its state remains at 1 all the time. It seems improbable that it could be a relative setpoint, so it can be assumed, according to the brief analysis, that it may be a \textbf{spare actuator}
+	\item \texttt{P1\_P102} seems to play no role in the system, since its state remains at 1 all the time. It seems improbable that it could be a relative setpoint, so it can be assumed, according to the brief analysis, that it may be a \textbf{spare actuator}.
 \end{itemize}
 
 \bigskip
-As you have probably already noticed, the vast majority of the graphs shown in the previous sections and chapters were generated precisely using the new graph analysis script.\newline
-The script that performs the new graph analysis is \texttt{runChartsSubPlots.py}, located in the \texttt{\$(project-dir)/statistical-graphs} directory, which is written in Python and makes use, like the previous one, of the \textit{matplotlib} libraries to generate the graph plots.\newline
+As the reader has probably already noticed, The majority of the graphs presented in the previous sections and chapters were generated using the new graph analysis script, specifically the \texttt{runChartsSubPlots.py} script. This Python script is located in the \texttt{\$(project-dir)/statistical-graphs} directory and utilizes the \textit{matplotlib} libraries to generate the graph plots, similar to the previous tool.\newline 
 The script accepts the following command-line parameters:
 
 \begin{itemize}
@@ -513,14 +514,13 @@ The script accepts the following command-line parameters:
 \end{itemize}
 This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
 
-\paragraph{Statistical Analysis} A quick mention of the statistical analysis part: after careful evaluation, I decided \textbf{not to include this aspect} of the previous tool within the framework, because I saw no real practical use for it. The actual statistical information can be easily integrated into the brief analysis immediately following the pre-processing phase, while the histogram has relative utility and, in my opinion, is outdated by the new graph analysis I implemented. \newline
-However, the Python \texttt{histPlots\_Stats.py} script remains in the directory, essentially unchanged from the one developed by Ceccato et al., in case future use is needed. 
+\paragraph{Statistical Analysis} After careful consideration, we made the decision not to include the statistical analysis aspect of the previous tool in the framework. We found that there was no practical use for it. Instead, we integrated the relevant statistical information into the brief analysis conducted after the pre-processing phase. Additionally, we deemed the histogram to have limited utility and considered it outdated in comparison to the new graph analysis approach we implemented. \newline
+Although we decided not to include the statistical analysis aspect in the framework, the Python script \texttt{histPlots\_Stats.py} from the original tool remains in the directory. This script is essentially unchanged from the version developed by Ceccato et al. and can be used in the future if the need arises. 
 
 \subsection{Phase 3: Invariant Inference and Analysis}
 \label{subsec:4_improve_invariants}
 The phase of invariant inference and analysis has undergone a redesign and improvement to offer the user a more comprehensive and effortless approach to identify invariants. This has been achieved through the application of new criteria to analyze and reorganize the Daikon analysis results. The outcome of this is a more compact presentation of information that highlights the possible relationships among invariants.\newline
 The new design not only enables the identification of undiscovered aspects of the system behavior but also confirms the hypotheses made during the earlier stages of analysis. This step is now semi-automated, unlike before, and allows for the analysis of invariants on individual actuator states and their combinations.
-\vfill
 
 \subsubsection{Revised Daikon Output}
 \label{subsub:4_new_daikon_output}
@@ -579,10 +579,10 @@ A brief example of the structure and format of this output related to \texttt{PL
 	Exiting Daikon.
 \end{lstlisting}
 
-In the framework I am presenting, this output is reduced to two sections, the general one and the elated to the user-specified condition, eliminating the one related to the negated condition because it is not useful in this context and a source of potential misinterpretation; moreover, the relationships between invariants will be highlighted instead by using \textbf{transitive closures}: transitive closure of a relation $R$ is another relation, typically denoted $R^{+}$ that adds to $R$ all those elements that, while not necessarily related directly to each other, can be reached by a \textit{chain} of elements related to each other. In other words, the transitive closure of $R$ is the smallest (in set theory sense) transitive relation $R$ such that $R$ $\subset$ $R^{+}$ \cite{transitive_closures}. 
+In the presented framework, the output is simplified to \textbf{two sections}: the \textit{general section} and the section related to the \textit{user-specified condition}. The section related to the negated condition is eliminated as it is not relevant in this context and could lead to potential misinterpretation. Moreover, the relationships between invariants will be emphasized by utilizing \textbf{transitive closures}: transitive closure of a relation $R$ is another relation, typically denoted $R^{+}$ that adds to $R$ all those elements that, while not necessarily related directly to each other, can be reached by a \textit{chain} of elements related to each other. In other words, the transitive closure of $R$ is the smallest (in set theory sense) transitive relation $R$ such that $R$ $\subset$ $R^{+}$ \cite{transitive_closures}. 
 
 \bigskip
-To implement the transitive closure of the invariants generated by Daikon, I first divided the invariants in each section by type according to their equivalence relation, not considering all those invariants that refer to additional attributes except for the slope, and for each of them I generated a \textbf{graph} using the NetworkX libraries, connecting with an arc the registers (represented by nodes) that have a common endpoint in the invariant through the transitive property. To reconstruct the individual invariant chains, then, I used a simple \textit{Depth-first Search} (DFS) on each of the graphs, thus obtaining the desired outcome. Figure \ref{fig:4_transitive_closure_graphs} shows some examples of these graphs:
+To implement the transitive closure of the invariants generated by Daikon, we initially categorized the invariants in each section by type based on their equivalence relation, excluding any invariants related to additional attributes except for the slope. For each type of invariant, we constructed a \textbf{graph} using the NetworkX library, where registers were represented as nodes, and arcs were created to connect registers that shared a common endpoint in the invariant, applying the transitive property. To reconstruct the individual invariant chains, then, we used a simple \textit{Depth-first Search} (DFS) on each of the graphs, thus obtaining the desired outcome. Figure \ref{fig:4_transitive_closure_graphs} shows some examples of these graphs:
 
 \begin{figure}[H]
 	\centering
@@ -643,7 +643,6 @@ At the end of this process, still applied to \texttt{PLC1} of the iTrust SWaT sy
 \end{lstlisting}
 Transitive closures can be appreciated in lines 7, 14 and 16 of Listing \ref{lst:4_daikon_new_output_plc1}.\newline
 In general, the output has been reduced in the number of effective rows (19 versus the 61 in the output of Listing \ref{lst:4_daikon_output_plc1}, making it certainly better to read and identify significant invariants) and the invariant chains make it more immediate to grasp the relationships between registers.
-\vfill
 
 \subsubsection{Types of Analysis}
 \label{subsub:4_types_analysis}
@@ -669,6 +668,7 @@ The script accepts the following command-line arguments:
 One or both types of analysis can be selected. The last two parameters set a condition on the value of the measurement that is meant to bypass the transient periods between the actuator state change and the actual trend change at the maximum and minimum values: this expedient is especially useful for the first type of analysis, allowing for generally more accurate data on measurement trends.
 
 \paragraph{Analysis on single actuator states}
+\label{par:4_single_actuator_states_analysis}
 Analysis on the states of individual actuators is the simplest: after the user is prompted to input the measurement, chosen from a list of likely available measurements, the script recognizes the likely actuators and the relative states of each, using the same mixed Daikon/Pandas technique adopted in the brief analysis during the pre-processing phase.\newline
 For each actuator and each state it assumes, a single Daikon analysis is performed, eventually placing the condition on the maximum and minimum level of the measurement.\newline 
 The result of these analyses are saved in the form of text files in a directory having the name corresponding to the analyzed actuator and contained in the default parent directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}: each file generated by the analysis is identified by the name of the actuator, the state and the condition, if any, on the measurement (see Figure \ref{fig:4_daikon_simpleanalysis_dirfiles}).
@@ -693,6 +693,7 @@ The result of these analyses are saved in the form of text files in a directory 
 An example of the outcome of this analysis is Listing \ref{lst:4_daikon_new_output_plc1}, where the actuator analyzed is \texttt{P1\_MV101} in state 2: from the generic invariants we can observe that \texttt{P1\_P101} is a likely actuator (line 5), assuming binary values; from line 8, however, we note that \texttt{P1\_P102} is permanently equal to 1, so it can be confirmed that it is a spare actuator rather than a setpoint; furthermore, lines 9 and 10 show the maximum and minimum values reached by \texttt{P1\_LIT101}, which we have assumed to be the register connected to the tank. The most interesting information, however, comes from the condition-generated invariants: at line 21 we notice that the slope of \texttt{P1\_LIT101} is 1 (thus increasing) when \texttt{P1\_MV101} is set to 2: this confirms what we assumed in the previous steps, namely, that \texttt{P1\_MV101} represents the ON state of the actuator and is responsible for filling the tank \texttt{P1\_LIT101}; moreover, at line 23 we see that \texttt{P1\_FIT101} is greater than \texttt{P1\_MV101}: this means that when the actuator assumes the value 2 the sensor \texttt{P1\_FIT101} detects data (in contrast, if \texttt{P1\_MV101} is 1 \texttt{P1\_FIT101} is 0, detecting nothing), confirming the original hypothesis made that this may be a pressure or flow sensor.
 
 \paragraph{Analysis of the Current System Configuration}
+\label{par:4_current_system_config_analysis}
 The analysis of the current system configuration based on the actual states of the actuators is more complex, but at the same time offers more interesting outcomes as it provides better evidence of actuator behavior in relation to the selected measurement.
 
 \begin{figure}[H]
@@ -702,7 +703,8 @@ The analysis of the current system configuration based on the actual states of t
 	\label{fig:4_daikon_systemstates_files}
 \end{figure}
 
-For this analysis, the script automatically recognizes the actual configurations of the actuators (e.g., \texttt{P1\_MV101 == 2, P1\_P101 == 1}) that represent a system state, and for each of these configurations  Daikon analysis is automatically run, after prompting the user for the measurement and eventually the actuators whose configurations are to be studied (If the user does not select any actuators, all those previously detected by the Python script will be considered): the analysis outcomes are saved, still in the text format, within a specific directory under the same parent directory of the previous type of analysis and, as before, their name is characterized by the rule used for the analysis (see Figure \ref{fig:4_daikon_systemstates_files}).\newline \newline
+For this analysis, the script automatically identifies the configurations of the actuators that represent different system states (e.g., \texttt{P1\_MV101 == 2, P1\_P101 == 1}). Daikon analysis is then performed for each of these configurations. The user is prompted to select the measurement attribute and, if desired, specific actuators for studying their configurations. If no actuators are selected, all previously detected actuators will be considered.\newline
+The analysis results are saved in text format within a designated directory, located alongside the previous analysis outputs. The filenames of these result files follow a specific naming convention based on the analysis rule applied (see Figure \ref{fig:4_daikon_systemstates_files}).\newline \newline
 An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_system_config_analysis}:
 
 \begin{lstlisting}[language=bash,numbers=left,caption={Daikon outcomes for the system configuration \texttt{P1\_MV101 == 2, P1\_P101 == 1} on \texttt{P1\_LIT101}},label=lst:4_current_system_config_analysis]
@@ -739,6 +741,7 @@ In addition, the invariant at line 8 also indicates that when the actuator \text
 The above is confirmed by the invariants related to the analysis condition: at line 24 we have that the slope is indeed equal to 1 (thus increasing) and that \texttt{P1\_FIT101}, at line 26, takes values greater than 2 when \texttt{P1\_MV101} is equal to 2.
 
 \paragraph{Refining the Analysis}
+\label{par:4_refining_analysis}
 In some cases, it may happen that the outcomes provided by the semi-automated analyses are not satisfactory to the user (e.g., the value of the slope may not emerge clearly) or simply the user wants to investigate a particular aspect of the system in more detail by trying to discover additional invariants that did not emerge previously: in this case, it is possible to run a new and more specific invariant analysis using the Python script \texttt{runDaikon.py}, which allows for more punctual analyses of the system.\newline
 The script, also contained in the default directory \texttt{\$(project\_dir)/daikon}, accepts three command-line parameters:
 
@@ -747,13 +750,16 @@ The script, also contained in the default directory \texttt{\$(project\_dir)/dai
 	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the \textit{.spinfo} file. It is possible to specify more than one condition, but it is recommended to use the logical operator \texttt{\&\&}
 	\item \textbf{-r} or \textbf{{-}{-}register}: specifies the directory where to save the text file with the outcomes
 \end{itemize}
-Performing this single analysis will produce a single output file containing the invariants discovered, file that will be saved in the directory specified by the user via the \texttt{-r} command-line option (by default the file will be saved in the directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}) to be examined later by the user.
+During the execution of this analysis, a single output file is generated, containing the discovered invariants. The user can specify the directory where this file should be saved using the \texttt{-r} command-line option. By default, the file is stored in the directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}. The output file serves as a record of the identified invariants and can be examined at a later time. 
 
 \bigskip
-In conclusion, the two types of analysis presented, along with the possibility of allowing for more refined analysis at a later date and Daikon's redefined output, make this stage much more complete, clear, and powerful than before
+In conclusion, the integration of these two analysis types, along with the ability to conduct more refined analysis in the future and the enhanced output format of Daikon, significantly enhances the completeness, clarity, and effectiveness of this stage compared to the previous framework.
 
 \subsection{Phase 4: Businness Process Analysis}
 \label{subsec:4_improve_bpa}
+
+\subsection{Phase 5: Network Analysis}
+\label{subsec:4_network_analysis}
 
 \vfill
 \nolinenumbers
