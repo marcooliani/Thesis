@@ -407,14 +407,14 @@ The last two properties concern the \textbf{relationship between actuator state 
 The methodology proposed by Ceccato et al. is certainly valid and offers a good starting point for approaching the reverse engineering of an industrial control system from the attacker's perspective, while also providing a tool to perform this task.
 
 \bigskip
-The limitations of this approach, however, all lie in the tool mentioned above and also in the testbed described in Section \ref{subsec:3_testbed}. In this section I will explain which are the criticisms of each phase, while in Chapter 4 I will formulate proposals to improve and make this methodology more efficient.
+The limitations of this approach, however, all lie in the tool mentioned above and also in the testbed described in Section \ref{subsec:3_testbed}. In this section we will explain which are the criticisms of each phase, while in Chapter 4 we will formulate proposals to improve and make this methodology more efficient.
 
 \paragraph{General Criticism}
 \label{par:3_limit_ceccato_general}
 There are several critical aspects associated with the application of this approach: the primary one concerns the fact that the proposed tool seems to be built specifically for the testbed used and that it is not applicable to other contexts, even to the same type of industrial control system (water treatment systems, in this case). 
 
 \bigskip
-What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the data gathering process: I will discuss this last aspect in more detail later.\newline
+What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the data gathering process: we will discuss this last aspect in more detail later.\newline
 Moreover, there is the presence of many \textit{hardcoded} variables and conditions within the scripts: this makes the system unconfigurable and unable to properly perform the various stages of the analysis as errors can occur due to incorrect data and mismatches with the system under analysis.\newline
 Having considered, furthermore, only the Modbus protocol for network communications between the PLCs is another major limiting factor and does not help the methodology to be adaptable to different systems communicating with different protocols (sometimes even multiple ones on the same system). 
 
@@ -545,5 +545,49 @@ The limitation in this case is principally Daikon: this software is designed to 
 
 	\item[\emph{\underline{Second limitation}}] The bash script used in this phase of the analysis does not help at all in deriving significant invariants more easily: it merely launches Daikon and saves its output to a text file by simply redirecting the stdout to file. No data reprocessing is done during this step. In addition, if a condition is to be specified to Daikon before performing the analysis, it is necessary each time to edit the .spinfo file by manually entering the desired rule, an inconvenient operation when multiple analyses are to be performed with different conditions each time. 
 \end{description}
+
+Table \ref{table:3_ceccato_limitations_table} provides a summary of the limitations discussed regarding the Ceccato et al. framework.
+
+{\small
+\begin{longtable}[c]{| l | l |}
+	\hline
+	\textbf{Phase} & \textbf{Limitations} \\ [0.5ex] 
+	\hline
+	\multirow{4}{12em}{Testbed} & - Oversimplified model compared to \\
+	& iTrust SWaT system \\
+	& - Physics of the liquid not considered: this \\ 
+	& causes data perturbation \\
+	\hline
+	\multirow{5}{12em}{Pre-processing} & - It is not possible to select \\
+	& a subsystem by (groups of) PLCs or by \\
+	& time range \\
+	& - Some additional attributes are manually \\
+	& inserted in the dataset \\
+	\hline 
+	\multirow{6}{12em}{Graphical/Statistical Analysis} & - Only one chart at the time \\
+	& is displayed: difficulty in capturing  the \\ 
+	& relationship between actuators and \\
+	& sensors \\
+	& - Statistical Analysis provides little \\ 
+	& information \\
+	\hline
+	\multirow{4}{12em}{Business Process Analysis} & - Ad hoc solution designed to \\
+	& work under special conditions \\
+	& - Use of commercial software for process \\
+	& mining \\
+	\hline
+	\multirow{3}{12em}{Invariant Analysis} & - Reading output is challenging  \\
+	& - Script for analysis merely launches \\
+	& Daikon without reprocessing outcomes \\
+	\hline
+	%\multirow{3}{4em}{\textbf{Priority}} & Confidentiality  \\
+	%& Integrity  \\
+	%& Availability  \\
+	%\hline
+	
+	\caption{Summary table of Ceccato et al. framework limitations}
+	\label{table:3_ceccato_limitations_table}
+\end{longtable}
+}
 \vfill
 \nolinenumbers

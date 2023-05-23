@@ -166,6 +166,7 @@ In total, the dataset consists of thousand and thousand of samples related to 51
 \paragraph{Network Traffic}
 The network traffic was collected using an appliance from a well-known network hardware manufacturer and was made available only in CSV format and not PCAP format. Table \ref{table:5_swat_network_traffic_data} shows some of the main data captured:
 
+{\small
 \begin{longtable}[c]{| c | c |}
 	\hline
 	\textbf{Category} & \textbf{Description} \\ [0.5ex] 
@@ -201,7 +202,7 @@ The network traffic was collected using an appliance from a well-known network h
 	
 	\caption{SWaT network traffic data}
 	\label{table:5_swat_network_traffic_data}
-\end{longtable}
+\end{longtable} }
 Unfortunately, the data provided are partial as it only includes readings from sensors and does not include information on actuator status.\newline \newline
 Do not mislead by the word \textit{Modbus} in the captured data fields: this is most likely a feature of the sniffing appliance, which may have encapsulated EtherNet/IP-CIP protocol packets in Modbus frames, as described by T. A. Snide in \cite{cip_in_modbus}.\newline
 To provide evidence that the protocol being used is CIP over EtherNet/IP, we can examine the "Source / Destination port" field in the captured data. The presence of TCP port 44818 as the destination port aligns with the TCP port used for transporting \textbf{explicit messages} in the EtherNet/IP protocol, as explained in Section \ref{subsub:enip}. Additionally, the "Application name", "Modbus Function Code" and "Modbus Function Description" fields further support this conclusion. The "Application name" explicitly states "CIP\_read\_tag\_service," while the "Modbus Function Code" field contains a decimal value of 76, which does not correspond to any known Modbus Function Calls. When converted to hexadecimal, this value is \texttt{4C}, matching the CIP protocol read tag request code as indicated in the "Modbus Function Description" field.
