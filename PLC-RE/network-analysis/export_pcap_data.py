@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from io import StringIO
 from textwrap import wrap
 
@@ -102,24 +103,57 @@ class ExportPCAPData:
 
         df.rename({'ip.src': 'src'}, axis=1, inplace=True)
         df.rename({'ip.dst': 'dst'}, axis=1, inplace=True)
-        df.rename({'_ws.col.Protocol': 'Protocol'}, axis=1, inplace=True)
+        df.rename({'_ws.col.Protocol': 'protocol'}, axis=1, inplace=True)
         df.rename({'cip.symbol': 'register'}, axis=1, inplace=True)
+        df.rename({'cip.data': 'data'}, axis=1, inplace=True)
+        df.rename({'cip.service': 'service_detail'}, axis=1, inplace=True)
+        df.rename({'cip.rr': 'service'}, axis=1, inplace=True)
         df.rename({'frame.time_epoch': self.config['DATASET']['timestamp_col']}, axis=1, inplace=True)
-        df[self.config['DATASET']['timestamp_col']] = pd.to_datetime(df[self.config['DATASET']['timestamp_col']],
-                                                                     unit='s')
+        df[self.config['DATASET']['timestamp_col']] = pd.to_datetime(df[self.config['DATASET']['timestamp_col']], unit='s')
 
         if self.pcap_timerange:
             df = df.loc[df[self.config['DATASET']['timestamp_col']].between(self.pcap_timerange[0],
                                                                             self.pcap_timerange[1],
                                                                             inclusive="both")]
+
+        print("Sostituzioni")
+        df["service"] = np.where(df["service"].str.contains("0x01"), "Response", df['service'])
+        df["service"] = np.where(df["service"].str.contains("0x00"), "Request", df['service'])
+        df["service_detail"] = np.where(df["service_detail"].str.fullmatch("0x4c", case=False), "Read Tag Request",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.fullmatch("0xcc", case=False), "Read Tag Response",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.fullmatch("0x4d", case=False), "Write Tag Request",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.fullmatch("0xcd", case=False), "Write Tag Response",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x0a", case=False),
+                                        "Multiple Service Packet Request",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x8a", case=False),
+                                        "Multiple Service Packet Response",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x01"), "Get Attribute All Request",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x81"), "Get Attribute All Response",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x0e"), "Get Attribute Single Request",
+                                        df['service_detail'])
+        df["service_detail"] = np.where(df["service_detail"].str.match("0x8e"), "Get Attribute Single Response",
+                                        df['service_detail'])
+        df = df[df['protocol'] != "CIP CM"]
+
         ## Da qui
 
-        df['cp.rr'] = df['cp.rr'].apply(wrap(df['cp.rr'], 8))
+        #df['cip.rr'] = df['cip.rr'].apply(wrap(df['cip.rr'], 8))
 
         ## A qui
 
         print("Saving CSV export ... ")
-        df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
+        #df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
+        df.to_csv(
+            f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["data_dir"])}/export_pcap2017.csv',
+            index=False)
 
         print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
 

@@ -29,6 +29,9 @@ class ServiceCodes:
         0x8a: "Multiple Service Packet Response",
         0xd5: "Get Instance Attributes List Response",
         0x83: "Get Attributes Response",
+
+        # GET_ATTRIBUTE_LIST_REPLY = 0x83,
+        # GET_ATTRIBUTE_SINGLE_REPLY = 0x8E,
     }
 
     MODBUS_SERVICE_CODES = {}

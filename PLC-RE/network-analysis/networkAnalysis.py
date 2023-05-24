@@ -29,13 +29,13 @@ class NetworkAnalysis:
                                       self.file))
 
         # comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
-        comm = df[['src', 'dst', 'protocol', 'service', 'register']].drop_duplicates().values.tolist()
+        comm = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().values.tolist()
         plc_comm_dir = list()
         for c in comm:
             c = ['missing data' if x is np.nan else x for x in c]
             plc_comm_dir.append(c)
 
-        # print("\n".join(map(str, plc_comm_dir)))
+        #print("\n".join(map(str, plc_comm_dir)))
         return plc_comm_dir
 
     @staticmethod
@@ -44,7 +44,7 @@ class NetworkAnalysis:
         G.graph_attr["label"] = "Communication Network diagram"
         G.graph_attr["fontsize"] = "12"
         G.graph_attr["format"] = "svg"
-        G.graph_attr["size"] = "15,20!"
+        # G.graph_attr["size"] = "15,20!"
         # G.graph_attr["ratio"] = "expand"
         G.node_attr["shape"] = "box"
         G.node_attr["color"] = "lightblue2"
@@ -64,12 +64,14 @@ class NetworkAnalysis:
             color = "black"
             labelfontcolor = "black"
 
-            if register == "missing data":
+            #if register == "missing data":
+            if "missing data" in register:
                 arrow_style = "dotted"
                 color = "dimgrey"
                 labelfontcolor = "dimgrey"
 
-            if service == "Request":
+            #if service == "Request":
+            if "Request" in service:
                 color = "red"
 
             G.add_node(src, label=src)
@@ -79,12 +81,12 @@ class NetworkAnalysis:
 
         G.unflatten("-f -l 200")
         G.layout(prog="dot")
-        # G.draw(f'data/network.svg')
-        G.draw(f'data/network.png')
-        G.draw(f'/tmp/network.png')
+        G.draw(f'data/network.svg')
+        #G.draw(f'data/network.png')
+        #G.draw(f'/tmp/network.png')
 
-        img = Image.open('/tmp/network.png')
-        img.show()
+        #img = Image.open('/tmp/network.png')
+        #img.show()
 
     @staticmethod
     def draw_network_diagram_OLD(plc_comm):
