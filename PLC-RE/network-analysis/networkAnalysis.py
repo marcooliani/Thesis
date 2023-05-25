@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import configparser
+import glob
 import graphviz
 import pygraphviz as pgv  # apt-get install graphviz graphviz-dev
 from PIL import Image
@@ -18,15 +19,37 @@ class NetworkAnalysis:
 
         parser = argparse.ArgumentParser()
         parser.add_argument('-f', "--file", type=str, help="CSV file with network data")
+        parser.add_argument('-d', "--directory", type=str, help="CSV files with network data")
         self.args = parser.parse_args()
 
         self.df = None
         self.file = self.args.file
+        if self.args.directory:
+            self.directory = self.args.directory
+        else:
+            self.directory = os.path.join(self.config['PATHS']['project_dir'],
+                                          self.config['NETWORK']['split_dir'])
+
+    def merge_datasets(self):
+        df_list = list()
+        df_files = glob.glob(os.path.join(self.directory, '*.csv'))
+
+        for file in sorted(df_files):
+            tmp = pd.read_csv(file)
+            df_list.append(tmp)
+
+        df = pd.concat(df_list, axis=0).reset_index(drop=True)
+        print(df)
+        return df
 
     def find_communications(self):
-        df = pd.read_csv(os.path.join(self.config['PATHS']['project_dir'],
-                                      self.config['NETWORK']['data_dir'],
-                                      self.file))
+        if self.args.directory:
+            df = self.merge_datasets()
+
+        else:
+            df = pd.read_csv(os.path.join(self.config['PATHS']['project_dir'],
+                                          self.config['NETWORK']['data_dir'],
+                                          self.file))
 
         # comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
         comm = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().values.tolist()
@@ -35,7 +58,7 @@ class NetworkAnalysis:
             c = ['missing data' if x is np.nan else x for x in c]
             plc_comm_dir.append(c)
 
-        #print("\n".join(map(str, plc_comm_dir)))
+        print("\n".join(map(str, plc_comm_dir)))
         return plc_comm_dir
 
     @staticmethod

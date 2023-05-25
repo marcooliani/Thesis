@@ -23,40 +23,45 @@ class ExportPCAPData:
         group.add_argument('-m', "--mergefiles", nargs='+', default=[],
                            help="multiple pcap files to include (w/o path)")
         group.add_argument('-d', "--mergedir", type=str, help="directory containing pcap files to merge")
+        group.add_argument('-s', "--singledir", type=str, help="directory containing pcap files for single analysis")
         parser.add_argument('-t', "--timerange", nargs=2, default=[],
                             help="time range selection (format YYYY-MM-DD HH:MM:SS")
         self.args = parser.parse_args()
 
-        self.pcap_file = None
-        self.pcap_multiple = self.args.mergefiles
-        self.pcap_dir = None
-        self.pcap_timerange = self.args.timerange
-
-    def check_args(self):
+        self.pcap_dir = self.config['NETWORK']['pcap_dir']
         if self.args.file:
             self.pcap_file = self.args.file
-        elif self.args.mergedir:
-            self.pcap_dir = self.args.mergedir
+        else:
             self.pcap_file = self.config['NETWORK']['pcap_merge_file']
-        elif self.args.mergefiles:
-            self.pcap_file = self.config['NETWORK']['pcap_merge_file']
-            self.pcap_multiple = self.args.mergefiles
 
-    def merge_pcap(self):
-        if not self.pcap_multiple and self.pcap_dir:
+        self.pcap_multiple = self.args.mergefiles
+        if self.args.mergedir:
+            self.pcap_dir = self.args.mergedir
+        elif self.args.singledir:
+            self.pcap_dir = self.args.singledir
+        self.pcap_timerange = self.args.timerange
+
+    def merge_pcap(self, pcap_file):
+        # if not self.pcap_multiple and self.pcap_dir:
+        if self.args.mergedir:
             print(f"Merging pcap files from directory {self.pcap_dir} ... ")
-            subprocess.check_output(f'mergecap -w {self.pcap_file} {self.pcap_dir}/*.pcap', shell=True)
+            subprocess.check_output(f'mergecap -w {pcap_file} {self.pcap_dir}/*.pcap', shell=True)
             print("Done")
 
         elif self.pcap_multiple:
             print(f"Merging selected files ... ")
-            subprocess.check_output(f'mergecap -w {self.pcap_file} '
+            subprocess.check_output(f'mergecap -w {pcap_file} '
                                     f'{" ".join(map(str, self.pcap_multiple))}', shell=True)
             print("Done")
 
-    def find_protocols(self):
+        else:
+            return pcap_file
+
+        return pcap_file
+
+    def __find_protocols(self, pcap_file):
         print("Detecting protocols ... ")
-        cap = pyshark.FileCapture(f'{self.pcap_file}', include_raw=True, use_json=True)
+        cap = pyshark.FileCapture(f'{pcap_file}', include_raw=True, use_json=True)
 
         found_protocols = list()
 
@@ -80,7 +85,9 @@ class ExportPCAPData:
 
         return found_protocols
 
-    def export_data(self, protocols):
+    def extract_data(self, pcap_file):
+        protocols = self.__find_protocols(pcap_file)
+
         print("Extracting PCAP data ... ")
         # fixed_param = ['frame.number', '_ws.col.Time', 'ip.src', 'ip.dst']  # Lo tengo qui, ma non serve...
         str_protocols = "-Y '"
@@ -94,7 +101,7 @@ class ExportPCAPData:
 
         # ud -> UTC date
         # ad -> absolute date (orario locale)
-        output = subprocess.check_output(f'tshark -r {self.pcap_file} -t ud -T fields '
+        output = subprocess.check_output(f'tshark -r {pcap_file} -t ud -T fields '
                                          f'-e frame.time_epoch -e ip.src -e ip.dst {str_protocols} '
                                          f'-e _ws.col.Protocol {str_columns} -e frame.number -e frame.protocols '
                                          f'-E header=y -E separator=, -E aggregator=/s', shell=True).decode('utf-8')
@@ -144,18 +151,8 @@ class ExportPCAPData:
         df = df[df['protocol'] != "CIP CM"]
 
         ## Da qui
-
         #df['cip.rr'] = df['cip.rr'].apply(wrap(df['cip.rr'], 8))
-
         ## A qui
-
-        print("Saving CSV export ... ")
-        #df.to_csv(self.config["NETWORK"]["csv_output"], index=False)
-        df.to_csv(
-            f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["data_dir"])}/export_pcap2017.csv',
-            index=False)
-
-        print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
 
         sources = sorted(df['src'].unique())
         destinations = sorted(df['dst'].unique())
@@ -163,13 +160,36 @@ class ExportPCAPData:
         ips = list(set(sources).intersection(destinations))
         print(ips)
 
+        return df
+
+    def save_to_csv(self, dataframe, split=False, filename=''):
+        if not split:
+            data_dir = os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["data_dir"])
+        else:
+            data_dir = os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["split_dir"])
+
+        if not filename:
+            filename = self.config["NETWORK"]["csv_output"]
+
+        print("Saving CSV export ... ")
+        dataframe.to_csv(
+            f'{os.path.join(data_dir, filename)}',
+            index=False)
+        print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
+
 
 def main():
     epd = ExportPCAPData()
-    epd.check_args()
-    epd.merge_pcap()
-    prot = epd.find_protocols()
-    epd.export_data(prot)
+
+    if not epd.args.singledir:
+        pcap_file = epd.merge_pcap(epd.pcap_file)
+        df = epd.extract_data(pcap_file)
+        epd.save_to_csv(df)
+    else:
+        for f in sorted(os.listdir(epd.args.singledir)):
+            if f.split('.')[-1] == 'pcap':
+                df = epd.extract_data(os.path.join(epd.pcap_dir, f))
+                epd.save_to_csv(df, split=True, filename=f'{f}.csv')
 
 
 if __name__ == '__main__':
