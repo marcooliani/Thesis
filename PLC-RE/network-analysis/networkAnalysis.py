@@ -18,8 +18,11 @@ class NetworkAnalysis:
         self.config.read('../config.ini')
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', "--file", type=str, help="CSV file with network data")
-        parser.add_argument('-d', "--directory", type=str, help="CSV files with network data")
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('-f', "--file", type=str, help="CSV file with network data")
+        group.add_argument('-D', "--directory", type=str, help="CSV files with network data")
+        parser.add_argument('-s', "--srcaddr", type=str, default=None, help="Source IP address")
+        parser.add_argument('-d', "--dstaddr", type=str, default=None, help="Destination IP address")
         self.args = parser.parse_args()
 
         self.df = None
@@ -29,6 +32,8 @@ class NetworkAnalysis:
         else:
             self.directory = os.path.join(self.config['PATHS']['project_dir'],
                                           self.config['NETWORK']['split_dir'])
+        self.src_addr = self.args.srcaddr
+        self.dst_addr = self.args.dstaddr
 
     def merge_datasets(self):
         df_list = list()
@@ -39,10 +44,11 @@ class NetworkAnalysis:
             df_list.append(tmp)
 
         df = pd.concat(df_list, axis=0).reset_index(drop=True)
-        print(df)
+        df.drop_duplicates(inplace=True)
+
         return df
 
-    def find_communications(self):
+    def find_communications(self,):
         if self.args.directory:
             df = self.merge_datasets()
 
@@ -51,18 +57,21 @@ class NetworkAnalysis:
                                           self.config['NETWORK']['data_dir'],
                                           self.file))
 
-        # comm2 = self.df[['src', 'dst']].drop_duplicates().to_numpy()
-        comm = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().values.tolist()
-        plc_comm_dir = list()
-        for c in comm:
-            c = ['missing data' if x is np.nan else x for x in c]
-            plc_comm_dir.append(c)
+        df = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().reset_index(drop=True)
+        df['register'] = df['register'].fillna(value='missing data')
 
-        print("\n".join(map(str, plc_comm_dir)))
-        return plc_comm_dir
+        if self.src_addr:
+            df = df[df["src"] == self.src_addr].reset_index(drop=True)
+        if self.dst_addr:
+            df = df[df["dst"] == self.dst_addr].reset_index(drop=True)
+        print(df)
+
+        return df
 
     @staticmethod
-    def draw_network_diagram(plc_comm):
+    def draw_network_diagram(df):
+        plc_comm = df.values.tolist()
+
         G = pgv.AGraph(strict=False, directed=True)
         G.graph_attr["label"] = "Communication Network diagram"
         G.graph_attr["fontsize"] = "12"
@@ -112,7 +121,7 @@ class NetworkAnalysis:
         #img.show()
 
     @staticmethod
-    def draw_network_diagram_OLD(plc_comm):
+    def draw_network_diagram_OLD(df):
 
         dot = graphviz.Digraph(name=f'Network Diagram',
                                node_attr={'color': 'lightblue2', 'style': 'rounded, filled',
@@ -124,6 +133,8 @@ class NetworkAnalysis:
         dot.attr(rankdir='LR')
         arrow_style = "solid"
 
+        plc_comm = df.values.to_list()
+        print(plc_comm)
         for plc in plc_comm:
             src = plc[0]
             dst = plc[1]
