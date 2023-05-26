@@ -486,31 +486,31 @@ The solution to this issue is simple and effective: the use of \textbf{subplots}
 To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the brief analysis from the previous step:
 
 \begin{itemize}
-	\item the chart of \texttt{P1\_FIT101} seems to confirm that this register can be associated with a \textbf{measurement}; moreover, we can see that the trend of this register is closely related to the periods in which \texttt{P1\_LIT101} has an increasing trend and to the evolution of \texttt{P1\_MV101}. Its values, between about 0 and 2.5, are too narrow to say that this register represents the tank, and the general trend also leads in that direction: we can therefore assume that it is a \textbf{pressure or flow sensor};
+	\item the data presented in the \texttt{P1\_FIT101} chart provides support for associating this register with a \textbf{measurement}. Furthermore, the chart indicates a close correlation between the trend of this register and the periods in which \texttt{P1\_LIT101} exhibits an upward trend and the evolution of \texttt{P1\_MV101}. The values of \texttt{P1\_FIT101}, ranging from approximately 0 to 2.5, are too limited to conclude that this register represents the level sensor of a tank. The overall trend also aligns with this interpretation, suggesting that it is more likely a \textbf{pressure or flow sensor};
 	
-	\item \texttt{P1\_LIT101}, because of the above, would therefore seem to \textbf{represent a tank}, as already assumed in the brief analysis;
+	\item based on the information provided above, it appears that \texttt{P1\_LIT101} indeed \textbf{represents the level sensor of a tank}, which was initially assumed in the brief analysis. The hypothesis is further reinforced by several factors. Firstly, the wide range of values observed in this register supports the notion of it being a level sensor. Additionally, the graphical representation of the level trend provides valuable insights. It shows an initial sharp rise, followed by a period of stabilization referred to as a \textit{plateau}, and subsequently, a similarly steep descent. Finally, there is a new phase of slower level growth compared to the previous one. These patterns lend further support to the interpretation of \texttt{P1\_LIT101} as a sensor specifically measuring the level of a tank;
 	
-	\item \texttt{P1\_MV101} assumes value 2 at the beginning of the ascending trend of \texttt{P1\_LIT101}, while it has value 1 in correspondence with the \textit{plateau} that is seen when the measurement is about 800 and when the trend of it is descending. Thus, we can have a confirmation of the initial conjecture: 1 represents the OFF state of the sensor, 2 the ON state, and \texttt{P1\_MV101} is the \textbf{actuator responsible for the rising level} of \texttt{P1\_LIT101};
+	\item at the start of the ascending trend of \texttt{P1\_LIT101}, the value of \texttt{P1\_MV101} is 2. Conversely, during the \textit{plateau} phase observed when the measurement is approximately 800 and during the descending trend, \texttt{P1\_MV101} has a value of 1. These observations provide further confirmation of the initial hypothesis: the value 1 represents the \textbf{OFF state} of the sensor, while 2 represents the \textbf{ON state}. Moreover, \texttt{P1\_MV101} can be identified as the actuator responsible for causing the rising level in \texttt{P1\_LIT101};
 	
-	\item \texttt in the brief analysis we observed the short duration of \texttt{P1\_MV101} in state 0, but we were not able to speculate on the reason for this. Graph analysis shows that {P1\_MV101} switches and stays in the 0 state acting as a kind of "transient" between states 1 and 2. It can be assumed that that is the period of time it actually takes for the actuator to change state;
+	\item during the brief analysis, we noticed the short duration of \texttt{P1\_MV101} in state 0, but we were unable to speculate on the underlying reason. However, further analysis of the graph reveals that \texttt{P1\_MV101} transitions and remains in the 0 state, acting as a type of "transient" between states 1 and 2. It can be inferred that this period represents the actual time required for the actuator to change its state.
 	
-	\item \texttt{P1\_P101} assumes value 2 at the beginning of the descending trend of \texttt{P1\_LIT101}, after the \textit{plateu}, and returns to value 1 at the change of slope of the (likely) tank increase: taken by itself this fact is not very clear, so it needs to be compared with \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its behavior: it can be seen that when \texttt{P1\_101} and \texttt{P1\_MV101} are in state 1 the water level remains stable, whereas, when \texttt{P1\_P101} changes to state 2 the level of the measurement drops rapidly; when \texttt{P1\_MV101} then also returns to state 2, the level of the measurement slowly starts rising again and then has a sudden rise at the change of state of \texttt{P1\_P101} from 2 to 1. We can therefore infer that \texttt{P1\_P101} is the \textbf{actuator responsible for emptying} the (presumed) tank: state 1 represents the OFF state, while state 2 represents the ON state;
+	\item we can observe the behavior of \texttt{P1\_P101} in relation to \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its role. At the beginning of the descending trend of \texttt{P1\_LIT101}, after the plateau phase, \texttt{P1\_P101} assumes a value of 2. It then changes back to value 1 at the point of the (presumed) tank's level increase. Although this fact alone may not be entirely clear, when comparing the behaviors of \texttt{P1\_P101}, \texttt{P1\_LIT101}, and \texttt{P1\_MV101}, certain patterns emerge. When \texttt{P1\_P101} and \texttt{P1\_MV101} are both in state 1, the water level remains stable. However, when P1\_P101 changes to state 2, the level of the measurement drops rapidly. Subsequently, when P1\_MV101 also transitions to state 2, the level slowly starts to rise again, with a sudden increase occurring when \texttt{P1\_P101} changes from 2 back to 1. From these observations, it can be inferred that \texttt{P1\_P101} serves as the \textbf{actuator responsible for emptying the presumed tank}. State 1 represents the \textbf{OFF state}, while state 2 represents the \textbf{ON state} of this actuator.
 	
-	\item \texttt{P1\_P102} seems to play no role in the system, since its state remains at 1 all the time. It seems improbable that it could be a relative setpoint, so it can be assumed, according to the brief analysis, that it may be a \textbf{spare actuator}.
+	\item it appears that \texttt{P1\_P102} plays no active role in the system as its state remains constant at 1 throughout. Considering this information, it seems unlikely that \texttt{P1\_P102} could serve as a relative setpoint. Therefore, according to the brief analysis, it can be inferred that \texttt{P1\_P102} is most likely a \textbf{spare actuator} that is not actively utilized in the system. A \textit{spare actuator} is indeed a secondary actuator that is intended to remains idle unless needed as a backup or replacement when the primary actuator is unavailable or needs to be taken out of service.
 \end{itemize}
 
 \bigskip
-As the reader has probably already noticed, The majority of the graphs presented in the previous sections and chapters were generated using the new graph analysis script, specifically the \texttt{runChartsSubPlots.py} script. This Python script is located in the \texttt{\$(project-dir)/statistical-graphs} directory and utilizes the \textit{matplotlib} libraries to generate the graph plots, similar to the previous tool.\newline 
+As the reader has probably already noticed, the majority of the graphs presented in the previous sections and chapters were generated using the new graph analysis script, specifically the \texttt{runChartsSubPlots.py} script. This Python script is located in the \texttt{\$(project-dir)/statistical-graphs} directory and utilizes the \textit{matplotlib} libraries to generate the graph plots, similar to the previous tool.\newline 
 The script accepts the following command-line parameters:
 
 \begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the dataset, in CSV format, from which to read the data. The dataset must be located within the directory containing the enriched datasets for the invariant analysis phase. If subsequent parameters are not specified, the script will show all registers in the dataset, except for additional attributes
+	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the CVS format dataset to read data from. The dataset must be within the directory containing the enriched datasets for the invariant analysis phase. If subsequent parameters are not specified, the script will display all registers in the dataset, excluding any additional attributes;
 	
-	\item \textbf{-r} or \textbf{{-}{-}registers}: specifies one or more specific registers to be displayed
+	\item \textbf{-r} or \textbf{{-}{-}registers}: specifies one or more specific registers to be displayed;
 	
-	\item \textbf{-a} or \textbf{{-}{-}addregisters}: adds one or more registers to the default visualization. This option is useful in case an additional attribute such as slope is to be analyzed
+	\item \textbf{-a} or \textbf{{-}{-}addregisters}: adds one or more registers to the default visualization. This option is useful in case an additional attribute such as slope is to be analyzed;
 	
-	\item \textbf{-e} or \textbf{{-}{-}excluderegisters}: excludes one or more specific registers from the default visualization. This option is useful to avoid displaying hardcoded setpoints or spare registers
+	\item \textbf{-e} or \textbf{{-}{-}excluderegisters}: excludes one or more specific registers from the default visualization. This option is useful to avoid displaying hardcoded setpoints or spare registers.
 \end{itemize}
 This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
 
@@ -519,24 +519,24 @@ Although we decided not to include the statistical analysis aspect in the framew
 
 \subsection{Phase 3: Invariant Inference and Analysis}
 \label{subsec:4_improve_invariants}
-The phase of invariant inference and analysis has undergone a redesign and improvement to offer the user a more comprehensive and effortless approach to identify invariants. This has been achieved through the application of new criteria to analyze and reorganize the Daikon analysis results. The outcome of this is a more compact presentation of information that highlights the possible relationships among invariants.\newline
+The phase of invariant inference and analysis has undergone a redesign and improvement to offer the user a more comprehensive and easier approach to identify invariants. This has been achieved through the application of new criteria to analyze and reorganize the Daikon analysis results. The outcome of this is a more compact presentation of information that highlights the possible relationships among invariants.\newline
 The new design not only enables the identification of undiscovered aspects of the system behavior but also confirms the hypotheses made during the earlier stages of analysis. This step is now semi-automated, unlike before, and allows for the analysis of invariants on individual actuator states and their combinations.
 
 \subsubsection{Revised Daikon Output}
 \label{subsub:4_new_daikon_output}
 To streamline the process of identifying invariants quickly and efficiently, it is necessary to revise the output generated by standard Daikon analysis. The goal is to create a more compact and readable format for the output.
 \newline \newline
-The current Daikon results consist of three sections:
+The current Daikon results basically consist of three sections, referred as \textit{program point sections} \cite{daikon_program_point}:
 
 \begin{enumerate}
-	\item the first section containing generic invariants, i.e., valid regardless of whether a condition is specified for the analysis
+	\item the first section containing generic invariants, i.e., valid regardless of whether a condition is specified for the analysis;
 	
-	\item the second section containing invariants obtained by specifying a condition for the analysis in the \textit{.spinfo} file 
+	\item the second section containing invariants obtained by specifying a condition for the analysis in the \textit{.spinfo} file, if any;
 	
-	\item a third section containing the invariants that are obtained from the negations of the condition possibly specified in the .spinfo file
+	\item a third section containing the invariants that are obtained from the negation of the condition potentially specified in the \textit{.spinfo} file.
 \end{enumerate}
 
-In each section only a single invariant per row is shown, without relating it in any way to the others: this makes it difficult to identify significant invariants and any invariant chains that might provide much more information about the behavior of the system than the single invariant.\newline
+In each section only a single invariant per row is shown, without relating it in any way to the others: this makes it difficult to identify significant invariants and any invariant chain that might provide much more information about the behavior of the system than the single invariant.\newline
 A brief example of the structure and format of this output related to \texttt{PLC1} of the iTrust SWaT system is shown in Listing \ref{lst:4_daikon_output_plc1}, where a condition was specified on the measurement \texttt{P1\_LIT101} and on actuator \texttt{P1\_MV101}: % sono 61 righe effettive di invarianti - 48 generiche, 10 condizionali, 1 negata
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Standard Daikon output for \texttt{PLC1} of the iTrust SWaT system},label=lst:4_daikon_output_plc1]
@@ -582,7 +582,7 @@ A brief example of the structure and format of this output related to \texttt{PL
 In the presented framework, the output is simplified to \textbf{two sections}: the \textit{general section} and the section related to the \textit{user-specified condition}. The section related to the negated condition is eliminated as it is not relevant in this context and could lead to potential misinterpretation. Moreover, the relationships between invariants will be emphasized by utilizing \textbf{transitive closures}: transitive closure of a relation $R$ is another relation, typically denoted $R^{+}$ that adds to $R$ all those elements that, while not necessarily related directly to each other, can be reached by a \textit{chain} of elements related to each other. In other words, the transitive closure of $R$ is the smallest (in set theory sense) transitive relation $R$ such that $R$ $\subset$ $R^{+}$ \cite{transitive_closures}. 
 
 \bigskip
-To implement the transitive closure of the invariants generated by Daikon, we initially categorized the invariants in each section by type based on their equivalence relation, excluding any invariants related to additional attributes except for the slope. For each type of invariant, we constructed a \textbf{graph} using the NetworkX library, where registers were represented as nodes, and arcs were created to connect registers that shared a common endpoint in the invariant, applying the transitive property. To reconstruct the individual invariant chains, then, we used a simple \textit{Depth-first Search} (DFS) on each of the graphs, thus obtaining the desired outcome. Figure \ref{fig:4_transitive_closure_graphs} shows some examples of these graphs:
+To implement the transitive closure of the invariants generated by Daikon, we initially categorized the invariants in each section by type based on their mathematical relation ($==$, $>$, $<$, $>=$, $<=$, $!=$), excluding any invariant related to additional attributes except for the slope. For each type of invariant, we constructed a \textbf{graph} using the NetworkX library, where registers were represented as nodes, and arcs were created to connect registers that shared a common endpoint in the invariant, applying the transitive property. To reconstruct the individual invariant chains, we employed a straightforward approach known as \textit{Depth-first Search} (DFS) on each of the graphs. This method allowed us to traverse the graphs and obtain the desired outcome, identifying the invariant chains. Figure \ref{fig:4_transitive_closure_graphs} shows some examples of these graphs:
 
 \begin{figure}[H]
 	\centering
@@ -647,25 +647,27 @@ In general, the output has been reduced in the number of effective rows (19 vers
 \subsubsection{Types of Analysis}
 \label{subsub:4_types_analysis}
 
-Compared to Ceccato et al.'s solution, in which individual analyses are performed manually, my proposal is to implement two types of semi-automated analysis: the first performs an analysis of all states for each individual register, while the second performs the analysis on the current system configuration based on the actual states of the actuators.\newline
-Both analyses refer to a specific measurement, selected by the user.
+In contrast to Ceccato et al.'s solution, which involves manual individual analyses, our proposal is to introduce \textbf{two types of semi-automated analysis}.\newline 
+The first type focuses on analyzing \textbf{all states for each individual actuator}. This automated analysis aims to provide comprehensive insights into the behavior of each actuator in relation to a specific measurement selected by the user.\newline
+The second type of analysis considers the current system configuration and examines the \textbf{actual states of the actuators}. This analysis takes into account the interplay and combined effects of multiple actuators on the selected measurement. By incorporating the real-time states of the actuators, this semi-automated analysis offers a more accurate assessment of the system behavior.
 
 \bigskip
 These two types of analysis will be handled by the Python script\\ \texttt{daikonAnalysis.py}, contained in the default directory \texttt{\$(project\_dir)/daikon}.\newline
 The script accepts the following command-line arguments:
 
 \begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. The dataset must be located within the directory containing the enriched datasets specified in the \textit{config.ini} file (by default \texttt{\$(project\_dir)/daikon/Daikon\_Invariants}).
+	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. The dataset must be located within the directory containing the enriched datasets specified in the \textit{config.ini} file (by default \texttt{\$(project\_dir)/daikon/Daikon\_Invariants});
 	
-	\item \textbf{-s} or \textbf{{-}{-}simpleanalysis}: performs the analysis on the states of individual actuators
+	\item \textbf{-s} or \textbf{{-}{-}simpleanalysis}: performs the analysis on the states of individual actuators;
 	
-	\item \textbf{-c} or \textbf{{-}{-}customanalysis}: performs the analysis on combinations of actual states of the actuators
+	\item \textbf{-c} or \textbf{{-}{-}customanalysis}: performs the analysis on combinations of actual states of the actuators;
 	
-	\item \textbf{-u} or \textbf{{-}{-}uppermargin}: defines a percentage margin on the maximum value of the measurement
+	\item \textbf{-u} or \textbf{{-}{-}uppermargin}: defines a percentage margin on the maximum value of the measurement;
 	
-	\item \textbf{-l} or \textbf{{-}{-}lowermargin}: defines a percentage margin on the minimum value of the measurement
+	\item \textbf{-l} or \textbf{{-}{-}lowermargin}: defines a percentage margin on the minimum value of the measurement;
 \end{itemize}
-One or both types of analysis can be selected. The last two parameters set a condition on the value of the measurement that is meant to bypass the transient periods between the actuator state change and the actual trend change at the maximum and minimum values: this expedient is especially useful for the first type of analysis, allowing for generally more accurate data on measurement trends.
+The selection of one or both types of analysis is possible. Additionally, the last two parameters can be used to set a condition on the value of the measurement. This condition is designed to bypass the transient periods that occur during actuator state changes and the actual trend changes at the maximum and minimum values of the measurement.\newline
+This approach proves particularly beneficial for the first type of analysis, as it enables more accurate data on the trends of the measurement. By excluding the transient periods, the analysis can focus on the stable and meaningful trends, providing improved insights into the behavior of the system.
 
 \paragraph{Analysis on single actuator states}
 \label{par:4_single_actuator_states_analysis}
@@ -690,7 +692,9 @@ The result of these analyses are saved in the form of text files in a directory 
 	\label{fig:4_daikon_simpleanalysis_dirfiles}
 \end{figure}
 
-An example of the outcome of this analysis is Listing \ref{lst:4_daikon_new_output_plc1}, where the actuator analyzed is \texttt{P1\_MV101} in state 2: from the generic invariants we can observe that \texttt{P1\_P101} is a likely actuator (line 5), assuming binary values; from line 8, however, we note that \texttt{P1\_P102} is permanently equal to 1, so it can be confirmed that it is a spare actuator rather than a setpoint; furthermore, lines 9 and 10 show the maximum and minimum values reached by \texttt{P1\_LIT101}, which we have assumed to be the register connected to the tank. The most interesting information, however, comes from the condition-generated invariants: at line 21 we notice that the slope of \texttt{P1\_LIT101} is 1 (thus increasing) when \texttt{P1\_MV101} is set to 2: this confirms what we assumed in the previous steps, namely, that \texttt{P1\_MV101} represents the ON state of the actuator and is responsible for filling the tank \texttt{P1\_LIT101}; moreover, at line 23 we see that \texttt{P1\_FIT101} is greater than \texttt{P1\_MV101}: this means that when the actuator assumes the value 2 the sensor \texttt{P1\_FIT101} detects data (in contrast, if \texttt{P1\_MV101} is 1 \texttt{P1\_FIT101} is 0, detecting nothing), confirming the original hypothesis made that this may be a pressure or flow sensor.
+Listing \ref{lst:4_daikon_new_output_plc1} provides an illustrative example of the analysis results. In this case, we focus on the actuator \texttt{P1\_MV101} in state 2. By examining the generic invariants, we can deduce that \texttt{P1\_P101} is a probable actuator with binary values, as indicated in line 5. However, upon closer inspection in line 8, we discover that \texttt{P1\_P102} consistently maintains a value of 1 throughout, thus confirming its role as a spare actuator rather than a setpoint. Furthermore, lines 9 and 10 present the maximum and minimum values achieved by \texttt{P1\_LIT101}, the register presumed to be connected to the tank.\newline
+The condition-generated invariants provide the most interesting insights. In particular, at line 21, we observe that when \texttt{P1\_MV101} is set to 2, the slope of \texttt{P1\_LIT101} is 1, indicating an increasing trend. This confirms our previous assumption that \texttt{P1\_MV101} represents the actuator's ON state and is responsible for filling the tank (\texttt{P1\_LIT101}).\newline
+Furthermore, at line 23, we discover that \texttt{P1\_FIT101} is greater than \texttt{P1\_MV101}. This implies that when the actuator assumes the value 2, the sensor \texttt{P1\_FIT101} registers a measurement. In contrast, when \texttt{P1\_MV101} is 1, \texttt{P1\_FIT101} remains at 0, signifying no recorded readings. This finding reinforces our initial hypothesis that \texttt{P1\_FIT101} may serve as a pressure or flow sensor.
 
 \paragraph{Analysis of the Current System Configuration}
 \label{par:4_current_system_config_analysis}
@@ -736,19 +740,19 @@ An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_sy
 	P1_FIT101 > P1_MV101
 	P1_FIT101 > P1_P101
 \end{lstlisting}
-Compared to Listing \ref{lst:4_daikon_new_output_plc1}, this time we can observe in the general invariants section the presence of implications, which were previously absent (the remaining generic invariants have been omitted for reasons of space). Such implications can provide very useful information, as in this case: for example, the invariant on line 18 tells us that if the value of \texttt{P1\_MV101} is greater than that of \texttt{P1\_P101} then the value of the slope is 1, that is, the tank level is increasing. Consequently, we have further confirmation that the state \texttt{P1\_MV101 == 2} is the ON state for that actuator and that it is the actuator responsible for filling the tank \texttt{P1\_LIT101}. Comparing the other analysis outcomes, we will discover that \texttt{P1\_P101} is instead responsible for emptying the tank and that its ON and OFF states are 2 and 1, respectively.\newline
-In addition, the invariant at line 8 also indicates that when the actuator \texttt{P1\_MV101} is in state 2 and \texttt{P1\_P101} is in state 1 then the value of \texttt{P1\_FIT101} is greater than 2: consequently, it follows that the corresponding sensor is measuring something relative to the tank \texttt{P1\_LIT101}.\newline
-The above is confirmed by the invariants related to the analysis condition: at line 24 we have that the slope is indeed equal to 1 (thus increasing) and that \texttt{P1\_FIT101}, at line 26, takes values greater than 2 when \texttt{P1\_MV101} is equal to 2.
+In contrast to Listing \ref{lst:4_daikon_new_output_plc1}, the current analysis reveals the presence of implications in the general invariants section, which were previously absent (remaining generic invariants omitted for brevity). These implications offer valuable insights, as demonstrated in this case. For instance, the invariant stated in line 18 informs us that if the value of \texttt{P1\_MV101} in greater than \texttt{P1\_P101}, then the slope's value is 1, indicating an increasing tank level. This finding further corroborates our initial understanding that the state \texttt{P1\_MV101 == 2} represents the ON state for the actuator responsible for filling the tank, namely \texttt{P1\_LIT101}. Upon comparing the results of the other analyses, we will uncover that \texttt{P1\_P101} serves the purpose of emptying the tank, with its ON and OFF states denoted as 2 and 1, respectively.\newline 
+Furthermore, the invariant presented in line 8 reveals that when \texttt{P1\_MV101} is in state 2 and \texttt{P1\_P101} is in state 1, the value of \texttt{P1\_FIT101} ins greater than 2. Consequently, it can be inferred that the associated sensor is measuring something in relation to the tank represented by \texttt{P1\_LIT101}.\newline
+The aforementioned observations are further supported by the invariants associated with the analysis condition. As indicated in line 24, the slope is indeed equal to 1, confirming an upward trend. Additionally, at line 26, it is evident that \texttt{P1\_FIT101} assumes values greater than 2 when \texttt{P1\_MV101} is equal to 2.
 
 \paragraph{Refining the Analysis}
 \label{par:4_refining_analysis}
-In some cases, it may happen that the outcomes provided by the semi-automated analyses are not satisfactory to the user (e.g., the value of the slope may not emerge clearly) or simply the user wants to investigate a particular aspect of the system in more detail by trying to discover additional invariants that did not emerge previously: in this case, it is possible to run a new and more specific invariant analysis using the Python script \texttt{runDaikon.py}, which allows for more punctual analyses of the system.\newline
-The script, also contained in the default directory \texttt{\$(project\_dir)/daikon}, accepts three command-line parameters:
+In certain situations, the outcomes provided by the semi-automated analyses may not meet the user's expectations. For instance, the clarity of the slope value may be insufficient, or the user may wish to delve deeper into a specific aspect of the system to uncover additional invariants that were not previously identified. In such cases, the user has the option to conduct a more targeted and specific invariant analysis using the Python script \texttt{runDaikon.py}, which enables precise investigations of the system.\newline
+The script, located in the default directory \texttt{\$(project\_dir)/daikon}, can be executed with three command-line parameters:
 
 \begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the enriched dataset, in CSV format, from which to read the data. Even in this case, the dataset must be located within the directory containing the enriched datasets
-	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the \textit{.spinfo} file. It is possible to specify more than one condition, but it is recommended to use the logical operator \texttt{\&\&}
-	\item \textbf{-r} or \textbf{{-}{-}register}: specifies the directory where to save the text file with the outcomes
+	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the CSV format \textit{enriched} dataset to read data from. Even in this case, the dataset must be located within the directory containing the enriched datasets;
+	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the \textit{.spinfo} file. It is possible to specify more than one condition, but it is strongly recommended to use the logical operator \texttt{\&\&} to avoid undesired behaviors in Daikon outcomes;
+	\item \textbf{-r} or \textbf{{-}{-}register}: specifies the directory where to save the text file with the outcomes.
 \end{itemize}
 During the execution of this analysis, a single output file is generated, containing the discovered invariants. The user can specify the directory where this file should be saved using the \texttt{-r} command-line option. By default, the file is stored in the directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}. The output file serves as a record of the identified invariants and can be examined at a later time. 
 
