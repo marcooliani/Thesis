@@ -169,13 +169,13 @@ class ExportPCAPData:
             data_dir = os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["split_dir"])
 
         if not filename:
-            filename = self.config["NETWORK"]["csv_output"]
+            filename = self.config["NETWORK"]["pcap_export_output"]
 
         print("Saving CSV export ... ")
         dataframe.to_csv(
             f'{os.path.join(data_dir, filename)}',
             index=False)
-        print(f'CSV file {self.config["NETWORK"]["csv_output"]} saved. Exiting')
+        print(f'CSV file {self.config["NETWORK"]["pcap_export_output"]} saved. Exiting')
 
 
 def main():

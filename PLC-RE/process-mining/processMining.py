@@ -29,7 +29,7 @@ class ProcessMining:
         parser.add_argument('-t', "--tolerance", type=float, default=self.config['MINING']['tolerance'],
                             required=False, help="tolerance")
         group.add_argument('-o', "--offset", type=int, default=0, required=False, help="offset")
-        group.add_argument('-g', "--graph", type=bool, default=False, required=False, help="generate state graph")
+        group.add_argument('-g', "--graph", type=bool, default=True, required=False, help="generate state graph")
 
         self.args = parser.parse_args()
 
@@ -147,7 +147,7 @@ class ProcessMining:
             # Con l'arrotondamento al terzo decimale sono un po' più preciso...
             slope = round((end_val - start_val)/difference_seconds, 3)
 
-            if -self.tolerance < slope < self.tolerance:
+            if -self.tolerance <= slope <= self.tolerance:
                 trend = 'STBL'
                 slope = 0
             elif slope >= self.tolerance:

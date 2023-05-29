@@ -6,6 +6,7 @@ import numpy as np
 import argparse
 import configparser
 import glob
+import ipaddress
 import graphviz
 import pygraphviz as pgv  # apt-get install graphviz graphviz-dev
 from PIL import Image
@@ -48,7 +49,7 @@ class NetworkAnalysis:
 
         return df
 
-    def find_communications(self,):
+    def find_communications(self):
         if self.args.directory:
             df = self.merge_datasets()
 
@@ -57,16 +58,39 @@ class NetworkAnalysis:
                                           self.config['NETWORK']['data_dir'],
                                           self.file))
 
-        df = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().reset_index(drop=True)
+        df = df[['src', 'dst', 'protocol', 'service_detail', 'register']]
         df['register'] = df['register'].fillna(value='missing data')
+        # df_nodup = df[['src', 'dst', 'protocol', 'service_detail', 'register']].drop_duplicates().reset_index(drop=True)
+        # df_nodup['register'] = df_nodup['register'].fillna(value='missing data')
+
+        # Trovo, ordino e stampo gli ip
+        sources = sorted(df['src'].unique(), key=ipaddress.IPv4Address)
+        destinations = sorted(df['dst'].unique(), key=ipaddress.IPv4Address)
+        ips = sorted(list(set(sources + destinations)), key=ipaddress.IPv4Address)
+        print(f'IP adrresses found: ')
+        print(' | '.join(map(str, ips)))
+        print()
 
         if self.src_addr:
+            # df_nodup = df_nodup[df_nodup["src"] == self.src_addr].reset_index(drop=True)
             df = df[df["src"] == self.src_addr].reset_index(drop=True)
         if self.dst_addr:
+            # df_nodup = df_nodup[df_nodup["dst"] == self.dst_addr].reset_index(drop=True)
             df = df[df["dst"] == self.dst_addr].reset_index(drop=True)
-        print(df)
+
+        df_print = df.groupby(['src', 'dst']).value_counts()
+        print(df_print.to_string())
+
+        df = df.groupby(['src', 'dst'], as_index=False).value_counts()
 
         return df
+
+    def save_to_csv(self, dataframe):
+        print("Saving CSV export ... ")
+        dataframe.to_csv(
+            f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["NETWORK"]["data_dir"], "network.csv")}',
+            index=False)
+        print(f'CSV file {self.config["NETWORK"]["networks_output"]} saved. Exiting')
 
     @staticmethod
     def draw_network_diagram(df):
@@ -96,14 +120,12 @@ class NetworkAnalysis:
             color = "black"
             labelfontcolor = "black"
 
-            #if register == "missing data":
             if "missing data" in register:
                 arrow_style = "dotted"
                 color = "dimgrey"
                 labelfontcolor = "dimgrey"
 
-            #if service == "Request":
-            if "Request" in service:
+            if "Request" in service or "Write" in service:
                 color = "red"
 
             G.add_node(src, label=src)
@@ -156,6 +178,7 @@ class NetworkAnalysis:
 def main():
     na = NetworkAnalysis()
     comm = na.find_communications()
+    na.save_to_csv(comm)
     na.draw_network_diagram(comm)
 
 
