@@ -231,6 +231,7 @@ Following is a brief explanation of the parameters just seen:
 Initially, the parameters for registers to be associated with each additional attribute may be left blank, as we may not have prior knowledge about the system and are unsure about which registers correspond to actuators, measurements, or other attributes. This information can be obtained from the brief analysis that follows the merging of datasets. The analysis, performed based on user's choice, provides indications on potential sensors, actuators, and other relevant information. These indications help the user set the desired values in the \textit{config.ini} file and refine the enrichment process by re-launching the \texttt{mergeDatasets.py} script.
 
 \paragraph{Slope Calculation}
+\label{par:4_slope_calculation}
 The \textit{slope} is an attribute that represents the \textbf{trend} of the measurement being considered. It is particularly useful, in our context, during the inference and invariant analysis phase to gather information about the trend under specific conditions. The slope can generally be classified as \textbf{increasing} (slope > 0), \textbf{decreasing} (slope < 0), or \textbf{stable} (slope = 0).\newline
 Normally, the slope is calculated through a simple mathematical formula: given an interval \textit{a}, \textit{b} relative to the measurement \textit{l}, the slope is given by the difference of these two values divided by the amount of time \textit{t} that the measurement takes to reach \textit{b} from \textit{a}:
 
@@ -769,8 +770,116 @@ Now, let's examine the key aspects of this new phase in greater detail.
 \subsubsection{Process Mining of the Physical Process}
 \label{subsub:4_proc_minining_phy}
 
+The mining of the physical process is performed by the Python script called \texttt{processMining.py}, located in the default directory \texttt{\$(project\_dir)/process-mining}.\newline
+This script accepts the following parameters from the command line:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename:} specifies the CSV format \textit{timestamped} dataset to be mined from. The dataset is obtained from the pre-processing stage and is located in the default directory \texttt{\$(project\_dir)/process-mining/data};
+	
+	\item \textbf{-a} or \textbf{{-}{-}actuators:} specifies one ore more actuators whose combinations of states are to be analyzed. If this parameter is not provided, all actuators in the subsystem will be considered;
+	
+	\item \textbf{-s} or \textbf{{-}{-}sensors:} specifies one or more measurements for which the trend will be calculated based on actuator state changes. If this parameter is omitted, all available measurements will be considered;
+	
+	\item \textbf{-t} or \textbf{{-}{-}tolerance:} specifies the tolerance to be taken into account during the trend calculation; 
+	
+	\item \textbf{-g} or \textbf{{-}{-}graph:} shows the resulting activity diagram.
+\end{itemize}
+
+The script processes the dataset in a sequential manner, analyzing each actuator state change. It calculates the duration in seconds of the system state, as well as the trend and slope of the specified measurement(s). Additionally, the script stores the next system state and the measurement values corresponding to the state change points, allowing for the identification of relative setpoints. These results are gradually collected and stored in a dictionary, where the keys represent the system states based on the actuator configurations, and the values represent the measured values mentioned above. The dictionary is then saved as a JSON file, which can be accessed by the user in the \texttt{\$(project\_dir)/process-mining/data} directory. The name of the file can be specified in the configuration file \textit{config.ini}.\newline \newline
+An example of the JSON file obtained in this step is shown in Listing \ref{lst:4_proc_mining_json}: the JSON file showcases the structure of the data obtained during the process.
+
+\begin{lstlisting}[language=java,numbers=none,caption={Example of the data contained in the produced JSON file} ,label=lst:4_proc_mining_json]
+	{
+		"P1_MV101 == 2, P1_P101 == 2": {
+			"start_value_P1_LIT101": [
+			534.9366,
+			495.4483,
+			497.9998,
+			495.9586,
+			495.8016
+			],
+			"end_value_P1_LIT101": [
+			536.0356,
+			532.7384,
+			541.7273,
+			534.4656,
+			540.8245
+			],
+			"slope_P1_LIT101": [
+			0,
+			0.015,
+			0.018,
+			0.016,
+			0.018
+			],
+			"trend_P1_LIT101": [
+			"STBL",
+			"ASC",
+			"ASC",
+			"ASC",
+			"ASC"
+			],
+			"time": [
+			119,
+			2464,
+			2477,
+			2452,
+			2440
+			],
+			"next_state": [
+			"P1_MV101 == 2, P1_P101 == 1",
+			"P1_MV101 == 2, P1_P101 == 1",
+			"P1_MV101 == 2, P1_P101 == 1",
+			"P1_MV101 == 2, P1_P101 == 1",
+			"P1_MV101 == 2, P1_P101 == 1"
+			]
+		},
+		"P1_MV101 == 2, P1_P101 == 1": {
+			...
+		}
+		"P1_MV101 == 0, P1_P101 == 1": {
+			...
+		}
+		
+		...
+	}
+\end{lstlisting}
+
+The collected data is now utilized to generate the \textbf{system activity diagram}. This diagram represents an \textit{oriented} graph where the nodes correspond to the system states determined by the actuator configurations. In addition to the state information, the nodes also display the trend (ascending, descending, or stable) and the slope of the reference measurement.\newline
+The edges in the diagram depict the values of the measurements at the time of the state change. These measurement values represent the setpoints for each measurement. Setpoints are calculated on the average of the values measured for that specific state. Additionally, the diagram incorporates on the edges the average duration of each system state.\newline
+Each data point on the arcs is accompanied by a \textit{standard deviation value}. This value provides information about the occurrence of a specific state within the system's cycle, indicating whether it appears multiple times with varying values and time durations. A low standard deviation suggests that the state is likely to occur only once within each cycle. Conversely, a high standard deviation indicates that the state may occur multiple times within the cycle.
+
+\bigskip
+An example of the activity diagram generated by the \texttt{processMining.py} script is presented in Figure \ref{fig:4_process_mining_graph}. This diagram illustrates the system's behavior by depicting transitions between different states. Nodes in the diagram represent specific system states, while arrows or edges indicate the flow between these states.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap4/state_graph_P1_LIT101.png}
+	\caption{Activity diagram for PLC1 of the iTrust SWaT system}
+	\label{fig:4_process_mining_graph}
+\end{figure}
+
+\noindent The diagram reveals important aspects of the system, such as its cyclicality and the emphasis on the temporal sequence of actuator states. These insights might not have been clearly evident in earlier stages of the analysis. The diagram provides a visual representation that allows us to appreciate the recurring patterns and understand how the system evolves over time. By observing the transitions and relationships between different states, we gain a better understanding of the dynamics and behavior of the system.
+
+\bigskip
+It is important to acknowledge that despite considering the tolerance set for trend and slope calculation, the accuracy of the related data may vary. For instance, there could be instances where multiple trends exist within the same node, or a trend may be stable instead of increasing or decreasing. These discrepancies arise due to data perturbations, which were discussed in Section \ref{par:4_slope_calculation}. Additionally, smoothing techniques were not employed in this analysis. Therefore, it becomes the responsibility of the user to correctly interpret the outcomes of this step, taking into account the information presented in the process mining diagram and the findings from previous analyses. By considering these factors together, the user can make informed interpretations and draw accurate conclusions from the results.
+
 \subsubsection{Network Communications}
 \label{subsub:4_proc_mining_net}
+The incorporation of network communications into Business Process Analysis has been reconsidered to shift away from a \textit{single-protocol} solution based on Modbus. Instead, the focus is on adopting a solution that can handle \textbf{multiple protocols}, even at the same time.\newline
+The main concept was to develop a new Python script that would extract and process data from PCAP files obtained through network traffic sniffing. The intention was to export this data to a CSV file, which would then be used as input for the process mining script, \texttt{processMining.py}, and integrated with the physical system data to derive commands to the actuators.
+
+\bigskip
+However, due to the specific case study discussed in Chapter \ref{casestudy} (and especially in Section \ref{subsec:5_2015_datasets}), \textbf{it was not feasible to implement this solution at the time}. The network data available for analysis either lacked references to the reads or writes performed by the actuators or, if such references existed, they were not associated with a suitable physical process dataset for the intended purposes. As a result, the integration of network data with the physical system data could not be realized in the given context.
+
+\bigskip
+Nevertheless, a thorough study was conducted on the available PCAP files to explore potential methodologies that could be implemented as future work. The analysis of the network data revealed that different protocols exhibit distinct behaviors when commanding changes in actuator states. Consequently, the previous approach proposed by Ceccato et al. becomes \textbf{impractical} when attempting to detect system state changes through network commands sent to the actuators.\newline
+However, considering that system state changes have already been identified through the process mining of the physical process, and with the corresponding event timestamps available, we propose an alternative approach to Ceccato et al.'s method. Instead of seeking the correspondence between network events and physical process events at the same instant, we suggest reversing the perspective. By focusing on the correspondence between a given event occurring in the physical process at a specific moment and the corresponding event in the network data at the same moment, it should be possible to achieve a similar, if not superior, outcome compared to the previous solution.\newline
+This \textit{inverse approach} aims to leverage the existing knowledge of system state changes obtained through the mining of the physical process. By aligning these physical events with their corresponding events in the network data, a more effective analysis can be conducted.
+
+\bigskip
+Although the integration of network data within Business Process Analysis was not feasible, the progress made thus far has resulted in the development of a \textbf{novel form of network analysis}. This approach, unlike the work conducted by Ceccato et al., offers a broader perspective on network communications and delves into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics.\newline
+In the upcoming section, we will delve further into this new network analysis methodology, discussing its unique features and the insights it can offer. By expanding the scope of our analysis, we aim to uncover valuable information that was not extensively explored in previous studies conducted by Ceccato et al.
 
 \subsection{Phase 5: Network Analysis}
 \label{subsec:4_network_analysis}
