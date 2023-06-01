@@ -37,16 +37,16 @@ Table \ref{table:2_it_ot_difference} summarizes the differences between traditio
 \vfill
 
 \section{Industrial Control Systems Architecture}
-\label{sec:ics_components}
+\label{sec:2_ics_components}
 In the past, there has been a clear division between \textit{Information Technology} (IT) and \textit{Operational Technology} (OT), both at the technical and organizational levels. Each domain has maintained its own distinct technology stacks, protocols, and standards. However, with the emergence of Industry 4.0 and the rapid expansion of industrial automation, which heavily relies on IT tools for monitoring and controlling critical infrastructures, the boundary between IT and OT has started to blur. This trend has paved the way for greater integration between these two domains, thus improving productivity and process quality.\newline \newline
-General ICS architecture consists in \textbf{six levels} each representing a functionality: this architecture comprising the OT and IT parts is represented in Figure \ref{fig:SCADA_schema} \cite{purdue_model}\cite{tesi_phd_norvegese}, according to the \textit{Purdue Enterprise Reference Architecture} (PERA), or simply \textbf{Purdue Model}:
+General ICS architecture consists in \textbf{six levels} each representing a functionality: this architecture comprising the OT and IT parts is represented in Figure \ref{fig:2_SCADA_schema} \cite{purdue_model}\cite{tesi_phd_norvegese}, according to the \textit{Purdue Enterprise Reference Architecture} (PERA), or simply \textbf{Purdue Model}:
 
 \begin{figure}[ht]
 	\centering
 	% \includegraphics[scale=0.20]{layers_scada_architecture_wiki.png}
 	\includegraphics[scale=0.35]{chap2/purdue_model_ics.png}
 	\caption{ICS architecture schema}
-	\label{fig:SCADA_schema}
+	\label{fig:2_SCADA_schema}
 \end{figure}
 
 \begin{itemize}
@@ -250,7 +250,7 @@ Among all the various protocols, some have risen to prominence as widely accepte
 \vfill
 
 \subsubsection{Modbus}
-\label{subsec:2_modbus}
+\label{subsubsec:2_modbus}
 \textit{Modbus} is a serial communication protocol developed by Modicon (now Schneider Electric) in 1979 for use with its PLCs \cite{Modbus_definition} and designed expressly for industrial use: it facilitates interoperability of different devices connected to the same network (sensors, PLCs, HMIs, ...) and it is also often used to connect RTUs to SCADA acquisition systems.
 
 \bigskip
@@ -285,7 +285,7 @@ Modbus TCP embeds a standard Modbus frame in a TCP frame (see Figure \ref{fig:mo
 \end{figure}
 
 \paragraph{Modbus registers}
-\label{subsub:modbus_registers}
+\label{par:2_modbus_registers}
 Modbus provides four object types, which map the data accessed by master and slave to the PLC memory:
 
 \begin{itemize}
@@ -296,7 +296,7 @@ Modbus provides four object types, which map the data accessed by master and sla
 \end{itemize}
 
 \paragraph{Modbus Function Codes}
-\label{subsub:modbus_func_codes}
+\label{par:2_modbus_func_codes}
 \textit{Modbus Function Codes} are specific codes used by the Modbus master within a request frame (see Figure \ref{fig:modbus_frames}) to tell the Modbus slave device which register type to access and which action to perform on it.
 
 \bigskip
@@ -330,7 +330,7 @@ Function Codes list for data access are listed in Table \ref{table:modbus_fc_lis
 \end{longtable}
 
 \paragraph{Modbus Security Issues}
-\label{subsub:modbus_sec}
+\label{par:2_modbus_sec}
 Despite its simplicity and widespread use, the Modbus protocol does not have any security feature, which exposes it to vulnerabilities and attacks.
 
 Data in Modbus are transmitted unencrypted (\textit{lack of confidentiality}), with no data integrity controls (\textit{lack of integrity}) and authentication checks (\textit{lack of authentication}), in addition to the \textit{lack of session}. Hence, the protocol is vulnerable to a variety of attacks, such as Denial of Services (DoS), buffer overflows and reconnaissance activities.
@@ -348,7 +348,7 @@ The easiest attack to bring to the Modbus protocol, however, is \textbf{packet s
 To make the Modbus protocol more secure, an encapsulated version was developed within the \textit{Transport Security Layer} (TLS) cryptographic protocol, also using mutual authentication. This version of the Modbus protocol is called \textbf{Secure Modbus} or \textbf{Modbus TLS}. In addition to this, Secure Modbus also includes X.509-type certificates to define permissions and authorisations \cite{modbus_tls_pdf}.
 
 \subsubsection{EtherNet/IP}
-\label{subsub:enip}
+\label{subsubsec:enip}
 \textit{EtherNet/IP} (where IP stands for \textit{Industrial Protocol}) is an open industrial protocol that allows the \textit{Common Industrial Protocol} (CIP) to run on a typical Ethernet network \cite{enip_pdf}. It is supported by ODVA \cite{odva_url}.
 
 \begin{figure}[ht]
@@ -384,10 +384,10 @@ defined by CIP standard \cite{enip_pdf}\cite{enip_pdf2}:
 	\end{itemize}
 \end{itemize}
 
-\paragraph{Session, Presentation and Application layer} At the upper layers, EtherNet/IP implements the CIP protocol stack. We will discuss this protocol more in detail in Section \ref{subsubsec:cip}. 
+\paragraph{Session, Presentation and Application layer} At the upper layers, EtherNet/IP implements the CIP protocol stack. We will discuss this protocol more in detail in Section \ref{subsubsec:2_cip}. 
 
 \subsubsection{Common Industrial Protocol (CIP)}
-\label{subsubsec:cip}
+\label{subsubsec:2_cip}
 The \textit{Common Industrial Protocol} (CIP) is an open industrial automation protocol supported by ODVA. It is a \textbf{media independent} (or \textit{transport independent}) protocol using a \textit{producer-consumer} communication model and providing a \textbf{unified architecture} throughout the manufacturing enterprise \cite{cip_protocol_web}\cite{cip_wiki}.\newline
 CIP has been adapted in different types of network:
 

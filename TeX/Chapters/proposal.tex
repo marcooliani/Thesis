@@ -883,6 +883,86 @@ In the upcoming section, we will delve further into this new network analysis me
 
 \subsection{Phase 5: Network Analysis}
 \label{subsec:4_network_analysis}
+The objective of the network analysis presented in this section is to offer users valuable information regarding the communication process within an industrial control system. This analysis aims to provide users with an overview of the communication between Programmable Logic Controllers (PLCs) at level 1, as well as the communication between PLCs and devices at higher levels such as HMIs and Historian servers (see Section \ref{sec:2_ics_components} for ICSs architecture). The analysis focuses on industrial protocols used and the information exchanged.\newline
+By reconstructing the network communication structure using data obtained from the network traffic sniffing process, users can gain a comprehensive understanding of the behavior of the underlying industrial system. This knowledge can then be utilized to plan a strategy for analyzing the physical processes within the system.
+
+\subsubsection{Extracting Data from PCAP Files}
+\label{subsubsec:4_extract_pcap}
+The initial step involves extracting the desired information from the PCAP files that contain the captured network traffic. This includes details such as the source IP address, destination IP address, protocol used, and the type of request made (e.g., Read/Write, Request/Response). The extracted data is then converted into a more convenient CSV format. This extracted data serves as the foundation for the subsequent phase.\newline
+In the latter part of this phase, the extracted data is utilized to generate the network schema. The network schema provides a visual representation of the connections and relationships within the network, showcasing the communication patterns between different components. This schema helps in understanding the overall structure and behavior of the industrial control system.
+
+\bigskip
+To accomplish the extraction of data from the PCAP files, a Python script called \texttt{export\_pcap\_data.py} is employed. This script, originally designed for the business process phase, is located in the directory\\ \texttt{\$(project\_dir)/network-analysis} and accepts the following options as command-line arguments:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename:} allows the user to specify a single PCAP file to be passed as input to the script. The user can provide the complete file path of the PCAP file as an argument;
+	
+	\item \textbf{-m} or \textbf{{-}{-}mergefiles:} enables the merging of multiple PCAP files. In this scenario, the files should be located within the directory specified by the \texttt{pcap\_dir} directive in the \textit{config.ini} configuration file and the user does not have to provide the path to each PCAP file;
+	
+	\item \textbf{-d} or \textbf{{-}{-}mergedir:} allows for specifying the directory that contains the PCAP files to be automatically imported into the script and merged. This ensures that all the PCAP files within the specified directory will be processed by the script without the need for manual selection or input.
+	
+	\item \textbf{-s} or \textbf{{-}{-}singledir:} operates differently from the previous option mentioned. This option enables the extraction of data from each individual PCAP file within the specified directory. The extracted data is then saved in separate CSV datasets, which are stored in the directory specified by the \texttt{split\_dir} directive in the \textit{config.ini} file. This functionality proves useful when dealing with exceptionally large PCAP files, where merging them together for export might consume significant time and resources. By utilizing this option, the extraction procedure becomes lighter and more manageable. The extracted data in separate CSV files can be utilized in the later stages of the Network Analysis process;
+	
+	\item \textbf{-t} or \textbf{{-}{-}timerange:} this functionality enables users to specify a specific time period within the PCAP files from which they wish to extract relevant information.
+\end{itemize}
+
+Unless the \textit{-s} option is explicitly specified, the results of data extraction and export will be saved to a single CSV dataset within the \\ \texttt{\$(project\_dir)/network-analysis/data} directory. The default file name for this output file is determined by the \texttt{pcap\_export\_output} directive specified in the \textit{config.ini} file. 
+In addition, by utilizing the \texttt{protocols} and \texttt{ws\_<protocol>\_field} directives, user can configure the network protocols to be searched within the PCAP files. Furthermore, user can specify the relevant Tshark/Wireshark fields to extract for the specified protocols set in the \texttt{protocols} directive.
+
+\bigskip
+After obtaining the extracted data, it is possible to proceed with the second part of the network analysis.
+\vfill
+
+\subsubsection{Network Information}
+\label{subsubsec:4_draw_network}
+During this stage, the exported CSV data is processed to derive valuable information regarding network communications and the structure of the network itself. The objective is to identify and establish relationships between IP addresses present on the network, thereby determining the sources and destinations of communications. Furthermore, the analysis detects the protocols used for each communication and quantifies the various types of requests made.
+
+\bigskip
+This information is then transformed into a \textbf{graph representation of the network} (or subnetwork, if specified). In this graph, devices are represented as nodes labeled with their IP addresses, while edges represent the incoming and outgoing communications of these devices, along with the corresponding information.\newline
+To ensure comprehensibility, the analysis also provides users with \textbf{textual information} containing the same details as the graph representation. This text-based information serves as an alternative for cases where the graph may become complex to interpret, particularly when numerous edges connect nodes and result in a high volume of network requests.\newline
+This textual information is saved to another CSV file, enabling offline reference or potential future utilization. By having this file available, users can access the network analysis results in a structured format for further analysis or documentation purposes.
+
+\bigskip
+The Python script \texttt{networkAnalysis.py} in the \texttt{\$(project\_dir)/network-analysis} directory manages this phase of the analysis. The script can be executed with the following parameters:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename:} used to specify the CSV dataset containing the network data exported in the previous step. The dataset should be located in the directory \texttt{\$(project\_dir)/network-analysis/data};
+	
+	\item \textbf{-D} or \textbf{{-}{-}directory:} used to specify the directory that contains the CSV datasets obtained using the \textit{-s} option of the Python script \texttt{export\_pcap\_data.py}. By passing this parameter, the script will automatically merge the datasets and proceed with the analysis of the data contained within them;
+	
+	\item \textbf{-s} or \textbf{{-}{-}srcaddr:} allows for specifying the source IP address for which you wish to display the incoming and outgoing communications. By providing the source IP address as an argument, the script will focus on showcasing the communications associated with that particular IP address;
+	
+	\item \textbf{-d} or \textbf{{-}{-}dstaddr:} enables the user to specify the destination IP address for which you want to display the incoming and outgoing communications. By providing the destination IP address as an argument, the script will concentrate on presenting the communications associated with that specific IP address.
+\end{itemize}
+
+The parameters related to IP addresses, including source and destination, are optional. It is possible to specify either one of them individually. For instance, if the user specifies only the source IP address, the script will display the network nodes with which it communicates on the outgoing side, along with the corresponding generated traffic. Similarly, if only the destination IP address is specified, the script will showcase the network nodes communicating with it on the incoming side, along with the relevant traffic data.
+
+\bigskip
+During the analysis, the script identifies and displays the IP addresses present in the network as output for the user's reference. This allows the user to select specific IP addresses from the command line for a more focused analysis, such as choosing a subnet of interest. Additionally, the script detects and tracks distinct communications between pairs of PLCs, keeping a record of the number of these communications.\newline
+The result of the analysis is a graph representation of the network (or subnetwork) to be analyzed. An example of such a graph can be seen in Figure \ref{fig:4_network_graph_example}. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap4/4_network_graph_example.png}
+	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination)}
+	\label{fig:4_network_graph_example}
+\end{figure}
+
+The graph illustrates the network communications between the source IP address 192.168.1.40 and the destination IP address 192.168.1.30. Each arrow represents a communication between these IP addresses, showcasing the flow and direction of the interactions. The red arrows indicate requests initiated by the source IP address towards the destination IP, while the black arrows represent responses sent by the source IP in response to previous requests made by the destination IP. The gray dotted arrows represent responses for which the corresponding request is missing or unavailable for some reason. Overall, the graph distinguishes the different types of communications and provides insights into the request-response dynamics between the source and destination IP addresses. The graph is automatically generated and saved within the\\ 
+\texttt{\$(project\_dir)/network-analysis/data} directory.
+
+\bigskip
+In terms of the textual output, we can observe how the same data is represented. The communications exchanged between the two PLCs are displayed more prominently, allowing for a clearer understanding. Unlike the graph, the textual representation includes a column on the right-hand side, indicating the number of communications for each type of request. This provides a more distinct perspective on the network behavior within an industrial control system that utilizes, in this case, the CIP protocol for its communications.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap4/network_text_output.png}
+	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination) in textual mode}
+	\label{fig:4_network_textual_example}
+\end{figure}
+
+As previously mentioned, the textual data is stored in a CSV dataset located in the \texttt{\$(project\_dir)/network-analysis/data} directory.
+
 
 \vfill
 \nolinenumbers
