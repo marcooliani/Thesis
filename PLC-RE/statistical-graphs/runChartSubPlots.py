@@ -33,6 +33,7 @@ class RunChartsSubPlots:
             registers = [x for x in df_cols if not x.startswith(self.config['DATASET']['max_prefix'])
                          and not x.startswith(self.config['DATASET']['min_prefix'])
                          and not x.startswith(self.config['DATASET']['prev_cols_prefix'])
+                         and not x.startswith(self.config['DATASET']['trend_cols_prefix'])
                          and not x.startswith(self.config['DATASET']['slope_cols_prefix'])]
 
             if self.args.excluderegisters:

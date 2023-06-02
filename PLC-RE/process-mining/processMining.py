@@ -150,7 +150,7 @@ class ProcessMining:
             if -self.tolerance <= slope <= self.tolerance:
                 trend = 'STBL'
                 slope = 0
-            elif slope >= self.tolerance:
+            elif slope > self.tolerance:
                 trend = 'ASC'
             else:
                 trend = 'DESC'
@@ -219,9 +219,9 @@ class ProcessMining:
                                node_attr={'color': 'lightblue2', 'style': 'rounded, filled',
                                           'shape': 'box', 'fontsize': '10'},
                                edge_attr={'fontfamily': 'Courier', 'fontsize': '8'},
-                               format='png',
+                               format='svg',
                                directory='graphs')
-        dot.attr(rankdir='LR')
+        dot.attr(rankdir='TB')
 
         states_list = [k for k, v in self.configurations.items()]
 

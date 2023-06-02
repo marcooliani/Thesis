@@ -96,8 +96,8 @@ class NetworkAnalysis:
     def draw_network_diagram(df):
         plc_comm = df.values.tolist()
 
-        G = pgv.AGraph(strict=False, directed=True)
-        G.graph_attr["label"] = "Communication Network diagram"
+        G = pgv.AGraph(strict=False, directed=True, rankdir='TD')
+        # G.graph_attr["label"] = "Communication Network diagram"
         G.graph_attr["fontsize"] = "12"
         G.graph_attr["format"] = "svg"
         # G.graph_attr["size"] = "15,20!"
@@ -130,13 +130,14 @@ class NetworkAnalysis:
 
             G.add_node(src, label=src)
             G.add_node(dst, label=dst)
+            # G.add_edge(src, dst, style=arrow_style, color=color)
             G.add_edge(src, dst, label=f'{protocol} {service}\n{register}', style=arrow_style, color=color,
                        labelfontcolor=labelfontcolor)
 
         G.unflatten("-f -l 200")
         G.layout(prog="dot")
         G.draw(f'data/network.svg')
-        #G.draw(f'data/network.png')
+        G.draw(f'data/network.png')
         #G.draw(f'/tmp/network.png')
 
         #img = Image.open('/tmp/network.png')
@@ -155,8 +156,8 @@ class NetworkAnalysis:
         dot.attr(rankdir='LR')
         arrow_style = "solid"
 
-        plc_comm = df.values.to_list()
-        print(plc_comm)
+        plc_comm = df.values.tolist()
+        #print(plc_comm)
         for plc in plc_comm:
             src = plc[0]
             dst = plc[1]
