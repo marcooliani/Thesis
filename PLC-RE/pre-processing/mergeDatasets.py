@@ -223,7 +223,8 @@ class MergeDatasets:
             # print(datasetPLC.isnull().values.any()) # Debug NaN
 
             # Removing empty registers (the registers with values equal to 0 are not used in the control of the CPS)
-            self.clean_null(file)
+            # self.clean_null(df)
+            df = df.loc[:, (df != 0).any(axis=0)]
 
             datasetPLC_daikon = df.copy()  # Altrimenti non mi differenzia le liste, vai a capire perchè...
 
@@ -232,6 +233,7 @@ class MergeDatasets:
 
             # Add previous values, slopes and limits to dataframe
             datasetPLC_daikon = self.enrich_df(datasetPLC_daikon, file)
+            print(datasetPLC_daikon.columns)
             # Concatenate the single PLCs datasets for Daikon
             df_list_daikon.append(datasetPLC_daikon)
 
@@ -240,14 +242,15 @@ class MergeDatasets:
     @staticmethod
     def __concat_datasets(datasets_list):
         df = pd.concat(datasets_list, axis=1).reset_index(drop=True)
-        df = df.T.drop_duplicates().T  # Drop dup columns in the dataframe (i.e. Timestamps)
+        df = df.loc[:, ~df.columns.duplicated()]  # Drop dup columns in the dataframe by name (i.e. Timestamps)
 
         return df
 
     def save_mining_dataset(self, datasets_list):
         mining_datasets = self.__concat_datasets(datasets_list)
+        # mining_datasets = mining_datasets.T.drop_duplicates().T  # Drop dup columns in the dataframe (i.e. Timestamps)
+
         # Save dataset with the timestamp for the process mining.
-        # mining_datasets.to_csv(f'../process-mining/data/{self.output_file.split(".")[0]}_TS.csv', index=False)
         mining_datasets.to_csv(
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["MINING"]["data_dir"], self.output_file.split(".")[0])}_TS.csv',
             index=False)
@@ -268,13 +271,6 @@ class MergeDatasets:
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["DAIKON"]["daikon_invariants_dir"], self.output_file)}',
             index=False)
         # print(daikon_datasets)  # Debug
-
-    @staticmethod
-    def add_zeros_column(dataframe):
-        print(f'Add zeros column to dataframe')
-        zero_col = [0 for _ in range(dataframe.shape[0])]
-        dataframe.insert(len(dataframe.columns), "zero_col", zero_col)
-
 
 def main():
     mg = MergeDatasets()
