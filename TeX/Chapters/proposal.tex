@@ -2,7 +2,7 @@
 \label{chap:proposal}
 
 \linenumbers
-\lettrine[lines=2]{I}{n Chapter \ref{state_of_art}}, we presented the state of the art of \textit{process comprehension} of an Industrial Control System (ICS) with a focus on the methodology proposed by Ceccato et al. \cite{ceccato}[Section \ref{sec:3_ceccato_metodology}], explaining what it consists of, its practical application on a testbed, and most importantly highlighting its limitations and critical issues (see Section \ref{subsec:3_ceccato_limitations}).
+\lettrine[lines=2]{I}{n} Chapter \ref{state_of_art}, we presented the state of the art of \textit{process comprehension} of an Industrial Control System (ICS) with a focus on the methodology proposed by Ceccato et al. \cite{ceccato}[Section \ref{sec:3_ceccato_metodology}], explaining what it consists of, its practical application on a testbed, and most importantly highlighting its limitations and critical issues (see Section \ref{subsec:3_ceccato_limitations}).
 
 \bigskip
 In this chapter we will present \textbf{a proposal to improve the methodology} presented in the previous chapter, addressing most of the critical issues (or at least trying to do so) mentioned above by almost completely rewriting the original framework, enhancing its functionalities and inserting new ones where possible, while preserving its general structure and approach. The system analysis will in fact consist of the same four steps as in the original methodology (Data Pre-processing, Graph and Statistical Analysis, Business Process Mining and Invariants Inference), but each of them will be deeply revised in order to provide a richer, clearer and more complete process comprehension of the industrial system to be analyzed and its behavior.
@@ -138,7 +138,111 @@ Instead, the framework extensively utilizes Python libraries for handling variou
 \end{itemize}
 Having now seen the structure of the framework, in the next sections we will go into more detail describing our proposal.
 
+\vfill
+
 \section{Analysis Phases}
+\label{sec:4_analysis_phases}
+
+\subsection{A Little Testbed: Stage 1 of iTrust SWaT System}
+\label{subsec:4_casestudy_plc1}
+Before we proceed with presenting the analysis steps of the proposed framework, let us introduce the testbed that will serve as an illustration for practical examples, demonstrating the effectiveness of our methodology and the potential of the framework. This testbed corresponds to Stage 1 of the iTrust SWaT (Secure Water Treatment) system \cite{swat_home}. The selection of this testbed is intentional, as it serves as a precursor to the comprehensive case study we will be addressing in the upcoming chapters. The iTrust SWaT system offers elements of greater complexity compared to the individual stages of the Ceccato et al. testbed.
+
+\bigskip
+The testbed comprises several components, including:
+
+\begin{itemize}
+	\item a \textbf{PLC} responsible for monitoring and controlling the operations within the stage;
+	
+	\item a \textbf{tank}, which serves as the main element of interest;
+	
+	\item \textbf{two sensors} that provide readings of the water level within the tank and the incoming flow;
+	
+	\item \textbf{three actuators}, namely a valve and two pumps. These actuators regulate the level within the tank by controlling the inflow and outflow of the liquid.
+\end{itemize}
+
+Despite its moderate complexity, this testbed provides an ideal platform for presenting straightforward and concise examples of the framework's behavior. It enables us to effectively demonstrate the potential of the framework and facilitate a deeper understanding of its underlying methodology.
+\vfill
+
+\subsection{Phase 0: Network Analysis}
+\label{subsec:4_network_analysis}
+The objective of the network analysis presented in this section is to offer users valuable information regarding the communication process within an industrial control system and a broader perspective on network communications, delving into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics. This analysis aims to provide users with an overview of the communication between Programmable Logic Controllers (PLCs) at level 1, as well as the communication between PLCs and devices at higher levels such as HMIs and Historian servers (see Section \ref{sec:2_ics_components} for ICSs architecture). The analysis focuses on industrial protocols used and the information exchanged.\newline
+By reconstructing the network communication structure using data obtained from the network traffic sniffing process, users can gain a comprehensive understanding of the behavior of the underlying industrial system. This knowledge can then be utilized to \textbf{plan a strategy} for analyzing the physical processes within the system.
+
+\subsubsection{Extracting Data from PCAP Files}
+\label{subsubsec:4_extract_pcap}
+The initial step involves extracting the desired information from the PCAP files that contain the captured network traffic. This includes details such as the source IP address, destination IP address, protocol used, and the type of request made (e.g., Read/Write, Request/Response). The extracted data is then converted into a more convenient CSV format. This extracted data serves as the foundation for the subsequent phase.\newline
+In the latter part of this phase, the extracted data is utilized to generate the network schema. The network schema provides a visual representation of the connections and relationships within the network, showcasing the communication patterns between different components. This schema helps in understanding the overall structure and behavior of the industrial control system.
+
+\bigskip
+To accomplish the extraction of data from the PCAP files, a Python script called \texttt{export\_pcap\_data.py} is employed. This script, originally designed for the business process phase, is located in the directory\\ \texttt{\$(project\_dir)/network-analysis} and accepts the following options as command-line arguments:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename:} allows the user to specify a single PCAP file to be passed as input to the script. The user can provide the complete file path of the PCAP file as an argument;
+	
+	\item \textbf{-m} or \textbf{{-}{-}mergefiles:} enables the merging of multiple PCAP files. In this scenario, the files should be located within the directory specified by the \texttt{pcap\_dir} directive in the \textit{config.ini} configuration file and the user does not have to provide the path to each PCAP file;
+	
+	\item \textbf{-d} or \textbf{{-}{-}mergedir:} allows for specifying the directory that contains the PCAP files to be automatically imported into the script and merged. This ensures that all the PCAP files within the specified directory will be processed by the script without the need for manual selection or input.
+	
+	\item \textbf{-s} or \textbf{{-}{-}singledir:} operates differently from the previous option mentioned. This option enables the extraction of data from each individual PCAP file within the specified directory. The extracted data is then saved in separate CSV datasets, which are stored in the directory specified by the \texttt{split\_dir} directive in the \textit{config.ini} file. This functionality proves useful when dealing with exceptionally large PCAP files, where merging them together for export might consume significant time and resources. By utilizing this option, the extraction procedure becomes lighter and more manageable. The extracted data in separate CSV files can be utilized in the later stages of the Network Analysis process;
+	
+	\item \textbf{-t} or \textbf{{-}{-}timerange:} this functionality enables users to specify a specific time period within the PCAP files from which they wish to extract relevant information.
+\end{itemize}
+
+Unless the \textit{-s} option is explicitly specified, the results of data extraction and export will be saved to a single CSV dataset within the \\ \texttt{\$(project\_dir)/network-analysis/data} directory. The default file name for this output file is determined by the \texttt{pcap\_export\_output} directive specified in the \textit{config.ini} file. 
+In addition, by utilizing the \texttt{protocols} and \\ \texttt{ws\_<protocol>\_field} directives, user can configure the network protocols to be searched within the PCAP files. Furthermore, user can specify the relevant Tshark/Wireshark fields to extract for the specified protocols set in the \texttt{protocols} directive.
+
+\bigskip
+After obtaining the extracted data, it is possible to proceed with the second part of the network analysis.
+
+\subsubsection{Network Information}
+\label{subsubsec:4_draw_network}
+During this stage, the exported CSV data is processed to derive valuable information regarding network communications and the structure of the network itself. The objective is to identify and establish relationships between IP addresses present on the network, thereby determining the sources and destinations of communications. Furthermore, the analysis detects the protocols used for each communication and quantifies the various types of requests made.
+
+\bigskip
+This information is then transformed into a \textbf{graph representation of the network} (or subnetwork, if specified). In this graph, devices are represented as nodes labeled with their IP addresses, while edges represent the incoming and outgoing communications of these devices, along with the corresponding information.\newline
+To ensure comprehensibility, the analysis also provides users with \textbf{textual information} containing the same details as the graph representation. This text-based information serves as an alternative for cases where the graph may become complex to interpret, particularly when numerous edges connect nodes and result in a high volume of network requests.\newline
+This textual information is saved to another CSV file, enabling offline reference or potential future utilization. By having this file available, users can access the network analysis results in a structured format for further analysis or documentation purposes.
+
+\bigskip
+The Python script \texttt{networkAnalysis.py} in the \texttt{\$(project\_dir)/network-analysis} directory manages this phase of the analysis. The script can be executed with the following parameters:
+
+\begin{itemize}
+	\item \textbf{-f} or \textbf{{-}{-}filename:} used to specify the CSV dataset containing the network data exported in the previous step. The dataset should be located in the directory \texttt{\$(project\_dir)/network-analysis/data};
+	
+	\item \textbf{-D} or \textbf{{-}{-}directory:} used to specify the directory that contains the CSV datasets obtained using the \textit{-s} option of the Python script \texttt{export\_pcap\_data.py}. By passing this parameter, the script will automatically merge the datasets and proceed with the analysis of the data contained within them;
+	
+	\item \textbf{-s} or \textbf{{-}{-}srcaddr:} allows for specifying the source IP address for which you wish to display the incoming and outgoing communications. By providing the source IP address as an argument, the script will focus on showcasing the communications associated with that particular IP address;
+	
+	\item \textbf{-d} or \textbf{{-}{-}dstaddr:} enables the user to specify the destination IP address for which you want to display the incoming and outgoing communications. By providing the destination IP address as an argument, the script will concentrate on presenting the communications associated with that specific IP address.
+\end{itemize}
+
+The parameters related to IP addresses, including source and destination, are optional. It is possible to specify either one of them individually. For instance, if the user specifies only the source IP address, the script will display the network nodes with which it communicates on the outgoing side, along with the corresponding generated traffic. Similarly, if only the destination IP address is specified, the script will showcase the network nodes communicating with it on the incoming side, along with the relevant traffic data.
+
+\bigskip
+During the analysis, the script identifies and displays the IP addresses present in the network as output for the user's reference. This allows the user to select specific IP addresses from the command line for a more focused analysis, such as choosing a subnet of interest. Additionally, the script detects and tracks distinct communications between pairs of PLCs, keeping a record of the number of these communications.\newline
+The result of the analysis is a graph representation of the network (or subnetwork) to be analyzed. An example of such a graph can be seen in Figure \ref{fig:4_network_graph_example}. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap4/4_network_graph_example.png}
+	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination)}
+	\label{fig:4_network_graph_example}
+\end{figure}
+
+The graph illustrates the network communications between the source IP address 192.168.1.40 and the destination IP address 192.168.1.30. Each arrow represents a communication between these IP addresses, showcasing the flow and direction of the interactions. The red arrows indicate requests initiated by the source IP address towards the destination IP, while the black arrows represent responses sent by the source IP in response to previous requests made by the destination IP. The gray dotted arrows represent responses for which the corresponding request is missing or unavailable for some reason. Overall, the graph distinguishes the different types of communications and provides insights into the request-response dynamics between the source and destination IP addresses. The graph is automatically generated and saved within the\\ 
+\texttt{\$(project\_dir)/network-analysis/data} directory.
+
+\bigskip
+In terms of the textual output, we can observe how the same data is represented. The communications exchanged between the two PLCs are displayed more prominently, allowing for a clearer understanding. Unlike the graph, the textual representation includes a column on the right-hand side, indicating the number of communications for each type of request. This provides a more distinct perspective on the network behavior within an industrial control system that utilizes, in this case, the CIP protocol for its communications.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.50]{chap4/network_text_output.png}
+	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination) in textual mode}
+	\label{fig:4_network_textual_example}
+\end{figure}
+
+As previously mentioned, the textual data is stored in a CSV dataset located in the \texttt{\$(project\_dir)/network-analysis/data} directory.
 
 \subsection{Phase 1: Data Pre-processing}
 \label{subsec:improve_preprocessing}
@@ -152,7 +256,6 @@ The combination of these limitations, along with the presence of hardcoded refer
 In the proposed framework, these issues have been addressed by incorporating new features. Firstly, the framework allows for the selection of a subsystem from the command line based on both temporal criteria and the specific PLCs to be included. This enables more focused and targeted analysis. Additionally, we have revamped the process of enriching the resulting dataset by eliminating manual entry of additional attributes. Instead, users now have the flexibility to determine the type of additional attribute to associate with a specific register.\newline
 Furthermore, after the pre-processing stage, a preliminary analysis can be conducted on the resulting dataset. This analysis aims to identify the registers that are associated with actuators, measurements, and hardcoded setpoints or constants. It provides insights into the dataset and helps in refining the enrichment step. The parameters for this analysis can be configured in the \textit{config.ini} file, allowing for customization and fine-tuning of the process.\newline \newline 
 In the upcoming sections, we will delve into a more comprehensive examination of the achievements made in this framework.
-\vfill
 
 \subsubsection{Subsystem Selection}
 \label{subsubsec:4_select_subsystem}
@@ -228,7 +331,7 @@ Following is a brief explanation of the parameters just seen:
 	\item[\texttt{slope\_cols\_prefix}, \texttt{slope\_cols\_list}] are related to the calculation of the slope of a specific register that contains numeric values (usually a measure), that is, its trend. Slope calculation makes little sense on booleans. The slope can be \textbf{ascending} (if its value is greater than zero), \textbf{descending} (if less than zero) or \textbf{stable} (if approximately equal to zero). We will delve into the details of slope calculation in the following paragraph, as it pertains to the attributes \texttt{trend\_cols\_prefix}, \texttt{trend\_cols\_list}, and \texttt{trend\_period}.
 \end{description}
 
-Initially, the parameters for registers to be associated with each additional attribute may be left blank, as we may not have prior knowledge about the system and are unsure about which registers correspond to actuators, measurements, or other attributes. This information can be obtained from the brief analysis that follows the merging of datasets. The analysis, performed based on user's choice, provides indications on potential sensors, actuators, and other relevant information. These indications help the user set the desired values in the \textit{config.ini} file and refine the enrichment process by re-launching the \texttt{mergeDatasets.py} script.
+Initially, the parameters for registers to be associated with each additional attribute may be left blank, as we may not have prior knowledge about the system and are unsure about which registers correspond to actuators, measurements, or other attributes. This information can be obtained from the preliminar analysis that follows the merging of datasets. The analysis, performed based on user's choice, provides indications on potential sensors, actuators, and other relevant information. These indications help the user set the desired values in the \textit{config.ini} file and refine the enrichment process by re-launching the \texttt{mergeDatasets.py} script.
 
 \paragraph{Slope Calculation}
 \label{par:4_slope_calculation}
@@ -244,25 +347,22 @@ Calculating the slope directly from the raw measurement data can be a suitable a
 However, if perturbations significantly affect the measurement readings, calculating the slope on individual time intervals may result in an inaccurate trend definition, irrespective of the chosen granularity. In such cases, the fluctuating nature of the measurements due to perturbations can introduce errors in the slope calculation, making it less reliable as an indicator of the actual trend.
 
 \bigskip
-Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the \texttt{P1\_LIT101} tank of the iTrust SWaT system; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of \texttt{P1\_LIT101} exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.\newline \newline
-The previous tool did not take into account the possibility of having strongly perturbed data, which presented a challenge that we needed to address in the development of the proposed framework.
-\vfill
-\pagebreak
+Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the \texttt{P1\_LIT101} tank of the iTrust SWaT system; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of \texttt{P1\_LIT101} exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.\newline
 
 \begin{figure}[H]
 	\centering
-	\begin{subfigure}{0.9\textwidth}
+	\begin{subfigure}{0.90\textwidth}
 		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g30_2.png}
 		\caption{}
 		\label{subfig:4_slope_g30_nodecomp}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.9\textwidth}
+	\begin{subfigure}{0.90\textwidth}
 		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g60_2.png}
 		\caption{}
 		\label{subfig:4_slope_g60_nodecomp}
 	\end{subfigure}
-	\begin{subfigure}{0.9\textwidth}
+	\begin{subfigure}{0.90\textwidth}
 		\includegraphics[width=\textwidth]{chap4/slope_nodecomp_g120_2.png}
 		\caption{}
 		\label{subfig:4_slope_g120_nodecomp}
@@ -271,6 +371,9 @@ The previous tool did not take into account the possibility of having strongly p
 	\label{fig:4_slope_comparison}
 \end{figure}
 
+\noindent The previous tool did not take into account the possibility of having strongly perturbed data, which presented a challenge that we needed to address in the development of the proposed framework.
+
+\bigskip
 The solution to this problem involves applying techniques to reduce the "noise" in the data, aiming to achieve a more linear trend in the measurement curve. By minimizing the effects of perturbations, we can calculate slopes more accurately.\newline
 There are various methods available for smoothing out noise in the data. In our framework, we focused on two commonly used approaches found in the literature: \textbf{polynomial regression} and \textbf{seasonal decomposition}. In addition to these two methods, we also explored the use of a \textbf{line simplification algorithm}.\newline \newline
 \textit{Polynomial regression} \cite{polynomial_regression} is a technique that allows us to create a filter to reduce the impact of noise on the data. By fitting a polynomial function to the measurements, we can obtain a smoother curve that captures the underlying trend while minimizing the effects of perturbations.\newline
@@ -335,7 +438,7 @@ During this step, the datasets of the individual PLCs are merged, resulting in t
 \bigskip
 By default, the enriched dataset will be saved in CSV format in the \texttt{\$(project-dir)/daikon/Daikon\_Invariants} directory. The other dataset, without additional data, will be saved in the \texttt{\$(project-dir)/process-mining/data directory}. It's worth noting that both paths can be configured in the \textit{config.ini} file. The dataset name can be specified in the \textit{config.ini} file or through the \texttt{-o} command-line option. When generating the dataset for process mining, the script will automatically add a \texttt{\_TS} suffix to the filename to indicate that it includes the timestamp. This flexibility allows the user to provide a different filename for each output, preventing overwriting of previous datasets. It enables the user to save the execution trace of the selected subsystem separately and utilize them in subsequent analysis phases.
 
-\subsubsection{Brief Analysis of the Obtained Subsystem}
+\subsubsection{Preliminar Analysis of the Obtained Subsystem}
 \label{subsubsec:4_brief_analysis}
 
 After merging the datasets, the user has the option to perform an \textbf{optional analysis} of the resulting dataset to extract preliminary data. This analysis aims to gather basic information about the (sub)system and potentially refine the enrichment process. If the user chooses to proceed with the analysis, the \texttt{mergeDatasets.py} script invokes another Python script located in the \texttt{\$(project-dir)/pre-processing} directory called \texttt{system\_info.py}.\newline
@@ -437,7 +540,7 @@ The \texttt{system\_info.py} file can also run in standalone mode if needed: it 
 \subsection{Phase 2: Graphs and Statistical Analysis}
 \label{subsec:4_improve_graphs}
 
-The new \textit{graph analysis} arises from the need to give the user an overview of the (sub)system obtained in the previous pre-processing phase, identifying more easily the typology of the registers and grasping more effectively the relationships and the dynamics that may exist between the registers controlled by one or more PLCs, confirming the initial conjectures if the brief analysis described in the previous section has been performed, or making new ones thanks to the visual graph support. 
+The new \textit{graph analysis} arises from the need to give the user an overview of the (sub)system obtained in the previous pre-processing phase, identifying more easily the typology of the registers and grasping more effectively the relationships and the dynamics that may exist between the registers controlled by one or more PLCs, confirming the initial conjectures if the preliminar analysis described in the previous section has been performed, or making new ones thanks to the visual graph support. 
 
 \bigskip
 In Ceccato et al.'s framework, as mentioned in Section \ref{subsec:3_ceccato_limitations}, it was only possible to view the chart of one register at a time. While this allowed for the identification or hypothesis of the register type, it made it challenging to establish relationships with other components of the system and derive conjectures about their behavior. To address this limitation, there was a need for a new tool that could provide more information in a more accessible manner.
@@ -484,20 +587,20 @@ The solution to this issue is simple and effective: the use of \textbf{subplots}
 \end{figure}
 
 \bigskip
-To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the brief analysis from the previous step:
+To demonstrate the behavior and effectiveness of the new graph analysis process, we observe in particular, Figure \ref{subfig:4_graph_analysis_2}: we can already have some validation on the conjectures made in the preliminar analysis from the previous step:
 
 \begin{itemize}
 	\item the data presented in the \texttt{P1\_FIT101} chart provides support for associating this register with a \textbf{measurement}. Furthermore, the chart indicates a close correlation between the trend of this register and the periods in which \texttt{P1\_LIT101} exhibits an upward trend and the evolution of \texttt{P1\_MV101}. The values of \texttt{P1\_FIT101}, ranging from approximately 0 to 2.5, are too limited to conclude that this register represents the level sensor of a tank. The overall trend also aligns with this interpretation, suggesting that it is more likely a \textbf{pressure or flow sensor};
 	
-	\item based on the information provided above, it appears that \texttt{P1\_LIT101} indeed \textbf{represents the level sensor of a tank}, which was initially assumed in the brief analysis. The hypothesis is further reinforced by several factors. Firstly, the wide range of values observed in this register supports the notion of it being a level sensor. Additionally, the graphical representation of the level trend provides valuable insights. It shows an initial sharp rise, followed by a period of stabilization referred to as a \textit{plateau}, and subsequently, a similarly steep descent. Finally, there is a new phase of slower level growth compared to the previous one. These patterns lend further support to the interpretation of \texttt{P1\_LIT101} as a sensor specifically measuring the level of a tank;
+	\item based on the information provided above, it appears that \texttt{P1\_LIT101} indeed \textbf{represents the level sensor of a tank}, which was initially assumed in the preliminar analysis. The hypothesis is further reinforced by several factors. Firstly, the wide range of values observed in this register supports the notion of it being a level sensor. Additionally, the graphical representation of the level trend provides valuable insights. It shows an initial sharp rise, followed by a period of stabilization referred to as a \textit{plateau}, and subsequently, a similarly steep descent. Finally, there is a new phase of slower level growth compared to the previous one. These patterns lend further support to the interpretation of \texttt{P1\_LIT101} as a sensor specifically measuring the level of a tank;
 	
 	\item at the start of the ascending trend of \texttt{P1\_LIT101}, the value of \texttt{P1\_MV101} is 2. Conversely, during the \textit{plateau} phase observed when the measurement is approximately 800 and during the descending trend, \texttt{P1\_MV101} has a value of 1. These observations provide further confirmation of the initial hypothesis: the value 1 represents the \textbf{OFF state} of the sensor, while 2 represents the \textbf{ON state}. Moreover, \texttt{P1\_MV101} can be identified as the actuator responsible for causing the rising level in \texttt{P1\_LIT101};
 	
-	\item during the brief analysis, we noticed the short duration of \texttt{P1\_MV101} in state 0, but we were unable to speculate on the underlying reason. However, further analysis of the graph reveals that \texttt{P1\_MV101} transitions and remains in the 0 state, acting as a type of "transient" between states 1 and 2. It can be inferred that this period represents the actual time required for the actuator to change its state.
+	\item during the preliminar analysis, we noticed the short duration of \texttt{P1\_MV101} in state 0, but we were unable to speculate on the underlying reason. However, further analysis of the graph reveals that \texttt{P1\_MV101} transitions and remains in the 0 state, acting as a type of "transient" between states 1 and 2. It can be inferred that this period represents the actual time required for the actuator to change its state.
 	
 	\item we can observe the behavior of \texttt{P1\_P101} in relation to \texttt{P1\_LIT101} and \texttt{P1\_MV101} to understand its role. At the beginning of the descending trend of \texttt{P1\_LIT101}, after the plateau phase, \texttt{P1\_P101} assumes a value of 2. It then changes back to value 1 at the point of the (presumed) tank's level increase. Although this fact alone may not be entirely clear, when comparing the behaviors of \texttt{P1\_P101}, \texttt{P1\_LIT101}, and \texttt{P1\_MV101}, certain patterns emerge. When \texttt{P1\_P101} and \texttt{P1\_MV101} are both in state 1, the water level remains stable. However, when P1\_P101 changes to state 2, the level of the measurement drops rapidly. Subsequently, when P1\_MV101 also transitions to state 2, the level slowly starts to rise again, with a sudden increase occurring when \texttt{P1\_P101} changes from 2 back to 1. From these observations, it can be inferred that \texttt{P1\_P101} serves as the \textbf{actuator responsible for emptying the presumed tank}. State 1 represents the \textbf{OFF state}, while state 2 represents the \textbf{ON state} of this actuator.
 	
-	\item it appears that \texttt{P1\_P102} plays no active role in the system as its state remains constant at 1 throughout. Considering this information, it seems unlikely that \texttt{P1\_P102} could serve as a relative setpoint. Therefore, according to the brief analysis, it can be inferred that \texttt{P1\_P102} is most likely a \textbf{spare actuator} that is not actively utilized in the system. A \textit{spare actuator} is indeed a secondary actuator that is intended to remains idle unless needed as a backup or replacement when the primary actuator is unavailable or needs to be taken out of service.
+	\item it appears that \texttt{P1\_P102} plays no active role in the system as its state remains constant at 1 throughout. Considering this information, it seems unlikely that \texttt{P1\_P102} could serve as a relative setpoint. Therefore, according to the preliminar analysis, it can be inferred that \texttt{P1\_P102} is most likely a \textbf{spare actuator} that is not actively utilized in the system. A \textit{spare actuator} is indeed a secondary actuator that is intended to remains idle unless needed as a backup or replacement when the primary actuator is unavailable or needs to be taken out of service.
 \end{itemize}
 
 \bigskip
@@ -515,7 +618,7 @@ The script accepts the following command-line parameters:
 \end{itemize}
 This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
 
-\paragraph{Statistical Analysis} After careful consideration, we made the decision not to include the statistical analysis aspect of the previous tool in the framework. We found that there was no practical use for it. Instead, we integrated the relevant statistical information into the brief analysis conducted after the pre-processing phase. Additionally, we deemed the histogram to have limited utility and considered it outdated in comparison to the new graph analysis approach we implemented. \newline
+\paragraph{Statistical Analysis} After careful consideration, we made the decision not to include the statistical analysis aspect of the previous tool in the framework. We found that there was no practical use for it. Instead, we integrated the relevant statistical information into the preliminar analysis conducted after the pre-processing phase. Additionally, we deemed the histogram to have limited utility and considered it outdated in comparison to the new graph analysis approach we implemented. \newline
 Although we decided not to include the statistical analysis aspect in the framework, the Python script \texttt{histPlots\_Stats.py} from the original tool remains in the directory. This script is essentially unchanged from the version developed by Ceccato et al. and can be used in the future if the need arises. 
 
 \subsection{Phase 3: Invariant Inference and Analysis}
@@ -672,7 +775,7 @@ This approach proves particularly beneficial for the first type of analysis, as 
 
 \paragraph{Analysis on single actuator states}
 \label{par:4_single_actuator_states_analysis}
-Analysis on the states of individual actuators is the simplest: after the user is prompted to input the measurement, chosen from a list of likely available measurements, the script recognizes the likely actuators and the relative states of each, using the same mixed Daikon/Pandas technique adopted in the brief analysis during the pre-processing phase.\newline
+Analysis on the states of individual actuators is the simplest: after the user is prompted to input the measurement, chosen from a list of likely available measurements, the script recognizes the likely actuators and the relative states of each, using the same mixed Daikon/Pandas technique adopted in the preliminar analysis during the pre-processing phase.\newline
 For each actuator and each state it assumes, a single Daikon analysis is performed, eventually placing the condition on the maximum and minimum level of the measurement.\newline 
 The result of these analyses are saved in the form of text files in a directory having the name corresponding to the analyzed actuator and contained in the default parent directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}: each file generated by the analysis is identified by the name of the actuator, the state and the condition, if any, on the measurement (see Figure \ref{fig:4_daikon_simpleanalysis_dirfiles}).
 
@@ -869,100 +972,18 @@ It is important to acknowledge that despite considering the tolerance set for tr
 The incorporation of network communications into Business Process Analysis has been reconsidered to shift away from a \textit{single-protocol} solution based on Modbus. Instead, the focus is on adopting a solution that can handle \textbf{multiple protocols}, even at the same time.\newline
 The main concept was to develop a new Python script that would extract and process data from PCAP files obtained through network traffic sniffing. The intention was to export this data to a CSV file, which would then be used as input for the process mining script, \texttt{processMining.py}, and integrated with the physical system data to derive commands to the actuators.
 
-\bigskip
-However, due to the specific case study discussed in Chapter \ref{casestudy} (and especially in Section \ref{subsec:5_2015_datasets}), \textbf{it was not feasible to implement this solution at the time}. The network data available for analysis either lacked references to the reads or writes performed by the actuators or, if such references existed, they were not associated with a suitable physical process dataset for the intended purposes. As a result, the integration of network data with the physical system data could not be realized in the given context.
+%\bigskip
+%However, due to the specific case study discussed in Chapter \ref{casestudy} (and especially in Section \ref{subsec:5_2015_datasets}), \textbf{it was not feasible to implement this solution at the time}. The network data available for analysis either lacked references to the reads or writes performed by the actuators or, if such references existed, they were not associated with a suitable physical process dataset for the intended purposes. As a result, the integration of network data with the physical system data could not be realized in the given context.
 
 \bigskip
-Nevertheless, a thorough study was conducted on the available PCAP files to explore potential methodologies that could be implemented as future work. The analysis of the network data revealed that different protocols exhibit distinct behaviors when commanding changes in actuator states. Consequently, the previous approach proposed by Ceccato et al. becomes \textbf{impractical} when attempting to detect system state changes through network commands sent to the actuators.\newline
+%Nevertheless, a thorough study was conducted on the available PCAP files to explore potential methodologies that could be implemented as future work. 
+The analysis of the network data revealed that different protocols exhibit distinct behaviors when commanding changes in actuator states. Consequently, the previous approach proposed by Ceccato et al. becomes \textbf{impractical} when attempting to detect system state changes through network commands sent to the actuators.\newline
 However, considering that system state changes have already been identified through the process mining of the physical process, and with the corresponding event timestamps available, we propose an alternative approach to Ceccato et al.'s method. Instead of seeking the correspondence between network events and physical process events at the same instant, we suggest reversing the perspective. By focusing on the correspondence between a given event occurring in the physical process at a specific moment and the corresponding event in the network data at the same moment, it should be possible to achieve a similar, if not superior, outcome compared to the previous solution.\newline
 This \textit{inverse approach} aims to leverage the existing knowledge of system state changes obtained through the mining of the physical process. By aligning these physical events with their corresponding events in the network data, a more effective analysis can be conducted.
 
-\bigskip
-Although the integration of network data within Business Process Analysis was not feasible, the progress made thus far has resulted in the development of a \textbf{novel form of network analysis}. This approach, unlike the work conducted by Ceccato et al., offers a broader perspective on network communications and delves into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics.\newline
-In the upcoming section, we will delve further into this new network analysis methodology, discussing its unique features and the insights it can offer. By expanding the scope of our analysis, we aim to uncover valuable information that was not extensively explored in previous studies conducted by Ceccato et al.
-
-\subsection{Phase 5: Network Analysis}
-\label{subsec:4_network_analysis}
-The objective of the network analysis presented in this section is to offer users valuable information regarding the communication process within an industrial control system. This analysis aims to provide users with an overview of the communication between Programmable Logic Controllers (PLCs) at level 1, as well as the communication between PLCs and devices at higher levels such as HMIs and Historian servers (see Section \ref{sec:2_ics_components} for ICSs architecture). The analysis focuses on industrial protocols used and the information exchanged.\newline
-By reconstructing the network communication structure using data obtained from the network traffic sniffing process, users can gain a comprehensive understanding of the behavior of the underlying industrial system. This knowledge can then be utilized to plan a strategy for analyzing the physical processes within the system.
-
-\subsubsection{Extracting Data from PCAP Files}
-\label{subsubsec:4_extract_pcap}
-The initial step involves extracting the desired information from the PCAP files that contain the captured network traffic. This includes details such as the source IP address, destination IP address, protocol used, and the type of request made (e.g., Read/Write, Request/Response). The extracted data is then converted into a more convenient CSV format. This extracted data serves as the foundation for the subsequent phase.\newline
-In the latter part of this phase, the extracted data is utilized to generate the network schema. The network schema provides a visual representation of the connections and relationships within the network, showcasing the communication patterns between different components. This schema helps in understanding the overall structure and behavior of the industrial control system.
-
-\bigskip
-To accomplish the extraction of data from the PCAP files, a Python script called \texttt{export\_pcap\_data.py} is employed. This script, originally designed for the business process phase, is located in the directory\\ \texttt{\$(project\_dir)/network-analysis} and accepts the following options as command-line arguments:
-
-\begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename:} allows the user to specify a single PCAP file to be passed as input to the script. The user can provide the complete file path of the PCAP file as an argument;
-	
-	\item \textbf{-m} or \textbf{{-}{-}mergefiles:} enables the merging of multiple PCAP files. In this scenario, the files should be located within the directory specified by the \texttt{pcap\_dir} directive in the \textit{config.ini} configuration file and the user does not have to provide the path to each PCAP file;
-	
-	\item \textbf{-d} or \textbf{{-}{-}mergedir:} allows for specifying the directory that contains the PCAP files to be automatically imported into the script and merged. This ensures that all the PCAP files within the specified directory will be processed by the script without the need for manual selection or input.
-	
-	\item \textbf{-s} or \textbf{{-}{-}singledir:} operates differently from the previous option mentioned. This option enables the extraction of data from each individual PCAP file within the specified directory. The extracted data is then saved in separate CSV datasets, which are stored in the directory specified by the \texttt{split\_dir} directive in the \textit{config.ini} file. This functionality proves useful when dealing with exceptionally large PCAP files, where merging them together for export might consume significant time and resources. By utilizing this option, the extraction procedure becomes lighter and more manageable. The extracted data in separate CSV files can be utilized in the later stages of the Network Analysis process;
-	
-	\item \textbf{-t} or \textbf{{-}{-}timerange:} this functionality enables users to specify a specific time period within the PCAP files from which they wish to extract relevant information.
-\end{itemize}
-
-Unless the \textit{-s} option is explicitly specified, the results of data extraction and export will be saved to a single CSV dataset within the \\ \texttt{\$(project\_dir)/network-analysis/data} directory. The default file name for this output file is determined by the \texttt{pcap\_export\_output} directive specified in the \textit{config.ini} file. 
-In addition, by utilizing the \texttt{protocols} and \texttt{ws\_<protocol>\_field} directives, user can configure the network protocols to be searched within the PCAP files. Furthermore, user can specify the relevant Tshark/Wireshark fields to extract for the specified protocols set in the \texttt{protocols} directive.
-
-\bigskip
-After obtaining the extracted data, it is possible to proceed with the second part of the network analysis.
-\vfill
-
-\subsubsection{Network Information}
-\label{subsubsec:4_draw_network}
-During this stage, the exported CSV data is processed to derive valuable information regarding network communications and the structure of the network itself. The objective is to identify and establish relationships between IP addresses present on the network, thereby determining the sources and destinations of communications. Furthermore, the analysis detects the protocols used for each communication and quantifies the various types of requests made.
-
-\bigskip
-This information is then transformed into a \textbf{graph representation of the network} (or subnetwork, if specified). In this graph, devices are represented as nodes labeled with their IP addresses, while edges represent the incoming and outgoing communications of these devices, along with the corresponding information.\newline
-To ensure comprehensibility, the analysis also provides users with \textbf{textual information} containing the same details as the graph representation. This text-based information serves as an alternative for cases where the graph may become complex to interpret, particularly when numerous edges connect nodes and result in a high volume of network requests.\newline
-This textual information is saved to another CSV file, enabling offline reference or potential future utilization. By having this file available, users can access the network analysis results in a structured format for further analysis or documentation purposes.
-
-\bigskip
-The Python script \texttt{networkAnalysis.py} in the \texttt{\$(project\_dir)/network-analysis} directory manages this phase of the analysis. The script can be executed with the following parameters:
-
-\begin{itemize}
-	\item \textbf{-f} or \textbf{{-}{-}filename:} used to specify the CSV dataset containing the network data exported in the previous step. The dataset should be located in the directory \texttt{\$(project\_dir)/network-analysis/data};
-	
-	\item \textbf{-D} or \textbf{{-}{-}directory:} used to specify the directory that contains the CSV datasets obtained using the \textit{-s} option of the Python script \texttt{export\_pcap\_data.py}. By passing this parameter, the script will automatically merge the datasets and proceed with the analysis of the data contained within them;
-	
-	\item \textbf{-s} or \textbf{{-}{-}srcaddr:} allows for specifying the source IP address for which you wish to display the incoming and outgoing communications. By providing the source IP address as an argument, the script will focus on showcasing the communications associated with that particular IP address;
-	
-	\item \textbf{-d} or \textbf{{-}{-}dstaddr:} enables the user to specify the destination IP address for which you want to display the incoming and outgoing communications. By providing the destination IP address as an argument, the script will concentrate on presenting the communications associated with that specific IP address.
-\end{itemize}
-
-The parameters related to IP addresses, including source and destination, are optional. It is possible to specify either one of them individually. For instance, if the user specifies only the source IP address, the script will display the network nodes with which it communicates on the outgoing side, along with the corresponding generated traffic. Similarly, if only the destination IP address is specified, the script will showcase the network nodes communicating with it on the incoming side, along with the relevant traffic data.
-
-\bigskip
-During the analysis, the script identifies and displays the IP addresses present in the network as output for the user's reference. This allows the user to select specific IP addresses from the command line for a more focused analysis, such as choosing a subnet of interest. Additionally, the script detects and tracks distinct communications between pairs of PLCs, keeping a record of the number of these communications.\newline
-The result of the analysis is a graph representation of the network (or subnetwork) to be analyzed. An example of such a graph can be seen in Figure \ref{fig:4_network_graph_example}. 
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[scale=0.60]{chap4/4_network_graph_example.png}
-	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination)}
-	\label{fig:4_network_graph_example}
-\end{figure}
-
-The graph illustrates the network communications between the source IP address 192.168.1.40 and the destination IP address 192.168.1.30. Each arrow represents a communication between these IP addresses, showcasing the flow and direction of the interactions. The red arrows indicate requests initiated by the source IP address towards the destination IP, while the black arrows represent responses sent by the source IP in response to previous requests made by the destination IP. The gray dotted arrows represent responses for which the corresponding request is missing or unavailable for some reason. Overall, the graph distinguishes the different types of communications and provides insights into the request-response dynamics between the source and destination IP addresses. The graph is automatically generated and saved within the\\ 
-\texttt{\$(project\_dir)/network-analysis/data} directory.
-
-\bigskip
-In terms of the textual output, we can observe how the same data is represented. The communications exchanged between the two PLCs are displayed more prominently, allowing for a clearer understanding. Unlike the graph, the textual representation includes a column on the right-hand side, indicating the number of communications for each type of request. This provides a more distinct perspective on the network behavior within an industrial control system that utilizes, in this case, the CIP protocol for its communications.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[scale=0.60]{chap4/network_text_output.png}
-	\caption{Network Communications between 192.168.1.40 (Source) and 192.168.1.30 (Destination) in textual mode}
-	\label{fig:4_network_textual_example}
-\end{figure}
-
-As previously mentioned, the textual data is stored in a CSV dataset located in the \texttt{\$(project\_dir)/network-analysis/data} directory.
-
+%\bigskip
+%Although the integration of network data within Business Process Analysis was not feasible, the progress made thus far has resulted in the development of a \textbf{novel form of network analysis}. This approach, unlike the work conducted by Ceccato et al., offers a broader perspective on network communications and delves into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics.\newline
+%In the upcoming section, we will delve further into this new network analysis methodology, discussing its unique features and the insights it can offer. By expanding the scope of our analysis, we aim to uncover valuable information that was not extensively explored in previous studies conducted by Ceccato et al.
 
 \vfill
 \nolinenumbers

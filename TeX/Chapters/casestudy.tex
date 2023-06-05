@@ -16,14 +16,21 @@ In contrast to the virtualized testbed discussed in Section \ref{subsec:3_testbe
 The physical process of the SWaT consists of six stages, denoted P1 through P6. These stages are \cite{swat_tecnical_pdf}\cite{swat_tippenhauer}:
 
 \begin{enumerate}
-	\item \textbf{taking in raw water:} feeds unfiltered water into the system
-	\item \textbf{chemical dosing:} adds chemicals to water useful for initial pretreatment
-	\item \textbf{Ultra Filtration (UF) system:} the water is filtered through a semi-permeable membrane (ultrafiltration membrane) using the liquid pressure, effectively capturing impurities and suspended solids, as well as removing bacteria, viruses, and other pathogens present in the water.
-	\item \textbf{dechlorination:} removes residual chlorine from disinfected water using ultraviolet lamps
-	\item \textbf{Reverse Osmosis (RO):} performs further filtration of the water
-	\item \textbf{backwash process:} cleans the membranes in UF using the water produced by RO
+	\item[P1.] \textbf{taking in raw water:} feeds unfiltered water into the system
+	
+	\item[P2.] \textbf{chemical dosing:} adds chemicals to water useful for initial pretreatment;
+	
+	\item[P3.] \textbf{Ultra Filtration (UF) system:} the water is filtered through a semi-permeable membrane (ultrafiltration membrane) using the liquid pressure, effectively capturing impurities and suspended solids, as well as removing bacteria, viruses, and other pathogens present in the water;
+	
+	\item[P4.] \textbf{dechlorination:} removes residual chlorine from disinfected water using ultraviolet lamps;
+	
+	\item[P5.] \textbf{Reverse Osmosis (RO):} performs further filtration of the water;
+	
+	\item[P6.] \textbf{backwash process:} cleans the membranes in UF using the water produced by RO.
+	
 \end{enumerate}
-Figure \ref{fig:5_swat_architecture_1} shows a graphical representation of the architecture and the six stages of the SWaT system.
+
+\noindent Figure \ref{fig:5_swat_architecture_1} shows a graphical representation of the architecture and the six stages of the SWaT system.
 
 \begin{figure}[ht]
 	\centering
@@ -64,11 +71,11 @@ The SWaT system's network architecture follows the principles of layering and zo
 Five layers are present starting from the highest to the lowest: 
 
 \begin{itemize}
-	\item \textbf{Layer 3.5} -- Demilitarized Zone (DMZ)
-	\item \textbf{Layer 3} -- Operation Management (Historian)
-	\item \textbf{Layer 2} -- Supervisory Control (Touch Panel, Engineering Workstation, HMI Control Clients)
-	\item \textbf{Layer 1} -- Plant Control Network (PLCs) (Star Network)
-	\item \textbf{Layer 0} -- Process (Actuator/Sensors and Input/output modules) (Ring Network)
+	\item \textbf{Layer 3.5} -- Demilitarized Zone (DMZ);
+	\item \textbf{Layer 3} -- Operation Management (Historian);
+	\item \textbf{Layer 2} -- Supervisory Control (Touch Panel, Engineering Workstation, HMI Control Clients);
+	\item \textbf{Layer 1} -- Plant Control Network (PLCs) (Star Network);
+	\item \textbf{Layer 0} -- Process (Actuator/Sensors and Input/output modules) (Ring Network).
 \end{itemize}
 PLCs at Layer 1 communicate with their respective sensors and actuators at Layer 0 through a conventional ring network topology based on EtherNet/IP, to ensure that the system can tolerate the loss of a single link without any adverse impact on data or control functionality.\newline
 PLCs between the different process stages at Layer 1 communicate with each other through a star network topology using the CIP protocol on EtherNet/IP, previously discussed in Section \ref{subsubsec:2_cip}.
@@ -77,11 +84,12 @@ PLCs between the different process stages at Layer 1 communicate with each other
 Regarding zoning, the SWaT system is divided into three zones, each containing one or more layers. These zones are, in descending order of security level: 
 
 \begin{itemize}
-	\item \textbf{Plant Control Network}, or \textbf{Control System:} includes layers from 0 to 2
-	\item \textbf{DMZ:} includes Layer 3.5
-	\item \textbf{Plant Network:} includes Layer 3
+	\item \textbf{Plant Control Network}, or \textbf{Control System:} includes layers from 0 to 2;
+	\item \textbf{DMZ:} includes Layer 3.5;
+	\item \textbf{Plant Network:} includes Layer 3;
 \end{itemize}
-Figure \ref{fig:5_swat_network_arch} provides a clearer visualization of the zoning and layer division within the network architecture of the SWaT system. This diagram highlights the distinct zones and their corresponding layers, offering a comprehensive overview of the system's network structure.
+
+\noindent Figure \ref{fig:5_swat_network_arch} provides a clearer visualization of the zoning and layer division within the network architecture of the SWaT system. This diagram highlights the distinct zones and their corresponding layers, offering a comprehensive overview of the system's network structure.
 
 \begin{figure}[ht]
 	\centering
