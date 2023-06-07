@@ -233,7 +233,6 @@ class MergeDatasets:
 
             # Add previous values, slopes and limits to dataframe
             datasetPLC_daikon = self.enrich_df(datasetPLC_daikon, file)
-            print(datasetPLC_daikon.columns)
             # Concatenate the single PLCs datasets for Daikon
             df_list_daikon.append(datasetPLC_daikon)
 
@@ -271,6 +270,7 @@ class MergeDatasets:
             f'{os.path.join(self.config["PATHS"]["project_dir"], self.config["DAIKON"]["daikon_invariants_dir"], self.output_file)}',
             index=False)
         # print(daikon_datasets)  # Debug
+
 
 def main():
     mg = MergeDatasets()
