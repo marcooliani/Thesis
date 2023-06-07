@@ -35,15 +35,41 @@ Based on our observations, the analysis strategy we will adopt involves consider
 
 \section{Reverse Engineering of the iTrust SWaT System}
 \label{sec:6_reverse_SWaT}
-Before starting the analysis, it is important to establish a premise regarding how the subsystems under investigation will be defined during the pre-processing phase. Apart from the projection determined by the considered PLCs, a time-based selection of the analysis period has also been performed (see Section \ref{subsubsec:4_select_subsystem}). This selection spans a duration of 20,000 seconds, which is equivalent to approximately five and a half hours or roughly five system cycles. The analysis begins at 100,000 seconds, which corresponds to approximately 27 hours from the start of the available data. This deliberate selection aims to exclude the initial transient period during which the SWaT system is initialized. We believe that this time range is more than sufficient for accurately defining the characteristics of the SWaT system components.
+Before we delve into the analysis, it is important to provide some preliminary remarks. 
+
+\bigskip
+Firstly, the analysis will be structured as a schematic analysis due to space constraints, which prevent us from presenting the extensive inferences and reasoning regarding the system in full detail. However, the general procedure of the methodology and how to reason about the data obtained from the framework have already been demonstrated through examples on the PLC1 of the SWaT system in Chapter \ref{chap:proposal}. We encourage readers to refer to those examples for a more comprehensive understanding. In this analysis, our focus will be on illustrating the conjectures and properties that arise from the analysis, utilizing tables and the outputs generated during the analysis.
+
+\bigskip
+The second premise addresses the process of defining the subsystems to be analyzed, which were obtained during the pre-processing phase, during the merge phase of the individual datasets. Apart from the projection determined by the considered PLCs, a time-based selection of the analysis period has also been performed (see Section \ref{subsubsec:4_select_subsystem}). This selection spans a duration of 20,000 seconds, which is equivalent to approximately five and a half hours or roughly five system cycles. The analysis begins at 100,000 seconds, which corresponds to approximately 27 hours from the start of the available data. This deliberate selection aims to exclude the initial transient period during which the SWaT system is initialized. We believe that this time range is more than sufficient for accurately defining the characteristics of the SWaT system components.
+
+\bigskip
+The third premise introduces some conventions regarding the PLC registers that will be utilized during the analysis. These conventions aid in identifying the nature and function of the registers. Specifically:
+
+\begin{enumerate}
+	\item Registers containing discrete values, such as binary or ternary values, are likely to represent actuators.
+	
+	\item Registers with continuous values are identified as measurements.
+	
+	\item Actuators with three states are recognized as valves, while those with two states are considered pumps.
+	
+	\item Sensors with a wide range between the maximum and minimum values are identified as level sensors for tanks. Sensors with a narrow range may represent other types of measurements such as flow or pressure sensors.
+	
+	\item Registers with a single constant value are recognized as either relative setpoints or backup actuators. The distinction is made based on the value contained in the register. Binary values or values corresponding to the states of the main actuators indicate backup actuators, while different values (e.g., 20, 40, 80, etc.) suggest the presence of relative setpoints.
+
+	\item Registers with similar names, such as \texttt{P1\_LIT101} and \texttt{P3\_LIT301}, or \texttt{P2\_MV201} and \texttt{P3\_MV302}, indicate the same type of register, such as a valve, pump, level sensor, or other category.
+\end{enumerate}
+
+By following these conventions, it becomes easier to interpret and analyze the functionality of the PLC registers within the system.
 
 \subsection{Reverse Engineering of PLC1 and PLC2}
 \label{subsec:6_P1P2_analysis}
-The initial focus of analysis will be on the pair comprising PLC1 and PLC2. In Chapter \ref{chap:proposal}, we have previously discussed certain conjectures and properties concerning PLC1. In this section, we will provide a brief summary of those points before proceeding with the rest of the analysis.
+The initial focus of analysis will be on the pair comprising PLC1 and PLC2. Let's delve into the main features of this subsystem by examining the outcomes obtained from applying the framework to it.
 
-\subsubsection{Pre-processing}
+\subsubsection{Pre-processing - Preliminary Analysis}
 \label{subsubsec:6_P1P2_preprocessing}
-After merging the datasets for the two PLCs under investigation, the preliminary analysis performed gives us the outcomes displayed in Listing \ref{lst:6_preproc_P1P2}:
+
+Listing \ref{lst:6_preproc_P1P2} shows the outcomes obtained from automatic recognition of sensors and actuators:
 
 \begin{lstlisting}[language=bash, numbers=left, caption=Preliminary analysis outcomes for sensors and actuators of \texttt{PLC1-2}, label=lst:6_preproc_P1P2]
 	Actuators: 
@@ -69,33 +95,43 @@ After merging the datasets for the two PLCs under investigation, the preliminary
 	P2_P206 [1.0]
 \end{lstlisting}
 
-Based on the assumptions made in Chapter \ref{chap:proposal}, \texttt{P1\_LIT101} is a \textbf{measurement}. We speculated that \texttt{P1\_LIT101} is likely a \textbf{level sensor for a tank}. This assumption is supported by the wide range of values observed for this sensor, with a minimum value of 489 and a maximum value of 815.
-Further \textbf{likely measurements} are available, namely \texttt{P1\_FIT101}, \texttt{P2\_FIT201}, \texttt{P2\_AIT201}, \texttt{P2\_AIT201} and \texttt{P2\_AIT201}. Upon analyzing the range of values for these measurements, it is evident that they do not align with typical characteristics of sensors associated with tanks. At this point, it is challenging to determine the specific association or purpose of these measurements. Further investigation is required to gain clarity on their intended function.
+\noindent Based on the output presented in the listing, we have compiled a preliminary set of conjectures and properties for the subsystem in question. These findings are summarized in Table \ref{table:6_p1p2_actuators_1}:
+
+{
+	\small
+	\begin{longtable}[l]{p{0.01\textwidth} p{0.45\textwidth} p{0.46\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Conjecture / Property} & \textbf{Reason} \\
+		\hline
+		
+		1 & \texttt{P1\_LIT101}, \texttt{P1\_FIT101}, \texttt{P2\_FIT201}, \texttt{P2\_AIT201}, \texttt{P2\_AIT202}, \texttt{P2\_AIT203} are \textbf{measurements}. & Registers contain continuous numerical values.\\
+		\hline
+		
+		2 & \texttt{P1\_LIT101} is identified as the \textbf{level sensor} specifically associated with a \textbf{tank} & Sensor has a wide range of values (minimum 489, maximum value of 815).\\
+		\hline
+		
+		3 & \texttt{P1\_MV101}, \texttt{P1\_P101}, \texttt{P2\_MV201}, \texttt{P2\_P203} and \texttt{P2\_P205} are \textbf{actuators}. & Registers contain discrete numerical values.\\
+		\hline
+		
+		4 & \texttt{P1\_MV101} and \texttt{P2\_MV201} assume three distinct states, represented by the values 0, 1, and 2. They can be identified as \textbf{valves}.& Obvious from the output and from point 3 of the third premise in Section \ref{sec:6_reverse_SWaT}\\
+		\hline
+		
+		5 & \texttt{P1\_P101}, \texttt{P2\_P203} and \texttt{P2\_P205} assume two distinct states, represented by the values 1, and 2. They can be identified as \textbf{pumps}. & Obvious from the output and from point 3 of the third premise in Section \ref{sec:6_reverse_SWaT}\\
+		\hline
+		
+		6 & \texttt{P1\_102}, \texttt{P2\_P201}, \texttt{P2\_P202}, \texttt{P2\_P204} and \texttt{P2\_P206} are \textbf{spare actuators}. & Registers contain constant numerical values.\\
+		\hline 
+		
+		7 & A spare actuator in state 1 is considered to be \textbf{OFF}. & Assumption on the actuator states.\\
+		\hline
+		
+		\caption{Likely measurements and actuators conjectures for PLC1-2}
+		\label{table:6_p1p2_actuators_1}
+	\end{longtable}
+}
 
 \bigskip
-Regarding the actuators, the analysis reveals the following \textbf{likely actuators}: \texttt{P1\_MV101}, \texttt{P1\_P101}, \texttt{P2\_MV201}, \texttt{P2\_P203}, and \texttt{P2\_P205}.\newline
-\texttt{P1\_MV101} and \texttt{P2\_MV201} exhibit three states (0, 1, and 2), while \texttt{P1\_P101}, \texttt{P2\_P203}, and \texttt{P2\_P205} operate with two states (1 and 2).\newline
-The analysis also indicates the presence of probable \textbf{spare actuators}, which can be identified by their consistent value of 1. This distinguishes them from relative setpoints.\newline 
-The following spare actuators have been identified: \texttt{P1\_P102}, \texttt{P2\_P201}, \texttt{P2\_P202}, \texttt{P2\_P204}, and \texttt{P2\_P206}.
-
-\noindent Next, we proceed to formalize our observations:
-
-\begin{description}
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Conjecture 1:}}] \texttt{P1\_LIT101}, \texttt{P1\_FIT101}, \texttt{P2\_FIT201}, \texttt{P2\_AIT201}, \texttt{P2\_AIT202} and \texttt{P2\_AIT203} are \textbf{measurements}.
-	
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Conjecture 2:}}] \texttt{P1\_LIT101} is identified as the \textbf{level sensor} specifically associated with a \textbf{tank}.
-	
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Conjecture 3:}}] \texttt{P1\_MV101}, \texttt{P1\_P101}, \texttt{P2\_MV201}, \texttt{P2\_P203} and \texttt{P2\_MV205} are \textbf{actuators}.
-	
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 1:}}] \texttt{P1\_MV101} and \texttt{P2\_MV201} assume three distinct states, represented by the values 0, 1, and 2.
-	
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Property 2:}}] \texttt{P1\_P101}, \texttt{P2\_P203} and \texttt{P2\_P205} assume two distinct states, represented by the values 1, and 2.
-	
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Conjecture 4:}}] \texttt{P1\_102}, \texttt{P2\_P201}, \texttt{P2\_P202}, \texttt{P2\_P204} and \texttt{P2\_P206} are \textbf{spare actuators}.
-	
-\end{description}
-
-Continuing with the examination of the outcomes from the preliminary analysis, it is evident that the duration of \texttt{P1\_MV101} and \texttt{P2\_MV201} in state 0 is only a few seconds. However, in the subsequent states, the duration is significantly longer, as demonstrated in Listing \ref{lst:6_preproc_P1P2_time}. 
+Continuing with the examination of the outcomes from the preliminary analysis, Listing \ref{lst:6_preproc_P1P2_time} shows the state durations of \texttt{P1\_MV101} and \texttt{P2\_MV201}:
 
 \begin{lstlisting}[language=bash, numbers=left, caption=Time duration of the states of actuators MV101 and MV201 of PLC1-2, label=lst:6_preproc_P1P2_time]
 	Actuator state durations:
@@ -118,16 +154,132 @@ Continuing with the examination of the outcomes from the preliminary analysis, i
 	120  3135  3144  3127  3109
 \end{lstlisting}
 
-Based on this observation, we can conjecture that state 0 serves as a transient state between the two actual states of the actuator, namely 1 and 2. From this deduction, we formalize the following conjecture:
+\bigskip
+\noindent Based on these data, we can derive a conjecture about the state 0 of the valves (Table \ref{table:6_p1p2_mvstate0}): 
 
-\begin{description}
-	\item[\colorbox{backcolourtext}{\normalfont\textit{Conjecture 5:}}] the state 0 of an actuator is a transient state.
-\end{description}
+{
+	\small
+	\begin{longtable}[l]{p{0.01\textwidth} p{0.45\textwidth} p{0.46\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Conjecture / Property} & \textbf{Reason} \\
+		\hline
+		
+		8 & The state 0 of a valve is a \textbf{transient state}. & The duration of state 0 is only a few seconds. However, the subsequent states, have a significantly longer duration.\\
+		\hline
+		
+	\caption{Conjecture on the state 0 of actuators}
+	\label{table:6_p1p2_mvstate0}
+\end{longtable}
+}
 
-\vfill
+\bigskip
+In the analysis of actuator state changes relative to measurements, we referred to examples from Section \ref{subsubsec:4_brief_analysis} that demonstrated the behavior of \texttt{P1\_P101}. Applying the same reasoning also to \texttt{P1\_MV101} we can derive the conjectures described in Table \ref{table:6_p1p2_p101}:
+
+{
+	\small
+	\begin{longtable}[l]{p{0.01\textwidth} p{0.45\textwidth} p{0.46\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Conjecture / Property} & \textbf{Reason} \\
+		\hline
+		
+		9 & State 1 of the pump \texttt{P1\_P101} corresponds to the \textbf{OFF state} of the actuator; state 2 of \texttt{P1\_P101} corresponds to the \textbf{ON state} of the actuator. & Derived from Conjecture 7.\\ 
+		\hline
+				
+		10 & The \textit{relative setpoints} of \texttt{P1\_P101} are approximately 535 (minimum) when state change to 1 and approximately 813 (maximum) when state change to 2. & Observation derived from output\\
+		\hline
+		
+		11 & \texttt{P1\_P101} is responsible for \textbf{emptying the tank} represented by \texttt{P1\_LIT101}. & Derived from Conjecture 9 and 10 \\
+		\hline
+		
+		12 & Pumps are responsible for \textbf{water outflow}. & Corollary to Conjecture 11\\
+		\hline		
+		
+		13 & State 1 of the valve \texttt{P1\_MV101} corresponds to the \textbf{OFF state} of the actuator; state 2 of \texttt{P1\_MV101} corresponds to the \textbf{ON state} of the actuator. & Derived from Conjecture 7.\\
+		\hline
+		
+		14 & The \textit{relative setpoints} of \texttt{P1\_MV101} are approximately 500 (minimum) when state change to 2 and approximately 800 (maximum) when state change to 1. & Observation derived from output\\
+		\hline
+		
+		15 & \texttt{P1\_MV101} is responsible for \textbf{filling the tank} represented by \texttt{P1\_LIT101}. & Derived from Conjecture 13 and 14 \\
+		\hline
+		
+		16 & Valves are responsible for \textbf{water intake}. & Corollary to Conjecture 15\\
+		\hline
+
+		\caption{Conjecture on valves and pumps}
+		\label{table:6_p1p2_p101}
+	\end{longtable}
+}
+
+\noindent Based on the conjecture, we can speculate that the level of the tank monitored by register \texttt{P1\_LIT101} is regulated by valve \texttt{P1\_MV101} at the inlet and valve \texttt{P1\_P101} at the outlet. However, the role of sensor \texttt{P1\_FIT101} is still uncertain, although in Section \ref{subsubsec:4_brief_analysis} we assumed it to be a flow or pressure sensor, and requires further investigation.
+
+\bigskip
+Regarding the elements controlled by PLC2, the analysis does not reveal the presence of another tank. Therefore, we cannot determine the exact role of sensors \texttt{P2\_AIT\textit{20x}} and \texttt{P2\_FIT201} at this point.\newline
+However, there is a similarity observed between the relative setpoints of \texttt{P1\_P101} and those of \texttt{P2\_MV201}, \texttt{P2\_P203}, and \texttt{P2\_P205}. These registers exhibit very similar values during state changes, suggesting a potential relationship or similar control behavior between them.
 
 \subsubsection{Graphs and Statistical Analysis}
 \label{subsubsec:6_P1P2_graphs}
+Figure \ref{fig:6_P1P2_graph_full} illustrates the graphical representation of the registers in PLC1-2 and their respective trends.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P1P2_1.png}
+	\caption{Chart of PLC1-2}
+	\label{fig:6_P1P2_graph_full}
+\end{figure}
+
+\noindent The image provides further support for Conjecture 6 and 7: \texttt{P1\_P102}, \texttt{P2\_P201}, \texttt{P2\_P202}, \texttt{P2\_P204}, and \texttt{P2\_P206} are \textbf{backup actuators}, specifically \textbf{pumps}. These actuators consistently maintain a state of 1 and do not seem to have any significant impact on the measurements. This confirmation also supports the inference made in Conjecture 9 that state 1 of the pumps corresponds to the \textbf{OFF state}, while state 2 corresponds to the \textbf{ON state}. As a result, we can exclude these registers from further analysis.\newline 
+Figure \ref{fig:6_P1P2_graph_full_nospare} provides a clearer representation of the subsystem after removing the spare actuators.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P1P2_5.png}
+	\caption{Chart of PLC1-2 without spare actuators (particular)}
+	\label{fig:6_P1P2_graph_full_nospare}
+\end{figure}
+
+Conjecture 1 and 2, which involve the identification of the tank level sensor and measurements, are confirmed by the charts. Additionally, Conjecture 11 and 12 regarding pump behavior and Conjecture 15 and 16 regarding valve behavior in relation to the tank are also validated. Furthermore, Conjecture 8, which suggests that valves have a 0 state, is also confirmed.\newline
+Looking at the plot, we can make further conjectures based on the observed trends and patterns (Table \ref{table:6_p1p2_graph_conj_1}):
+
+{
+	\small
+	\begin{longtable}[l]{p{0.01\textwidth} p{0.45\textwidth} p{0.46\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Conjecture / Property} & \textbf{Reason} \\
+		\hline
+		17 & The trend of \texttt{P1\_FIT101} follows the trend of \texttt{P1\_MV101} & \texttt{P1\_FIT101} takes a value of 0 when the valve \texttt{P1\_MV101} is OFF, and positive values (> 2) when the valve is ON.\\
+		\hline
+		
+		18 & \texttt{P1\_FIT101} is a \textbf{flow sensor} related to the inlet water flow at \texttt{P1\_LIT101}. & Corollary to Conjecture 17\\ 
+		\hline
+		
+		19 & \texttt{P2\_FIT201} is also a likely \textbf{flow sensor}. & By analogy with \texttt{P1\_FIT101} (point 6 of the third premise in Section \ref{sec:6_reverse_SWaT})\\ 
+		\hline
+		
+		20 & There is a correlation between the trend of \texttt{P1\_P101} and the trend of \texttt{P2\_MV201}. & Observation derived from the plot\\ 
+		\hline
+		
+		21 & \texttt{P2\_MV201} is responsible for \textbf{filling a tank} that is \textit{not} part of this subsystem. & Sensors \texttt{P2\_AIT202} and \texttt{P2\_AIT203} do not exhibit an increasing trend when the valve is ON, and there is no apparent correspondence between the trend of the valve and the trend of \texttt{P1\_LIT101}.\\ 
+		\hline
+		
+		22 & \texttt{P2\_AIT201} is a sensor that measures \textbf{some property of the water}. & Sensor does not show a cyclic pattern in its measurements.\\
+		\hline
+		
+		23 & \texttt{P2\_AIT202} is a sensor that measures \textbf{some property of the water}. & Very narrow range between maximum and minimum values (point 4 of the third premise in Section \ref{sec:6_reverse_SWaT})\\
+		\hline
+		
+		24 & The trend of \texttt{P2\_AIT202} and \texttt{P2\_AIT203} follows the trend of \texttt{P2\_P20x} pumps & Observation derived from the plot\\ 
+		\hline
+		
+		\caption{Conjecture on the charts}
+		\label{table:6_p1p2_graph_conj_1}
+	\end{longtable}
+}
+
+\bigskip
+Currently, the specific role of \texttt{P2\_AIT203} sensors and the correlation between \texttt{P2\_P20x} pumps and \texttt{P2\_AIT202} and \texttt{P2\_AIT203} sensors cannot be determined. These aspects require further analysis and investigation as they exhibit a cyclic pattern that seems to be associated with the behavior of the pumps.
+
+\vfill
 
 \subsubsection{Invariant Inference and Analysis}
 \label{subsubsec:6_P1P2_invariants}
