@@ -154,7 +154,7 @@ The tool furthermore offers the possibility, in parallel to the memory registers
 
 \paragraph{Data Pre-processing}
 \label{par:3_preproc} 
-The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all unused registers, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data, such as the \textbf{previous value} of all registers and the the \textbf{measurement slope}, that is, the trend of the water level in the system tanks along the system cycles.\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually inserted.}. See \ref{par:3_preproc_limitation} for more detail.\newline \newline
+The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all unused registers, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data, such as the \textbf{previous value} of all registers and the the \textbf{measurement slope}, that is, the trend of the water level in the system tanks along the system cycles\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually inserted.}. See \ref{par:3_preproc_limitation} for more detail.\newline \newline
 This process leads to the creation of two copies of the full dataset: one enriched with the additional data, but not timestamped, which will be used for the invariant analysis; the other unenriched, but timestamped, which will be used for business process mining.
 
 \subsection{Graphs and Statistical Analysis}
@@ -430,7 +430,7 @@ OpenPLC is an open source cross-platform software that simulates the hardware an
 It is for sure an excellent choice for creating a zero-cost industrial or home automation and \textit{Internet of Things} (IoT) system that is easy to manage via a dedicated, comprehensive and functional web interface. In spite of these undoubted merits, however, there are (at the moment) \textbf{very few supported protocols}: the main one and also referred to in the official documentation is \textbf{Modbus}, while the other protocol is DNP3.
 
 \begin{description}
-	\item[\emph{\underline{First limitation}}] The biggest problem with the testbed, however, is not with the controller part, but with the \textbf{physical part}: first of all, it must be said that although this is something purely demonstrative even though it is fully functional, the implemented Simulink model is really \textbf{oversimplified} compared to the iTrust SWaT system, which itself is a scaled-down version of a real water treatment plant. In fact, in the entire system there are only three actuators, two of which are connected to the same tank and controlled by the same PLC, and sensors related only to the water level in the system's tanks: in a real system there are many more \textit{field devices}, which can monitor and control other aspects of the system beyond the mere contents of the tanks. Consider, for example, measuring and controlling the chemicals in the water, the pressure of the liquid in the filter unit, or more simply the amount of water flow at a given point or time.\newline
+	\item[\emph{\underline{First limitation}}] The biggest problem with the testbed, however, is not with the controller part, but with the \textbf{physical part}: first of all, it must be said that although this is something purely demonstrative even though it is fully functional, the implemented Simulink model is really \textbf{oversimplified} compared to other testbeds. In fact, in the entire system there are only three actuators, two of which are connected to the same tank and controlled by the same PLC, and sensors related only to the water level in the system's tanks: in a real system there are many more \textit{field devices}, which can monitor and control other aspects of the system beyond the mere contents of the tanks. Consider, for example, measuring and controlling the chemicals in the water, the pressure of the liquid in the filter unit, or more simply the amount of water flow at a given point or time.\newline
 	All these must be considered and represent a number of additional variables that makes analysis and consequently reverse engineering of the system more difficult.
 	
 	\item[\emph{\underline{Second limitation}}] The second critical aspect concerns the \textbf{simulation of the physics of the liquid} inside the tanks: Simulink does not consider the fact that inside a tank that is filling (emptying) the liquid in it undergoes \textbf{fluctuations} which cause the level sensor not to see the water level constantly increasing (decreasing) or at most being stable at each point of detection. Figure \ref{fig:testbed_physics} exemplifies more clearly with an example the concept just expressed: these oscillations cause a \textbf{perturbation} in the data.\newline
@@ -548,12 +548,12 @@ The limitation in this case is principally Daikon: this software is designed to 
 Table \ref{table:3_ceccato_limitations_table} provides a summary of the limitations discussed regarding the Ceccato et al. framework.
 
 {\small
-\begin{longtable}[c]{| l | l |}
+\begin{longtable}[c]{p{0.35\textwidth} p{0.55\textwidth}}
 	\hline
 	\textbf{Phase} & \textbf{Limitations} \\ [0.5ex] 
 	\hline
 	\multirow{4}{12em}{Testbed} & - Oversimplified model compared to \\
-	& iTrust SWaT system \\
+	& other testbeds \\
 	& - Physics of the liquid not considered: this \\ 
 	& causes data perturbation \\
 	\hline
