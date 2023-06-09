@@ -287,6 +287,7 @@ At the same time, the user has the option to specify these settings via the comm
 	
 	\item \textbf{-g} or \textbf{{-}{-}granularity:} specifies a granularity (expressed in seconds) that will be used to calculate the measurement slope during the dataset enrichment phase. We will discuss this later in Section \ref{subsubsec:4_dataset_enrichment}.
 \end{itemize}
+\vfill
 
 \subsubsection{Dataset Enrichment}
 \label{subsubsec:4_dataset_enrichment}
@@ -432,6 +433,8 @@ During this step, the datasets of the individual PLCs are merged, resulting in t
 \bigskip
 By default, the enriched dataset will be saved in CSV format in the \texttt{\$(project-dir)/daikon/Daikon\_Invariants} directory. The other dataset, without additional data, will be saved in the \texttt{\$(project-dir)/process-mining/data directory}. It's worth noting that both paths can be configured in the \textit{config.ini} file. The dataset name can be specified in the \textit{config.ini} file or through the \texttt{-o} command-line option. When generating the dataset for process mining, the script will automatically add a \texttt{\_TS} suffix to the filename to indicate that it includes the timestamp. This flexibility allows the user to provide a different filename for each output, preventing overwriting of previous datasets. It enables the user to save the execution trace of the selected subsystem separately and utilize them in subsequent analysis phases.
 
+\vfill
+
 \subsubsection{Preliminary Analysis of the Obtained Subsystem}
 \label{subsubsec:4_brief_analysis}
 
@@ -455,45 +458,45 @@ Listing \ref{lst:4_brief_infos} shows an example of the output this brief analys
 	P102 [1.0]
 	
 	Actuator state changes:
-	index     LIT101     MV101     prev_MV101
-	669     800.7170         0              2
-	1850    499.0203         0              1
-	4876    800.5992         0              2
-	6052    498.9026         0              1
-	9071    800.7170         0              2
-	10260   499.1381         0              1
-	13268   801.3058         0              2
-	14435   498.4315         0              1
-	17423   801.4628         0              2
-	18603   498.1567         0              1
+	  LIT101     MV101     prev_MV101
+	800.7170         0              2
+	499.0203         0              1
+	800.5992         0              2
+	498.9026         0              1
+	800.7170         0              2
+	499.1381         0              1
+	801.3058         0              2
+	498.4315         0              1
+	801.4628         0              2
+	498.1567         0              1
 	
-	index     LIT101     MV101     prev_MV101
-	677     805.0741         1              0
-	4885    805.7414         1              0
-	9079    805.7806         1              0
-	13276   805.1133         1              0
-	17432   804.4068         1              0
+	  LIT101     MV101     prev_MV101
+	805.0741         1              0
+	805.7414         1              0
+	805.7806         1              0
+	805.1133         1              0
+	804.4068         1              0
 	
-	index     LIT101     MV101     prev_MV101
-	1858    495.4483         2              0
-	6060    497.9998         2              0
-	10269   495.9586         2              0
-	14443   495.8016         2              0
-	18611   494.5847         2              0
+	  LIT101     MV101     prev_MV101
+	495.4483         2              0
+	497.9998         2              0
+	495.9586         2              0
+	495.8016         2              0
+	494.5847         2              0
 	
-	index     LIT101      P101      prev_P101
-	118     536.0356         1              2
-	4322    533.3272         1              2
-	8537    542.1591         1              2
-	12721   534.8581         1              2
-	16883   540.5890         1              2
+	  LIT101      P101      prev_P101
+	536.0356         1              2
+	533.3272         1              2
+	542.1591         1              2
+	534.8581         1              2
+	540.5890         1              2
 	
-	index     LIT101      P101      prev_P101
-	1190    813.0031         2              1
-	5395    813.0031         2              1
-	9597    811.8256         2              1
-	13776   812.7283         2              1
-	17938   813.3171         2              1
+	  LIT101      P101      prev_P101
+	813.0031         2              1
+	813.0031         2              1
+	811.8256         2              1
+	812.7283         2              1
+	813.3171         2              1
 	
 	Actuator state durations:
 	MV101 == 0.0
@@ -530,6 +533,8 @@ The information obtained here can be used, as mentioned above, to refine the enr
 
 \bigskip
 The \texttt{system\_info.py} file can also run in standalone mode if needed: it takes as command-line arguments the dataset to be analyzed, a list of actuators, and a list of sensors. For analysis related to state changes, the dataset must mandatorily be of the enriched type.
+
+\vfill
 
 \subsection{Phase 2: Graphs and Statistical Analysis}
 \label{subsec:4_improve_graphs}

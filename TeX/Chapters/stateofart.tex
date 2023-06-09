@@ -545,40 +545,56 @@ The limitation in this case is principally Daikon: this software is designed to 
 
 	\item[\emph{\underline{Second limitation}}] The bash script used in this phase of the analysis does not help at all in deriving significant invariants more easily: it merely launches Daikon and saves its output to a text file by simply redirecting the stdout to file. No data reprocessing is done during this step. In addition, if a condition is to be specified to Daikon before performing the analysis, it is necessary each time to edit the .spinfo file by manually entering the desired rule, an inconvenient operation when multiple analyses are to be performed with different conditions each time. 
 \end{description}
-Table \ref{table:3_ceccato_limitations_table} provides a summary of the limitations discussed regarding the Ceccato et al. framework.
+Table \ref{table:3_ceccato_limitations_table} provides a summary of the limitations discussed regarding the Ceccato et al. framework:
 
 {\small
-\begin{longtable}[c]{p{0.35\textwidth} p{0.55\textwidth}}
+\begin{longtable}[c]{p{0.35\textwidth} p{0.57\textwidth}}
 	\hline
 	\textbf{Phase} & \textbf{Limitations} \\ [0.5ex] 
 	\hline
-	\multirow{4}{12em}{Testbed} & - Oversimplified model compared to \\
-	& other testbeds \\
-	& - Physics of the liquid not considered: this \\ 
-	& causes data perturbation \\
+	Testbed & - Oversimplified model compared other testbeds \newline
+	- Physics of the liquid not considered: this causes data perturbation. \\
 	\hline
-	\multirow{5}{12em}{Pre-processing} & - It is not possible to select \\
-	& a subsystem by (groups of) PLCs or by \\
-	& time range \\
-	& - Some additional attributes are manually \\
-	& inserted in the dataset \\
-	\hline 
-	\multirow{6}{12em}{Graphical/Statistical Analysis} & - Only one chart at the time \\
-	& is displayed: difficulty in capturing  the \\ 
-	& relationship between actuators and \\
-	& sensors \\
-	& - Statistical Analysis provides little \\ 
-	& information \\
+	Pre-processing & - It is not possible to select a subsystem by (groups of) PLCs or by time range \newline
+	- Some additional attributes are manually inserted into dataset.\\
 	\hline
-	\multirow{4}{12em}{Business Process Analysis} & - Ad hoc solution designed to \\
-	& work under special conditions \\
-	& - Use of commercial software for process \\
-	& mining \\
+	Graphical/Statistical\newline Analysis & - Only one chart at the time is displayed: difficulty in capturing the relationship between actuators and sensors. \newline
+	- Statistical Analysis provides little information \\
 	\hline
-	\multirow{3}{12em}{Invariant Analysis} & - Reading output is challenging  \\
-	& - Script for analysis merely launches \\
-	& Daikon without reprocessing outcomes \\
+	Business Process\newline Analysis & - Ad hoc solution designed to work under special conditions\newline
+	- Use of commercial software for process mining\\
 	\hline
+	Invariant Analysis & - Reading output is challenging\newline
+	- Script for analysis merely launches Daikon without reprocessing outcomes\\
+	\hline
+	
+	%\multirow{4}{12em}{Testbed} & - Oversimplified model compared to \\
+	%& other testbeds \\
+	%& - Physics of the liquid not considered: this \\ 
+	%& causes data perturbation \\
+	%\hline
+	%\multirow{5}{12em}{Pre-processing} & - It is not possible to select \\
+	%& a subsystem by (groups of) PLCs or by \\
+	%& time range \\
+	%& - Some additional attributes are manually \\
+	%& inserted in the dataset \\
+	%\hline 
+	%\multirow{6}{12em}{Graphical/Statistical Analysis} & - Only one chart at %the time \\
+	%& is displayed: difficulty in capturing  the \\ 
+	%& relationship between actuators and \\
+	%& sensors \\
+	%& - Statistical Analysis provides little \\ 
+	%& information \\
+	%\hline
+	%\multirow{4}{12em}{Business Process Analysis} & - Ad hoc solution %designed to \\
+	%& work under special conditions \\
+	%& - Use of commercial software for process \\
+	%& mining \\
+	%\hline
+	%\multirow{3}{12em}{Invariant Analysis} & - Reading output is challenging  \\
+	%& - Script for analysis merely launches \\
+	%& Daikon without reprocessing outcomes \\
+	%\hline
 	%\multirow{3}{4em}{\textbf{Priority}} & Confidentiality  \\
 	%& Integrity  \\
 	%& Availability  \\
