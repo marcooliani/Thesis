@@ -189,7 +189,7 @@ class SystemInfo:
 
                 for v in actuators[actuator]:
                     print(df[df.eval(f'{actuator} == {v} '
-                                     f'and {self.config["DATASET"]["prev_cols_prefix"]}{actuator} != {v}')])
+                                     f'and {self.config["DATASET"]["prev_cols_prefix"]}{actuator} != {v}')].to_string(index=False))
                     print()
 
 
