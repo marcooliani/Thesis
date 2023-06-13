@@ -1,12 +1,50 @@
-\chapter{Conclusions}
+\chapter{Conclusion and Future Work}
 \label{conclusions}
 \linenumbers
 
-\section{Discussions}
-\label{sec:7_discussion}
+\paragraph{Discussion}
+\label{par:7_discussion}
+Upon completing our black-box analysis of the iTrust SWaT system, although partial, we can confidently state that we have achieved a significant level of process comprehension for the examined system. Furthermore, we have successfully derived a relatively accurate model of its behavior. Specifically:
 
-\section{Future work}
-\label{sec:7_futurework}
+\begin{enumerate}
+	\item we successfully identified the registers associated with the physical process measures and their respective operating ranges (setpoints);
+	
+	\item among these measurements, we were able to distinguish the sensors responsible for monitoring the water level in the tanks;
+	
+	\item we identified the registers associated with the actuators, such as pumps and valves, and determined their ON and OFF states;
+	
+	\item we were able to determine whether an actuator is responsible for controlling incoming or outgoing flows within the system;
+	
+	\item we successfully identified the possible states that the system may assume and determined the chronological sequence in which these states occur;
+	
+	\item we recognized the specific events that trigger changes in the system state through the actuators, such as reaching specific water level values in the tanks, and vice versa;
+	
+	\item we elucidated the relationships between registers belonging to different PLCs, highlighting their interconnections and dependencies;
+	
+	\item we partially reconstructed the communication network between the PLCs, outlining the connections and interactions between them.
+\end{enumerate}
+
+For some registers it was not possible to derive their specific role (e.g., register \texttt{P2\_AIT203} monitored by PLC2). In such cases, we were restricted to making conjectures or relying on generic properties inferred from other aspects. Additionally, based on the available data, we were unable to establish the presence of piping or other elements such as filter membranes or tanks containing chemicals.
+
+\bigskip
+Items 4, 5, and 8 in the aforementioned list highlight the expanded scope of information that can be obtained from the proposed framework compared to the work of Ceccato et al. Furthermore, the increased quantity and depth of information acquired at each step of the methodology reinforce our belief that the primary objective of this thesis has been fully accomplished.
+
+\paragraph{Future work}
+\label{par:7_futurework}
+Undoubtedly, the proposed framework can be further improved. Throughout the development of this thesis, ideas for potential enhancements have emerged, representing a natural evolution of the current proposal. In the following, we will illustrate these areas for future work:
+
+\begin{itemize}
+	\item \textbf{Scanning of the system and data gathering:} In our methodology, we excluded a particular step since we utilized the datasets provided by iTrust, encompassing both physical process and network traffic data (for more details, please refer to Section \ref{sec:5_swat_datasets}). However, in cases where ready-made datasets are unavailable, this step may be necessary. It is important to note that the main limitation of this step, compared to the Ceccato et al. tool, is its exclusive focus on the recognition of PLCs based on the Modbus protocol. As we have observed, there exist numerous industrial protocols, and Modbus, although widely used, is just one among many. Therefore, it becomes imperative to ensure that this phase can effectively handle the recognition of PLCs using multiple protocols. To address this challenge, one can leverage the \texttt{protocols} directive within the \texttt{[NETWORK]} section of the general configuration file, \textit{config.ini}.
+	
+	\bigskip
+	Another potential solution we propose is the implementation of an automatic recognition method utilizing Machine Learning and Artificial Intelligence techniques. This approach has been explored and tested on the datasets related to the physical process of the SWaT system provided by iTrust. Unfortunately, these datasets proved to be inconsistent in many instances, which hindered the adequacy of training. As a result, this avenue was abandoned. However, if an attacker has the capability to conduct repeated series of scans on the target system, they could utilize this data collection to train a model for recognition purposes;
+	
+	\item \textbf{Automatic recognition of measurements and actuators:} this aspect was implemented within our framework using a mixed Daikon-Pandas technique. While this technique has shown positive results, it can be further improved by modifying it to utilize only the Pandas library. The revised technique would involve checking the type and number of distinct values in each register to accurately identify measurements and actuators. This modification would offer greater flexibility and precision in the recognition process, allowing for the definition of specific criteria, such as setting a maximum number of distinct values to determine whether a register should be classified as an actuator;
+	
+	\item \textbf{Completion of Business Process Analysis and Network Analysis:} in our implementation, these aspects remained incomplete, as stated in Section \ref{par:6_premesse_bpa}, due to the unavailability of comprehensive and overlapping data in the datasets provided by iTrust for the given years. To address this, improvements are required, such as enhancing the multiprotocol support of the network data export script (currently adapted to CIP only) and suggesting a modular solution. Additionally, it is necessary to implement an event recognition mechanism to identify system state changes within network communications;
+	
+	\item \textbf{Recognition of actual system states:} in the steps related to Invariant Analysis and Business Process, it was necessary to manually specify the actuators that directly impact the subsystem under study, omitting the remaining ones. This approach allowed us to obtain the actual states of the subsystem, enabling the derivation of information that is more immediate and likely more accurate. Throughout the thesis development, various methods were explored, including approximating tank level data (similar to the approach used for slope calculation in Section \ref{par:4_slope_calculation}) and identifying points of slope change. However, none of these methods proved effective due to significant data perturbations. Consequently, addressing this issue remains an ongoing challenge that requires additional time to find a consistent and reliable solution.
+\end{itemize}
 
 \vfill
 \nolinenumbers
