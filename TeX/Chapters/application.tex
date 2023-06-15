@@ -335,6 +335,7 @@ We summarize in Table \ref{table:6_P1P2_summarize_graphs} the conjectures made i
 Through the process of \textit{invariant analysis}, we aim to discover new information about the system and determine whether the conjectures made in the previous steps are supported by the data obtained from the Daikon analysis.
 
 \paragraph{General Invariants}
+\label{par:6_P1P2_general_invariant}
 We will begin this phase by analyzing the general invariants (see Section 4.2.5.1.). Listing \ref{lst:6_preproc_P1P2_general_invariants} presents a selection of these invariants:
 
 \begin{lstlisting}[language=bash, numbers=left, caption=General Invariants for PLC1-2, label=lst:6_preproc_P1P2_general_invariants]
@@ -546,27 +547,257 @@ From the conjectures derived from the four phases of the analysis we will derive
 	\end{longtable}
 }
 
-\vfill
-
 \subsection{Reverse Engineering of PLC2 and PLC3}
 \label{subsec:6_P2P3_analysis}
+Continuing our analysis of the iTrust SWaT system, our current focus will be on the registers of PLC3 and any potential relationships they may have with the registers of PLC2.
 
-\subsubsection{Pre-processing}
+\subsubsection{Pre-processing - Preliminary Analysis}
 \label{subsubsec:6_P2P3_preprocessing}
+
+\paragraph{Measurements and Actuators Recognition}
+\label{par:6_P2P3_measures_actuators_recognition}
+Listing \ref{lst:6_preproc_P2P3} shows the outcomes obtained from automatic recognition of likely measurements and actuators. After previously identifying the measurements and actuators of PLC2 in Section \ref{par:6_P1P2_measures_actuators_recognition}, the listing exclusively showcases the registers associated with PLC3.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Preliminary analysis outcomes for sensors and actuators of \texttt{PLC2-3}, label=lst:6_preproc_P2P3]
+	Actuators: 
+	...
+	P3_MV301 [0.0, 1.0, 2.0]
+	P3_MV302 [0.0, 1.0, 2.0]
+	P3_MV303 [0.0, 1.0, 2.0]
+	P3_MV304 [0.0, 1.0, 2.0]
+	P3_P302 [1.0, 2.0]
+	
+	Sensors: 
+	...
+	P3_DPIT301 {'max_lvl': 20.4, 'min_lvl': 0.0}
+	P3_FIT301 {'max_lvl': 2.4, 'min_lvl': 0.0}
+	P3_LIT301 {'max_lvl': 1014.5, 'min_lvl': 786.5}
+	
+	Hardcoded setpoints or spare actuators: 
+	...
+	P3_P301 [1.0]
+\end{lstlisting}
+
+From the provided listing, it is evident that the \textbf{likely measurements} related to PLC3 are \texttt{P3\_DPIT301}, \texttt{P3\_FIT301}, and \texttt{P3\_LIT301}. Drawing an analogy with the derived properties from Table \ref{table:6_P1P2_summarize_properties}, \texttt{P3\_LIT301} can be associated with a \textbf{tank level sensor}, while \texttt{P3\_FIT301} may be linked to a flow or pressure sensor. However, the specific role of \texttt{P3\_DPIT301} cannot be speculated upon at this time.
+
+\bigskip
+Regarding the \textbf{likely actuators}, they include \texttt{P3\_MV301}, \texttt{P3\_MV302}, \texttt{P3\_MV303}, \texttt{P3\_MV304}, and \texttt{P3\_P302}. By drawing parallels with the previous analysis outcomes, it can be inferred that registers \texttt{P3\_MV30x} represent valves, while \texttt{P3\_P302} corresponds to a pump.
+
+\bigskip
+Lastly, there is a \textbf{spare actuator} identified as \texttt{P3\_P301}. Similar to the previous analysis, this is an inactive pump, indicated by the constant value of 1 in this register, signifying that it is in the OFF state.
+
+\paragraph{Actuator State Durations}
+\label{par:6_P2P3_actuators_duration}
+Let's proceed with the analysis of the actuator states' duration, as displayed in Listing \ref{lst:6_preproc_P2P3_actuator_duration}. In this analysis, our focus will not be on examining the correspondence between values and the actual actuator states, as in Section \ref{par:6_P1P2_actuators_duration}. Instead, we will explore whether these actuators exhibit any distinct patterns or behaviors based on their duration.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Time duration of the states of actuators of PLC3, label=lst:6_preproc_P2P3_actuator_duration]
+	Actuator state durations:
+	...
+	P3_MV301 == 1.0
+	2527  4154  4154  4154  4094
+	
+	P3_MV301 == 2.0
+	36  35  36  35  34
+	
+	P3_MV302 == 1.0
+	662  138  654  138  656  139  658  137  656  137
+	
+	P3_MV302 == 2.0
+	62  1783  1596  1787  1591  1791  1576  1803  1540  1782
+	
+	P3_MV303 == 1.0
+	2526  4089  4088  4089  4028
+	
+	P3_MV303 == 2.0
+	97  96  97  96  96
+		
+	P3_MV304 == 1.0
+	689  1832  2206  1838  2203  1840  2191  1852  2152  1831
+	
+	P3_MV304 == 2.0
+	43  87  42  89  43  88  43  88  43  88
+	
+	P3_P302 == 1.0
+	637  115  632  115  632  114  634  114  632  115
+	
+	P3_P302 == 2.0
+	60  1821  1632  1825  1629  1829  1615  1841  1578  1820
+\end{lstlisting}
+
+A notable behavior is observed in the \texttt{P3\_MV30x} valves. \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} have a relatively \textbf{short duration in the ON state}, ranging from around 30 seconds to a minute and a half. In contrast, \texttt{P3\_MV302} remains in the ON state for a longer duration but exhibits approximately twice as many cycles as the other actuators (10 cycles compared to 5 cycles). A similar characteristic is also observed in the OFF state of these actuators.
+
+This behavior displayed by the actuators warrants further investigation in subsequent steps. However, based on the short duration of the ON state for \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304}, \textbf{it appears unlikely that they have a significant impact on the tank level}. On the other hand, the influence of \texttt{P3\_MV302} cannot be ruled out and requires additional examination.
+
+\bigskip
+We can observed that \texttt{P3\_P302}, the pump in PLC3, exhibits a similar behavior to \texttt{P3\_MV302}, with a cycle number of 10. Furthermore, the durations of the ON and OFF states for both actuators appear to be overlapping. This suggests a \textbf{potential relationship between the two actuators}. Additionally, considering that \texttt{P3\_P302} is the only pump in PLC3, it is reasonable to speculate that it may have an influence on the tank level. Further investigation is necessary to validate this speculation and explore the precise nature of the relationship between \texttt{P3\_P302} and \texttt{P3\_MV302}.
+
+\paragraph{Actuator State Changes}
+\label{par:6_preproc_P2P3_actuator_state_changes}
+Based on the analysis of the probable measurements, we have identified the likely tank, represented by register \texttt{P3\_LIT301}. In the previous analysis of the PLC1-2 subsystem in Section \ref{subsec:6_P1P2_analysis}, the role of valve \texttt{P2\_MV201} remained unresolved. We speculated that this actuator might be responsible for the incoming water flow to an element outside the analyzed subsystem. To investigate this further, we can examine the relationship between \texttt{P2\_MV201} and the tank within this subsystem. By extracting information from the corresponding setpoints, we can gather insights to verify if our speculation holds true. \newline 
+Listing \ref{lst:6_P2P3_preproc_changestate} displays the setpoints associated with the state change of \texttt{P2\_MV201} in relation to the level of tank \texttt{P3\_LIT301}.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=P1\_P101 state changes in relation to P1\_LIT101, label=lst:6_P2P3_preproc_changestate]
+	Actuator state changes:
+	...
+	P2_MV201  prev_P2_MV201  P3_LIT301
+	       0              2  1000.2240
+	       0              1   799.1140
+	       0              2  1001.5060
+	       0              1   799.1942
+	       0              2  1001.5460
+	       0              1   799.1140
+	...
+\end{lstlisting}
+
+The setpoints provided in the listing support our conjecture. The maximum relative setpoint of 1000 and the minimum relative setpoint very close to 800 indicate a correlation that appears intentional. Based on this information, we can speculate that \texttt{P2\_MV201} is indeed the \textbf{valve responsible for the tank} associated with \texttt{P3\_LIT301}.
+
+\bigskip
+Regarding further information obtained from this step, there is limited insight available. While \texttt{P3\_P302} appears to be the pump responsible for emptying the tank associated with \texttt{P3\_LIT301}, the analysis of the actuator lifetime indicates twice as many values compared to other actuators. The pump exhibits setpoint values of approximately 850 and 970 for the transition from ON to OFF, and 900 and 1000 for the transition from OFF to ON. On the other hand, \texttt{P3\_MV302} shows numerous state changes and shares setpoints with values close to 850, 970, 1000, and 900 for the same transitions. These values align perfectly with those of the \texttt{P3\_P302} pump, suggesting a potential relationship between the two actuators.
+
+\bigskip
+Obtaining information about the remaining registers is challenging at this stage. Further analysis steps are required to gather additional insights and uncover more information about the system.
 
 \subsubsection{Graphs and Statistical Analysis}
 \label{subsubsec:6_P2P3_graphs}
+Graphical analysis can provide valuable insights and help validate the conjectures made during the preliminary analysis, as well as uncover connections between registers that were not identified in the previous step. To begin, we will test the hypothesis that valve \texttt{P2\_MV201} is responsible for filling the tank associated with \texttt{P3\_LIT101}. Figure \ref{fig:6_graphs_P2P3_mv201} displays these registers, along with other registers whose behavior and relationships with the tank level we will explore in an attempt to gain a deeper understanding.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P2P3_7.png}
+	\caption{Verifying the conjecture about valve \texttt{P2\_MV201} }
+	\label{fig:6_graphs_P2P3_mv201}
+\end{figure}
+
+\bigskip
+The figure shows the particular behavior of \texttt{P3\_LIT103}, with two slope changes during the tank filling period. These slope changes correspond approximately to the relative setpoints found for \texttt{P3\_MV302} and \texttt{P3\_P302}. However, we will analyze this aspect later.
+What we can see in relation to the initial conjecture about the role of \texttt{P2\_MV201} is that the period during which the valve remains in the ON state corresponds exactly to the increasing trend of \texttt{P3\_LIT301}. The conjecture thus finds further support. We also note how \texttt{P2\_FIT201} is related to the trend of \texttt{P2\_MV201} and the increasing trend of \texttt{P3\_LIT301}. 
+
+\bigskip
+Now let's examine the relationships between the tank represented by \texttt{P3\_LIT301} and the other actuators of PLC3 through Figure \ref{fig:6_graphs_P3}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P3_3.png}
+	\caption{PLC3 registers}
+	\label{fig:6_graphs_P3}
+\end{figure}
+
+From the charts, it is evident that the trends of \texttt{P3\_DPIT301} and \texttt{P3\_FIT301} exhibit similarities. Furthermore, their overall pattern closely follows that of the valve \texttt{P3\_MV302}. Based on these observations, we can speculate that there is a relationship between these registers or that they serve similar functions, possibly as p\textbf{ressure or flow sensors}.
+
+\bigskip
+Regarding pump \texttt{P3\_P302}, we observe that its OFF state coincides with the increasing slope of P3\_LIT301 during its upward trend and the entire phase when the level remains relatively stable. Conversely, its ON state corresponds to the gradual increase and decrease of the water level in the tank. This observation provides further evidence to support the hypothesis that \texttt{P3\_P302} is responsible for emptying the tank.
+
+Valve \texttt{P3\_MV302} exhibits a similar pattern to pump \texttt{P3\_P302}. Building upon our previous findings, we can speculate that, similar to \texttt{P2\_MV201} in the previous analyzed subsystem, \texttt{P3\_MV302} is responsible for controlling the incoming flow to another element outside the analyzed subsystem.
+
+\bigskip
+Let us now analyze the potential roles of valves \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} in relation to the indicated tank level. It seems unlikely that \texttt{P3\_MV304} has any direct impact on the tank level. The valve is activated twice within one system cycle, but there are no noticeable changes in \texttt{P3\_LIT301} during its first opening. This suggests that the second opening is also insignificant in terms of tank level. However, it is worth noting the slight peaks in \texttt{P3\_FIT301} that occur shortly after the valve's opening.
+
+Regarding the remaining valves, \texttt{P3\_MV301} and \texttt{P3\_MV303}, their impact on the tank level is still unclear, particularly during the increased slope of \texttt{P3\_LIT101} around the second 2500. Figure \ref{fig:6_graphs_P3_zoom}  provides us with a comprehensive overview of the situation.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.90\textwidth}
+		\includegraphics[width=\textwidth]{chap6/P3_8.png}
+		\caption{}
+		\label{subfig:6_mv301}
+	\end{subfigure}
+	\begin{subfigure}{0.90\textwidth}
+		\includegraphics[width=\textwidth]{chap6/P3_8b.png}
+		\caption{}
+		\label{subfig:6_mv301_zoom}
+	\end{subfigure}
+	\caption{\texttt{P3\_MV301} and \texttt{P3\_MV303} analysis}
+	\label{fig:6_graphs_P3_zoom}
+\end{figure}
+
+The analysis of the valves \texttt{P3\_MV301} and \texttt{P3\_MV303} indeed presents some challenges. However, upon closer examination of Figure \ref{subfig:6_mv301_zoom}, we observe that when these valves are in the ON state, the slope of \texttt{P3\_LIT301} remains relatively constant. This is unexpected, as one would anticipate a steeper slope due to the inflow of liquid. Additionally, in Figure \ref{subfig:6_mv301}, we can observe that when these valves are in the OFF state, the slope of \texttt{P3\_LIT301} from the second 4300 remains similar to the section we are currently analyzing. Based on these observations, we speculate that these valves either \textbf{do not affect the water level of the tank} or have a minimal, undetectable impact.
+
+\bigskip
+Indeed, Figure \ref{fig:6_graphs_P3} provides additional insights into the relationship between the valves \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} and the sensors \texttt{P3\_DPIT301} and \texttt{P3\_FIT301}. The graph shows that the values of \texttt{P3\_DPIT301} and \texttt{P3\_FIT301} undergo noticeable changes during the activation of these valves, suggesting a potential connection between them. This observation supports the hypothesis that the valves and sensors are linked in some way,
 
 \subsubsection{Invariant Inference and Analysis}
 \label{subsubsec:6_P2P3_invariants}
 
+\paragraph{General Invariants}
+\label{par:6_P2P3_general_invariant}
+
+The analysis of general invariants does not yield any significant insights. However, it confirms the maximum and minimum values of the measurements seen in Section \ref{par:6_P2P3_measures_actuators_recognition} and identifies the presence of the spare actuators \texttt{P3\_P301}. 
+
+\paragraph{Analysis on Single Actuator States}
+\label{par:6_P2P3_single_act_states}
+The analysis of single actuator states reveals additional information. The resulting invariants provide further support for the conjecture regarding the roles of \texttt{P2\_MV201} and \texttt{P3\_P302} in regulating the water level in the tank, with the former responsible for filling and the latter for emptying. Listing \ref{lst:6_preproc_P2P3_conditional_invariants} presents the specific invariants involved in this analysis.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Conditional Invariants for \texttt{P2\_MV201} and \texttt{P3\_P302}, label=lst:6_preproc_P2P3_conditional_invariants]
+	===========================
+	P2_MV201 == 1.0 && P3_LIT301 < max_P3_LIT301 - 20 && P3_LIT301 > min_P3_LIT301 + 24 
+	===========================
+	P3_P301 == P3_MV303 == P3_MV301 == P2_P205 == P2_P203 == P2_MV201 == 1.0
+	P3_P302 == 2.0
+	slope_P3_LIT301 == -1.0
+	P3_FIT301 > P2_MV201
+	P3_DPIT301 > P3_FIT301 > P3_P302
+	...
+	===========================
+	P2_MV201 == 2.0 && P3_LIT301 < max_P3_LIT301 - 20 && P3_LIT301 > min_P3_LIT301 + 24 
+	===========================
+	P2_P205 == P2_P203 == P2_MV201 == 2.0
+	slope_P3_LIT301 == P2_P201
+	P2_FIT201 > P2_MV201
+	P2_FIT201 > P2_P201
+	P2_FIT201 > P3_FIT301
+	...
+	===========================
+	P3_P302 == 1.0 && P3_LIT301 < max_P3_LIT301 - 20 && P3_LIT301 > min_P3_LIT301 + 24 
+	===========================
+	P2_P205 == P2_P203 == P2_MV201 == 2.0
+	slope_P3_LIT301 == P3_P302 == P2_P201
+	P2_FIT201 > P2_MV201
+	P2_FIT201 > P3_FIT301
+	...
+	===========================
+	P3_P302 == 2.0 && P3_LIT301 < max_P3_LIT301 - 20 && P3_LIT301 > min_P3_LIT301 + 24 
+	===========================
+	P2_MV201 one of { 1.0, 2.0 }
+	slope_P3_LIT301 one of { -1.0, 1.0 }
+	P3_DPIT301 > P3_P302 > slope_P3_LIT301
+	...
+\end{lstlisting}
+
+Morover, from the analysis of the invariants it becomes apparent that when \texttt{P3\_P302} is in the ON state and \texttt{P2\_MV201} is in the OFF state, both \texttt{P3\_FIT301} and \texttt{P3\_DPIT301} take values greater than 2 (as derived from lines 5, 7, 8 and 32 of the listing). 
+
+\bigskip
+Regarding the valves \texttt{P3\_MV301} and \texttt{P3\_MV303}, Daikon's analysis does not provide specific information about their behavior during changes in slope when the water level rises. Therefore, further analysis is required to understand their role in the system.
+
+However, one observation can be made regarding \texttt{P3\_MV304}. Daikon's analysis reveals two different slopes (increasing and decreasing) when this valve is in the ON state, which aligns with the observations made in the Graphical Analysis in Section \ref{subsubsec:6_P2P3_graphs}. This finding strengthens the conecture that \texttt{P3\_MV304} does not play a significant role in the tank cycle represented by \texttt{P3\_LIT301}.
+
+\paragraph{Analysis of the Current System Configuration}
+\label{par:6_P2P3_current_system_conf}
+To simplify the analysis and facilitate the interpretation of outcomes, two separate groups of actuators were analyzed. The first group consists of \texttt{P2\_MV201} and \texttt{P3\_P302}, which are conjectured to regulate the level of the tank. The second group includes \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304}, for which it is speculated that they do not play a role in regulating the tank level. This grouping allows for a clearer examination of the states of the system and provides an opportunity to gain a better understanding of the behavior of these actuators. By analyzing these two groups separately, it becomes easier to draw conclusions and make comparisons between the different sets of actuators.
+
+\bigskip
+The analysis of the first group of actuators, specifically \texttt{P2\_MV201} and \texttt{P3\_P302}, further supports the conjectures made regarding their behavior in relation to the trend of the tank level. It was necessary to refine the analysis manually using the \texttt{runDaikon.py} script to obtain more detailed insights, particularly for the state \texttt{[P2\_MV201 == 2, P3\_P302 == 2]}. 
+
+Regarding the second group of actuators, the analysis of their states only reinforces the hypothesis that their activation does not have a significant impact on the trend of tank level represented by \texttt{P3\_LIT301}. 
+
+\bigskip
+Unfortunately, no further useful information can be derived from this phase of the analysis. To address the remaining questions and clarify any outstanding issues, we will proceed to the next and final phase of the subsystem analysis.
+
+\vfill
+
 \subsubsection{Business Process Mining and Analysis}
 \label{subsubsec:6_P2P3_bpa}
+
+bla
+
+\vfill
+
+\subsubsection{Properties}
+\label{subsubsec:6_P2P3_summary_table}
 
 \subsection{Reverse Engineering of PLC3 and PLC4}
 \label{subsec:6_P3P4_analysis}
 
-\subsubsection{Pre-processing}
+\subsubsection{Pre-processing - Preliminary Analysis}
 \label{subsubsec:6_P3P4_preprocessing}
 
 \subsubsection{Graphs and Statistical Analysis}
@@ -577,6 +808,9 @@ From the conjectures derived from the four phases of the analysis we will derive
 
 \subsubsection{Business Process Mining and Analysis}
 \label{subsubsec:6_P3P4_bpa}
+
+\subsubsection{Properties}
+\label{subsubsec:6_P3P4_summary_table}
 
 \vfill
 \nolinenumbers
