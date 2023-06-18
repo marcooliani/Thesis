@@ -32,7 +32,7 @@ To define this strategy, a potential starting point could involve analyzing netw
 The graph clearly illustrates the structure of communications between the PLCs. Referring back to Table \ref{table:5_swat_ip_addresses}, which displays the IP address - PLC associations, we can observe that PLCs 1 through 4 communicate directly and sequentially with each other in a Request/Response communication pattern (represented by red and black arrows, respectively). Additionally, PLC6 communicates with both PLC1 and PLC2. On the other hand, the gray dotted arrows indicate communications for which we have knowledge of a response, but the corresponding request is unknown. For the purposes of our analysis strategy, we will not consider these communications within this context.
 
 \bigskip
-Based on our observations, the analysis strategy we will adopt involves considering sequential pairs of PLCs to effectively capture the relationships and implications between registers. Therefore, the PLC pairs we will focus on are PLC1-2, PLC2-3, and PLC3-4. 
+Based on our observations, the analysis strategy we will adopt involves considering sequential pairs of PLCs to effectively capture the relationships and implications between registers. %Therefore, the PLC pairs we will focus on are PLC1-2, PLC2-3, and PLC3-4. 
 
 \section{Reverse Engineering of the iTrust SWaT System}
 \label{sec:6_reverse_SWaT}
@@ -40,7 +40,7 @@ Before we delve into the analysis, it is important to provide some preliminary r
 
 \paragraph{Analysis structure}
 \label{par:6_analysis_struture}
-Firstly, the analysis will be structured as a schematic analysis due to space constraints, which prevent us from presenting the extensive inferences and reasoning regarding the system in full detail. However, the general procedure of the methodology and how to reason about the data obtained from the framework have already been demonstrated through examples on the PLC1 of the SWaT system in Chapter \ref{chap:proposal}. We encourage readers to refer to those examples for a more comprehensive understanding. In this analysis, our focus will be on illustrating the conjectures and properties that arise from the analysis, utilizing tables and the outputs generated during the analysis.
+Firstly, the analysis will be structured as a schematic analysis due to space constraints, which prevent us from presenting the extensive inferences and reasoning regarding the system in full detail. Therefore, following the analysis strategy outlined in Section \ref{sec:6_analysis_strategy}, we will concentrate exclusively on the pairs of PLCs comprising PLC1-2, PLC2-3, and PLC3-4. However, the general procedure of the methodology and how to reason about the data obtained from the framework have already been demonstrated through examples on the PLC1 of the SWaT system in Chapter \ref{chap:proposal}. We encourage readers to refer to those examples for a more comprehensive understanding. In this analysis, our focus will be on illustrating the conjectures and properties that arise from the analysis, utilizing tables and the outputs generated during the analysis.
 
 \paragraph{Defining subsystem time duration}
 \label{par:6_subsystem_duration}
@@ -48,23 +48,7 @@ The second premise addresses the process of defining the subsystems to be analyz
 
 \paragraph{Conventions}
 \label{par:6_conventions}
-The third premise introduces some conventions regarding the PLC registers that will be utilized during the analysis. These conventions aid in identifying the nature and function of the registers. Specifically:
-
-\begin{enumerate}
-	\item Registers containing \textit{discrete values}, such as binary or ternary values, are likely to represent \textbf{actuators}.
-	
-	\item Registers with \textit{continuous values} are likely to represent \textbf{measurements}.
-	
-	\item Actuators with three states are recognized as \textbf{valves}, while those with two states are considered \textbf{pumps}. The definitions of \textit{valve} and \textit{pump} in this context are arbitrary and primarily serve the purpose of distinguishing between the two types of registers.
-	
-	\item Measurements that encompass a broader spectrum of values, fluctuating between maximum and minimum thresholds, are commonly designated as \textbf{level sensors} utilized for tank monitoring. Conversely, Measurements characterized by a narrower range may serve other measurement purposes, such as \textbf{flow or pressure sensing}.
-	
-	\item Registers with a single constant value are recognized as either \textbf{relative setpoints} or \textbf{backup actuators}. The distinction is made based on the value contained in the register. Binary values or values corresponding to the states of the main actuators indicate backup actuators, while different values (e.g., 20, 40, 80, etc.) suggest the presence of relative setpoints.
-
-	\item Registers with similar names, such as \texttt{P1\_LIT101} and \texttt{P3\_LIT301}, or \texttt{P2\_MV201} and \texttt{P3\_MV302}, indicate the same type of register, such as a valve, pump, level sensor, or other category.
-\end{enumerate}
-
-By following these conventions, it becomes easier to interpret and analyze the functionality of the PLC registers within the system.
+The third premise introduces a convention that governs the naming of PLC registers and will be consistently followed throughout our analysis. According to this convention, registers with similar names, such as \texttt{P1\_LIT101} and \texttt{P3\_LIT301}, \texttt{P2\_MV201} and \texttt{P3\_MV202}, are considered to belong to the \textbf{same category or type of register}. This convention allows us to establish a relationship or correspondence between registers based on their naming pattern. By grouping registers with similar names, we can infer that they serve similar functions or represent similar components in the system, such as level sensors, tanks, pumps, and so on.
 
 \paragraph{About the Business Process Analysis}
 \label{par:6_premesse_bpa}
@@ -105,13 +89,17 @@ Listing \ref{lst:6_preproc_P1P2} shows the outcomes obtained from automatic reco
 	P2_P206 [1.0]
 \end{lstlisting}
 
-Based on the results shown in Listing \ref{lst:6_preproc_P1P2}, the framework has recognized \texttt{P1\_MV101}, \texttt{P1\_P101}, \texttt{P2\_MV201}, \texttt{P2\_P203}, and \texttt{P2\_P205} as \textbf{likely actuators}. The actuators indicated by the \textit{Pxxx} string are binary actuators, meaning they have two states represented by the values 1 and 2. On the other hand, the actuators identified by the \textit{MVxxx} string are ternary actuators with three distinct states: 0, 1, and 2. According to the third premise of Section \ref{sec:6_reverse_SWaT}, for point 3, actuators denoted by the \textit{Pxxx} string will be classified as \textbf{pumps}, while those labeled with \textit{MVxxx} will be recognized as \textbf{valves}.
+Based on the results presented in Listing \ref{lst:6_preproc_P1P2}, the framework has identified \texttt{P1\_MV101}, \texttt{P1\_P101}, \texttt{P2\_MV201}, \texttt{P2\_P203}, and \texttt{P2\_P205} as \textbf{probable actuators}. The actuators denoted by the \textit{Pxxx} notation are binary actuators (not boolean!), meaning they have two states represented by the values 1 and 2. Conversely, the actuators identified by the \textit{MVxxx} notation are ternary actuators with three distinct states: 0, 1, and 2. 
+
+To simplify the analysis, we have arbitrarily categorized the registers identified by the notation \textit{MVxxx} as \textbf{valves} and the registers identified by the notation \textit{Pxxx} as \textbf{pumps}. It is important to note that this distinction is solely for convenience and does \textit{not} necessarily reflect the actual role or function of these actuators within the system. 
 
 \bigskip
-\texttt{P1\_FIT101}, \texttt{P1\_LIT101}, \texttt{P2\_AIT201}, \texttt{P2\_AIT202}, \texttt{P2\_AIT203}, and \texttt{P2\_FIT201} have been identified as \textbf{likely measurements}. Each measurement provides a specific range of values, spanning from a maximum to a minimum value. Based on the range of values reported by these measurements and according to the third premise of Section \ref{sec:6_reverse_SWaT}, for point 4, it is reasonable to infer that \texttt{P1\_LIT101} could potentially be a \textbf{level sensor for a tank}.
+\texttt{P1\_FIT101}, \texttt{P1\_LIT101}, \texttt{P2\_AIT201}, \texttt{P2\_AIT202}, \texttt{P2\_AIT203}, and \texttt{P2\_FIT201} have been identified as \textbf{likely measurements}. Upon analyzing the range of values for register \texttt{P1\_LIT101}, we observe a significant difference between the maximum and minimum values. This observation leads us to speculate that \texttt{P1\_LIT101} could be identified as a \textbf{level sensor for the tank controlled by PLC1}. However, when examining registers \texttt{P1\_FIT101}, \texttt{P2\_FIT201}, \texttt{P2\_AIT201}, and \texttt{P2\_AIT202}, the small difference between their maximum and minimum values makes it unlikely that they represent additional tanks. 
+
+Regarding register \texttt{P2\_AIT203}, although the range of values is not as wide as in the case of \texttt{P1\_LIT101}, it is still worth examining more closely. It is possible that \texttt{P2\_AIT203} indicates the presence of a small tank. However, considering our speculation that the other \texttt{P2\_AIT20x} registers are not tank level sensors, it is uncertain whether \texttt{P2\_AIT203} falls into that category as well. Further analysis is required to confirm its role within the system.
 
 \bigskip
-In addition, there are some registers that have been recognized as \textbf{hardcoded setpoints} or \textbf{spare actuators} due to their constant values. These registers share a resemblance to the previously identified pump registers. According to points 5 and 6 of the third premise in Section \ref{sec:6_reverse_SWaT}, it is reasonable to assume that these registers correspond to \textbf{spare actuators}. Furthermore, the fact that they have a constant value of 1 indicates that they might represent the \textbf{OFF state} of the pumps.
+Some registers have been identified as \textbf{hardcoded setpoints} or \textbf{spare actuators} based on their constant values. These registers exhibit similarities to the previously recognized pump registers. It is plausible to speculate that these registers could correspond to \textbf{spare actuators}. Moreover, the constant value of 1 associated with these registers suggests that it may represent the \textbf{OFF state} of the pumps. 
 
 \paragraph{Actuator State Durations}
 \label{par:6_P1P2_actuators_duration}
@@ -142,22 +130,25 @@ It is evident that the duration of \textbf{state 0 is relatively short}, averagi
 
 \paragraph{Actuator State Changes}
 \label{par:6_preproc_P1P2_actuator_state_changes}
-Now that we have identified \texttt{P1\_LIT101} as the supposed tank, we can examine the trend of the tank level as the actuators change state. Listing \ref{lst:6_P1P2_preproc_changestate} provides information on the levels of the tank in correlation with the state changes of the \texttt{P1\_P101} pump:
+Now that we have identified \texttt{P1\_LIT101} as the supposed level sensor of the tank, we can examine the trend of the tank level as the actuators change state. Listing \ref{lst:6_P1P2_preproc_changestate} provides information on the levels of the tank in correlation with the state changes of the \texttt{P1\_P101} pump:
 
-\begin{lstlisting}[language=bash, numbers=left, caption=P1\_P101 state changes in relation to P1\_LIT101, label=lst:6_P1P2_preproc_changestate]
+\begin{lstlisting}[language=bash, numbers=left, caption=\texttt{P1\_P101} state changes in relation to \texttt{P1\_LIT101}, label=lst:6_P1P2_preproc_changestate]
+	Actuator state changes:
+	...
 	P1_LIT101  P1_P101  prev_P1_P101
 	 536.0356        1             2
 	 533.3272        1             2
 	 542.1591        1             2
 	 534.8581        1             2
 	 540.5890        1             2
-	
+	      ...      ...           ...
 	P1_LIT101  P1_P101  prev_P1_P101
 	 813.0031        2             1
 	 813.0031        2             1
 	 811.8256        2             1
 	 812.7283        2             1
 	 813.3171        2             1
+	      ...      ...           ...
 \end{lstlisting}
 
 Based on the speculation that state 1 represents the OFF state of the pump and state 2 represents the ON state, we can analyze the data in Listing \ref{lst:6_P1P2_preproc_changestate}. When pump \texttt{P1\_P101} transitions from the ON state to the OFF state, the average level of \texttt{P1\_LIT101} is 535. On the other hand, when \texttt{P1\_P101} goes from the OFF state to the ON state, the average level of \texttt{P1\_LIT101} is 813. These values correspond to the \textbf{minimum and maximum relative setpoints} of \texttt{P1\_P101}, respectively. 
@@ -246,7 +237,7 @@ However, there is a similarity observed between the relative setpoints of \textt
 	\label{fig:6_P1P2_graph_full}
 \end{figure}
 
-Figure \ref{fig:6_P1P2_graph_full} illustrates the graphical representation of the registers in PLC1-2 and their respective trends.
+Figure \ref{fig:6_P1P2_graph_full} illustrates the graphical representation of the registers in PLC1 and PLC2 and their respective trends.
 
 The image provides additional support to the conjectures made during the preliminary analysis regarding the spare actuators. Furthermore, it is evident from the graphs that these spare actuators \textbf{do not appear to influence the trend} of any of the measurements. Therefore, based on this observation, we can confidently exclude these registers from further graphical analysis.
 
@@ -261,7 +252,7 @@ Figure \ref{fig:6_P1P2_graph_full_nospare} shows a clearer representation of the
 \end{figure}
 
 Figure %\ref{fig:6_P1P2_graph_full_nospare} 
-provides furthermore additional insights that allow us to speculate on aspects that remained unexplained during the preliminary analysis. The most prominent aspect that stands out is the relationship between the level behavior of \texttt{P1\_LIT101} and the states of \texttt{P1\_P101} and \texttt{P1\_MV101}. It becomes evident that these two actuators \textbf{are \textit{not} mutually exclusive}, and when they are both in the ON state, the growth of the tank level is slow. However, as soon as {P1\_P101} switches to the OFF state, the tank level starts to increase at a faster rate. Conversely, when \texttt{P1\_MV101} switches to the OFF state, the tank level decreases. During periods when both actuators are in the OFF state, there is a \textit{plateau} where the tank level remains relatively stable.
+provides furthermore additional insights that allow us to speculate on aspects that remained unexplained during the preliminary analysis. The most prominent aspect that stands out is the relationship between the level behavior of \texttt{P1\_LIT101} and the states of \texttt{P1\_P101} and \texttt{P1\_MV101}. It appears evident that these two actuators \textbf{do \textit{not} exhibit complementary behavior}, meaning that their states do not alternate in an \textit{ON-OFF} pattern. Instead, they can remain in the same state, either ON or OFF, for extended periods of time. When they are both in the ON state, the growth of the tank level is slow. However, as soon as \texttt{P1\_P101} switches to the OFF state, the tank level starts to increase at a faster rate. Conversely, when \texttt{P1\_MV101} switches to the OFF state, the tank level decreases. During periods when both actuators are in the OFF state, there is a \textit{plateau} where the tank level remains relatively stable.
 
 \bigskip
 Furthermore, we observe a relationship between \texttt{P1\_FIT101} and the trend of \texttt{P1\_MV101}. When the valve is in the off state, \texttt{P1\_FIT101} registers a value of 0, whereas it registers a value greater than 2 when the valve is open. This suggests that \texttt{P1\_FIT101} could be a \textbf{sensor associated with the flow} of water entering the tank, which is represented by \texttt{P1\_LIT101}. By drawing an analogy with its name, it is plausible to consider \texttt{P2\_FIT201} as another flow sensor.
@@ -352,6 +343,8 @@ We will begin this phase by analyzing the general invariants (see Section 4.2.5.
 \end{lstlisting}
 
 The invariant mentioned on line 2 is particularly significant: it states that \texttt{P2\_P203} and \texttt{P2\_P205} always have the same values. While this information was somewhat apparent in the previous steps, it becomes more apparent and evident in this analysis. This observation leads us to speculate that the two pumps, \texttt{P2\_P203} and \texttt{P2\_P205}, \textbf{are related to each other} in some way. The other invariants provided in this section further reinforce the hypotheses about the spare actuators.
+
+\vfill
 
 \paragraph{Analysis on Single Actuator States}
 \label{par:6_P1P2_single_act_states}
@@ -540,7 +533,7 @@ From the conjectures derived from the four phases of the analysis we will derive
 		P20 & Both \texttt{P2\_AIT201} and \texttt{P2\_AIT202} serve as sensors for measuring certain properties of the water. & Preliminary Analysis\newline Graphical Analysis\\
 		\hline
 		
-		P21 & The behavior and trend of \texttt{P2\_AIT202} and \texttt{P2\_AIT203} are directly associated with the operation of the pump. & Graphical Analysis\newline Invariant Analysis\\
+		P21 & The behavior and trend of \texttt{P2\_AIT202} and \texttt{P2\_AIT203} are directly associated with the operation of the pumps. & Graphical Analysis\newline Invariant Analysis\\
 		
 		\caption{Properties of the PLC1-2 subsystem}
 		\label{table:6_P1P2_summarize_properties}
@@ -636,7 +629,7 @@ We can observed that \texttt{P3\_P302}, the pump in PLC3, exhibits a similar beh
 Based on the analysis of the probable measurements, we have identified the likely tank, represented by register \texttt{P3\_LIT301}. In the previous analysis of the PLC1-2 subsystem in Section \ref{subsec:6_P1P2_analysis}, the role of valve \texttt{P2\_MV201} remained unresolved. We speculated that this actuator might be responsible for the incoming water flow to an element outside the analyzed subsystem. To investigate this further, we can examine the relationship between \texttt{P2\_MV201} and the tank within this subsystem. By extracting information from the corresponding setpoints, we can gather insights to verify if our speculation holds true. \newline 
 Listing \ref{lst:6_P2P3_preproc_changestate} displays the setpoints associated with the state change of \texttt{P2\_MV201} in relation to the level of tank \texttt{P3\_LIT301}.
 
-\begin{lstlisting}[language=bash, numbers=left, caption=P1\_P101 state changes in relation to P1\_LIT101, label=lst:6_P2P3_preproc_changestate]
+\begin{lstlisting}[language=bash, numbers=left, caption=\texttt{P2\_MV201} state changes in relation to \texttt{P3\_LIT301}, label=lst:6_P2P3_preproc_changestate]
 	Actuator state changes:
 	...
 	P2_MV201  prev_P2_MV201  P3_LIT301
@@ -646,7 +639,7 @@ Listing \ref{lst:6_P2P3_preproc_changestate} displays the setpoints associated w
 	       0              1   799.1942
 	       0              2  1001.5460
 	       0              1   799.1140
-	...
+	     ...            ...        ...
 \end{lstlisting}
 
 The setpoints provided in the listing support our conjecture. The maximum relative setpoint of 1000 and the minimum relative setpoint very close to 800 indicate a correlation that appears intentional. Based on this information, we can speculate that \texttt{P2\_MV201} is indeed the \textbf{valve responsible for the tank} associated with \texttt{P3\_LIT301}.
@@ -763,7 +756,7 @@ The analysis of single actuator states reveals additional information. The resul
 	...
 \end{lstlisting}
 
-Morover, from the analysis of the invariants it becomes apparent that when \texttt{P3\_P302} is in the ON state and \texttt{P2\_MV201} is in the OFF state, both \texttt{P3\_FIT301} and \texttt{P3\_DPIT301} take values greater than 2 (as derived from lines 5, 7, 8 and 32 of the listing). 
+Moreover, from the analysis of the invariants it becomes apparent that when \texttt{P3\_P302} is in the ON state and \texttt{P2\_MV201} is in the OFF state, both \texttt{P3\_FIT301} and \texttt{P3\_DPIT301} take values greater than 2 (as derived from lines 5, 7, 8 and 32 of the listing). 
 
 \bigskip
 Regarding the valves \texttt{P3\_MV301} and \texttt{P3\_MV303}, Daikon's analysis does not provide specific information about their behavior during changes in slope when the water level rises. Therefore, further analysis is required to understand their role in the system.
@@ -787,30 +780,325 @@ Unfortunately, no further useful information can be derived from this phase of t
 \subsubsection{Business Process Mining and Analysis}
 \label{subsubsec:6_P2P3_bpa}
 
-bla
+One of the hypotheses that needed to be tested was whether the valves \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} have an impact on the tank level in the section between setpoints 850 and 900. Our initial assumption was that these actuators do not affect the level detected by \texttt{P3\_LIT301} because, as observed in the Graphical Analysis, the slope in that interval is similar to the slope between setpoints 970 and 1000, where these valves are not involved.
+
+To verify this conjecture, we utilized the JSON file generated by the \texttt{processMining.py} script. This script allows us to isolate the specific intervals and calculate the slope for each of them. In Listing \ref{lst:6_preproc_P2P3_bp1}, we present the outcomes of these calculations, providing further insights into the behavior of the valves during those intervals.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Slope calculation of \texttt{P3\_LIT301} for the 850-900 and 970-1000 intervals related to tank levels, label=lst:6_preproc_P2P3_bp1]
+	"slope_P3_LIT301": [
+	0.383, # from 970 to 1000
+	0.395, # from 850 to 900
+	0.384,
+	0.395,
+	0.354,
+	0.38,
+	0.388,
+	0.381,
+	0.385,
+	0.386
+	],
+\end{lstlisting}
+
+The provided data in Listing \ref{lst:6_preproc_P2P3_bp1} illustrates the calculated slopes for the intervals between 970 and 1000 (odd-numbered lines) and the intervals between 850 and 900 (even-numbered lines). Upon examination, we observe that the values for these two intervals are nearly identical, accounting for some expected fluctuations. This finding reinforces our initial conjecture that the \texttt{P3\_MV301}, \texttt{P3\_MV303} and \texttt{P3\_MV304} valves do not play a role in the process of filling and emptying the tank. It is indeed possible to speculate that the \texttt{P3\_MV30x} valves, similar to \texttt{P3\_MV302}, might have a role in a different part of the system that has not been analyzed in the current context. 
+
+\bigskip
+Based on the activity diagram obtained from the analysis of actuators \texttt{P2\_MV201} and \texttt{P3\_P302}, the behavior of subsystem PLC2-3 can be summarized as follows:
+
+\begin{itemize}
+	\item When the system is in the states \texttt{[P2\_MV201 == 2, P3\_P302 == 2]} and \texttt{[P2\_MV201 == 2, P3\_P302 == 1]}, the level of the tank represented by \texttt{P3\_LIT301} is increasing. The tank level exhibits a faster growth rate in the latter state.
+	
+	\item When the system is in the state \texttt{[P2\_MV201 == 1, P3\_P302 == 1]}, the tank level remains stable.
+	
+	\item When the system is in the state \texttt{[P2\_MV201 == 1, P3\_P302 == 2]}, the tank level is decreasing.
+\end{itemize}
+
+The \textbf{absolute setpoints} for the tank level in subsystem PLC2-3 are defined as follows: the minimum setpoint is 800, the maximum setpoint is 1000, and there are additional setpoints at 850, 900, and 970, which correspond to specific changes in the slope of the tank level.
+
+\bigskip
+Taking a closer look at the behavior of sensors \texttt{P2\_FIT201} and \texttt{P3\_FIT301}, we observe the following patterns: \texttt{P2\_FIT201}, which is associated with incoming water flow and connected to valve \texttt{P2\_MV201}, exhibits values greater than 2 when the valve is in the ON state. Conversely, when the valve is set to OFF, the sensor reading drops to 0.
+
+Regarding \texttt{P3\_FIT301}, it appears to be linked to the behavior of the pump \texttt{P3\_P301} and correlates with the water flow out of the tank. When the pump is activated and in the ON state, the sensor records values greater than 2. On the other hand, when the pump is turned off and in the OFF state, the sensor reading returns to 0.
+
+\begin{comment}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/business_process_P2P3a.png}
+	\caption{Activity diagram for PLC2-3}
+	\label{fig:6_P2P3_process_mining}
+\end{figure}
+\end{comment}
 
 \vfill
 
 \subsubsection{Properties}
 \label{subsubsec:6_P2P3_summary_table}
+Table \ref{table:6_P2P3_summarize_properties} provides a summary of the properties inferred from the conjectures made throughout the different stages of the analysis.
+
+\bigskip
+{\footnotesize
+	\begin{longtable}[l]{p{0.05\textwidth} p{0.57\textwidth} p{0.30\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Statement} & \textbf{Derived from} \\
+		\hline
+		
+		P22 & The registers \texttt{P3\_DPIT301}, \texttt{P3\_FIT301}, and \texttt{P3\_LIT301} of PLC3 are considered measurements. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P23 & The registers \texttt{P3\_MV301}, \texttt{P3\_MV302}, \texttt{P3\_MV303}, \texttt{P3\_MV304}, and \texttt{P3\_P302} od PLC3 are considered actuators. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P24 & The register \texttt{P3\_P301} of PLC3 is considered a spare actuator. & Preliminary Analysis\newline Graphical Analysis\newline Invariant Analysis \\
+		\hline
+		
+		P25 & The register \texttt{P3\_LIT301} of PLC3 represents the level sensor of the tank controlled by PLC3. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P26 & \texttt{P2\_MV201} and \texttt{P3\_P302} are the actuators responsible for the level behavior of the water contained in the tank. & Graphical Analysis\newline Invariant Analysis\newline Business Process \\
+		\hline
+		
+		P27 & The rate of tank level growth is slow when both \texttt{P2\_MV201} and \texttt{P3\_P302} are in the ON state. The growth speed increases when \texttt{P3\_P302} transitions to the OFF state. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		P28 & The tank level decreases when \texttt{P2\_MV201} is in the OFF state and \texttt{P3\_P302} is in the ON state. & Graphical Analysis\newline Invariant Analysis \\
+		\hline
+		
+		P29 & The tank level remains (relatively) stable when both \texttt{P2\_MV201} and \texttt{P3\_P302} are in the OFF state. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		P30 & The trend of the tank level transitions from ascending to stable when the level reaches approximately 1000. It shifts from stable to descending when the level averages around 1012. It changes from descending back to ascending when the level reaches about 800. The speed of thank filling increases noticeably from around 850 to 900 and from around 970 to 1000. & Business Process \\
+		\hline
+		
+		P31 & Absolute setpoints are 800, 850, 900, 970, 1000. & Business Process \\
+		\hline
+		
+		P32 & \texttt{P2\_FIT201} serves as a flow or pressure sensor to the \texttt{P3\_LIT301} register. It is related to the \texttt{P2\_MV201} valve. & Graphical Analysis\newline Invariant Analysis\newline Business Process\\
+		\hline
+		
+		P33 & \texttt{P3\_FIT301} and \texttt{P3\_DPIT301} exhibit similar patterns in their behavior. Both registers are related to the operation of pump P3\_P302 and, consequently, to the flow of water out of the tank. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		P34 & The registers \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} do not have an impact on the water level dynamics of the tank controlled by PLC3. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		\caption{Properties of the PLC2-3 subsystem}
+		\label{table:6_P2P3_summarize_properties}
+	\end{longtable}
+}
 
 \subsection{Reverse Engineering of PLC3 and PLC4}
 \label{subsec:6_P3P4_analysis}
+In the final phase of the reverse engineering process, the focus is directed towards the subsystem consisting of PLC3 and PLC4 in the iTrust SWaT system. Given the constraints of the thesis, this section will provide a concise and schematic overview compared to the earlier sections.
 
 \subsubsection{Pre-processing - Preliminary Analysis}
 \label{subsubsec:6_P3P4_preprocessing}
 
+\paragraph{Measurements and Actuators Recognition}
+\label{par:6_P3P4_measures_actuators_recognition}
+
+Listing \ref{lst:6_preproc_P3P4} shows the outcomes obtained from automatic recognition of likely measurements and actuators for PLC4. We omit those related to PLC3 as they are already known.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Preliminary analysis outcomes for sensors and actuators of \texttt{PLC3-4}, label=lst:6_preproc_P3P4]
+	Actuators: 
+	...
+	
+	Sensors: 
+	...
+	P4_AIT401 {'max_lvl': 148.8, 'min_lvl': 148.8}
+	P4_AIT402 {'max_lvl': 191.1, 'min_lvl': 185.5}
+	P4_FIT401 {'max_lvl': 1.7, 'min_lvl': 1.7}
+	P4_LIT401 {'max_lvl': 1002.8, 'min_lvl': 775.8}
+	
+	Hardcoded setpoints or spare actuators: 
+	...
+	P4_P401 [1.0]
+	P4_P402 [2.0]
+	P4_P403 [1.0]
+	P4_P404 [1.0]
+	P4_UV401 [2.0]
+\end{lstlisting}
+
+From the information provided in Listing \ref{lst:6_preproc_P3P4}, several observations can be made. Firstly, it is noted that there are no apparent actuators listed in the analysis. The likely sensors identified include \texttt{P4\_AIT401}, \texttt{P4\_AIT402}, \texttt{P4\_FIT401}, and \texttt{P4\_LIT401}. Among these sensors, \texttt{P4\_LIT401} is presumed to be the level sensor for the tank controlled by PLC4 based on similarities with the previous cases.
+
+\bigskip
+It is acknowledged that \texttt{P4\_FIT401} and \texttt{P4\_AIT401} are recognized as sensors, despite their seemingly constant values. It is important to note that the script used to identify likely actuators and sensors rounds the values to the first decimal place. Therefore, it is inferred that these registers contain continuous data with narrow value ranges.
+
+Drawing on the analogy with the P20 property mentioned in Section 6.x, it is speculated that the \texttt{P4\_AIT40x} registers represent measurements related to some water property. Additionally, \texttt{P4\_FIT401} is speculated to represent a pressure or flow sensor, based on similarities observed in previous cases.
+
+\bigskip
+In the analysis of the hardcoded setpoints and spare actuators, two registers stand out: \texttt{P4\_P402} and \texttt{P4\_UV401}, both with a value of 2. Drawing on analogies from previous cases, \texttt{P4\_P402} is speculated to represent a pump that is constantly in the ON state and therefore active. However, regarding \texttt{P4\_UV401}, it is unclear whether it is an actuator, a hardcoded setpoint, or a different type of register. Further analysis is needed to determine its exact purpose and functionality within the system.
+
+On the other hand, it can be concluded that \texttt{P4\_P401}, \texttt{P4\_P403}, and \texttt{P4\_P404} are spare actuators, specifically pumps. 
+
+\paragraph{Actuator State Durations}
+\label{par:6_P3P4_actuators_duration}
+Since there are no state-changing actuators within PLC4, further analysis regarding the duration of actuator states will not be performed for this subsystem. Please refer to Section \ref{par:6_P2P3_actuators_duration} for evaluations of the duration of actuator states in PLC3.
+
+\paragraph{Actuator State Changes}
+\label{par:6_preproc_P3P4_actuator_state_changes}
+As previously mentioned, our assumption is that P4\_LIT401 serves as the level sensor for the tank controlled by PLC4. In our analysis of PLC2-3, we speculated that \texttt{P3\_MV302} acted as a valve responsible for the incoming flow to an external element outside of that subsystem. To test this hypothesis, we examine the setpoints of \texttt{P3\_MV302} in relation to the level of tank \texttt{P4\_LIT401}. The setpoints of \texttt{P3\_MV302} corresponding to the tank level are presented in Listing \ref{lst:6_P3P4_preproc_changestate}.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=\texttt{P3\_MV302} state changes in relation to \texttt{P4\_LIT401}, label=lst:6_P3P4_preproc_changestate]
+	Actuator state changes:
+	...
+	P3_MV302  prev_P3_MV302  P4_LIT401
+	       0              2  1000.5510
+	       0              1   784.4911
+	       0              2   922.1866
+	       0              1   881.0818
+	       0              2  1000.2820
+	       0              1   786.1061
+	       0              2   922.8018
+	       0              1   881.8508
+	     ...            ...        ...
+\end{lstlisting}
+
+The initial analysis suggests a potential correlation between the tank level values of \texttt{P4\_LIT401} and the behavior of \texttt{P3\_MV302}. The ON state of \texttt{P3\_MV302} aligns with an increase in the tank level, while the OFF state corresponds to a decrease. However, further analysis is required to provide additional evidence and support for this conjecture.
+\vfill
+
 \subsubsection{Graphs and Statistical Analysis}
 \label{subsubsec:6_P3P4_graphs}
+We will attempt to gain a deeper understanding of the pattern exhibited by the PLC4 registers by referencing Figure \ref{fig:6_graph_P4}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P4_1.png}
+	\caption{PLC4 registers}
+	\label{fig:6_graph_P4}
+\end{figure}
+
+The image reveals interesting behavior in the \texttt{P4\_AIT401} and \texttt{P4\_AIT401} registers. Notably, \texttt{P4\_AIT401} exhibits a linear trend rather than a cyclic one, with values oscillating within a narrow range. This suggests that, similar to \texttt{P2\_AIT201} (refer to Section \ref{subsubsec:6_P2P3_graphs}), this register may correspond to a sensor measuring a specific water property. On the other hand, \texttt{P4\_AIT402} appears to follow the level trend of sensor \texttt{P4\_LIT401}, but with a downward cyclic pattern where each cycle starts at a lower level than the previous one. Given the limited value range and the similarity in naming conventions, it is highly likely that this register represents another water property sensor rather than a tank.
+
+Additionally, \texttt{P4\_FIT401} does not display a cyclic pattern like the other registers of the same type, and its values exhibit minimal variation, corroborating the findings from the previous analysis phase.
+
+\bigskip
+Now, let us refer to Figure \ref{fig:6_graph_P3P4_mv302} to seek confirmation regarding the conjecture that implicates valve \texttt{P3\_MV302} as the responsible actuator for tank filling.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P3P4_mv302.png}
+	\caption{\texttt{P3\_MV302} and \texttt{P4\_LIT401} behaviors}
+	\label{fig:6_graph_P3P4_mv302}
+\end{figure}
+
+The image provides clear evidence that the behaviors of valve \texttt{P3\_MV302} and tank level sensor \texttt{P4\_LIT401} perfectly align. Additionally, \texttt{P3\_FIT301} (and its corresponding sensor, \texttt{P3\_DPIT301}) appear to be related to the pattern observed in \texttt{P4\_LIT401}.
+ 
+\bigskip
+Upon closer observation, it becomes apparent that the tank controlled by PLC4 \textbf{does \textit{not} have plateau periods}. When the incoming water flow ceases, the tank immediately begins to empty. Based on our findings in previous subsystems, we speculate that the actuator responsible for tank emptying could be the pump indicated by register \texttt{P4\_P402}. This speculation is further supported by the nearly constant trend observed in sensor \texttt{P4\_FIT401}.
+
+\bigskip
+Figure \ref{fig:6_graph_P3P4_tanks} depicts the correlation between the tanks within this subsystem and the actuators that are responsible for their filling cycle.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.35]{chap6/P3P4_tanks.png}
+	\caption{Tanks in subsystem PLC3-4 and their correlation.}
+	\label{fig:6_graph_P3P4_tanks}
+\end{figure}
+
+\bigskip
+Further analysis was conducted to investigate whether valves \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} played a role in the tank filling cycle of PLC4. However, the analysis did not confirm this hypothesis. Therefore, it can be speculated that these valves are connected to other parts of the system that are not currently discussed in this analysis.
 
 \subsubsection{Invariant Inference and Analysis}
 \label{subsubsec:6_P3P4_invariants}
+The invariant analysis for the subsystem consisting of PLC3-4 will be brief as the states of the subsystem align with the states of valve \texttt{P3\_MV302}, with \texttt{P4\_P402} being constant throughout.
+
+\paragraph{General Invariants}
+\label{par:6_P3P4_general_invariant}
+Again, the analysis of the general invariants offers no new information compared to what we conjectured earlier. We therefore continue with the analysis of the current system configuration.
+
+\paragraph{Analysis of the Current System Configuration}
+\label{par:6_P3P4_current_system_conf}
+The analysis of the current system configuration provides confirmation that when the system is in the state \texttt{[P3\_MV302 == 1, P4\_P402 == 2]}, the tank level, as indicated by sensor \texttt{P4\_LIT401}, shows a decreasing slope. Additionally, it is noted that the spare actuators align with the expected behavior. 
+
+However, in the state \texttt{[P3\_MV302 == 2, P4\_P402 == 2]}, the invariants generated by Daikon do not provide the anticipated slope data, which was expected to be increasing based on previous observations. This is due to the descending slope between levels 880 and 925 of the tank represented by \texttt{P4\_LIT401}: by refining the analysis between the two increasing slope sections we get the correct outcome, as shown in Listing \ref{lst:6_preproc_P3P4_refine_analysis}.
+
+\begin{lstlisting}[language=bash, numbers=left, caption=Daikon manual analysis for \texttt{P3\_MV302 == 2}, label=lst:6_preproc_P3P4_refine_analysis]
+	===========================
+	P3_MV302 == 2 && P4_P402 == 2 && P4_LIT401 < 990 && P4_LIT401 > 930
+	===========================
+	...
+	slope_P4_LIT401 == slope_P3_LIT301 == P4_P404 == P4_P403 == P4_P401 == P3_P301 == P3_MV304 == P3_MV303 == P3_MV301 == 1.0
+	...
+\end{lstlisting}
 
 \subsubsection{Business Process Mining and Analysis}
 \label{subsubsec:6_P3P4_bpa}
 
+The process mining step for the PLC3-4 subsystem is straightforward. In this phase, we will not focus on determining the chronological order of states (as we already know they correspond to the states of valve \texttt{P3\_MV302}). Instead, we will examine the setpoints and extract any available information concerning additional measurements.
+Figure \ref{fig:6_P3P4_process_mining} presents the activity diagram depicting the subsystem under analysis.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap6/business_process_P3P4.png}
+	\caption{Activity diagram for PLC3-4}
+	\label{fig:6_P3P4_process_mining}
+\end{figure}
+
+\bigskip
+The diagram provides confirmation that when the system is in the state \texttt{[P3\_MV302 == 2, P4\_P402 == 2]}, the tank level trend is increasing. Conversely, when the system is in the state \texttt{[P3\_MV302 == 2, P4\_P402 == 2]}, the trend is decreasing.
+
+\bigskip
+Regarding the setpoints, based on the standard deviation of the data from \texttt{P4\_LIT401}, the absolute setpoints for the system are as follows: 785 (minimum), 880 (relative minimum), 925 (relative maximum), and 1000 (maximum).
+
+\bigskip
+Furthermore, from the process mining phase, we can extract information about \texttt{P3\_FIT301} and \texttt{P3\_DPIT301}. \texttt{P3\_FIT301} registers values greater than 2 when both pump \texttt{P4\_P402} and valve \texttt{P3\_MV302} are in the ON state, while it drops to an average of 0.7 when the valve is off. Similarly, P3\_DPIT301 registers values close to 20 when the valve is ON, and these values decrease when the valve is OFF.
+\vfill
+
 \subsubsection{Properties}
 \label{subsubsec:6_P3P4_summary_table}
+
+Table \ref{table:6_P3P4_summarize_properties} provides a summary of the properties inferred from the conjectures made throughout the different stages of the analysis. Regrettably, we encountered difficulties in determining the type and purpose of the register labeled as \texttt{P4\_UV401}.
+
+\bigskip
+{\footnotesize
+	\begin{longtable}[l]{p{0.05\textwidth} p{0.57\textwidth} p{0.30\textwidth}}
+		\hline
+		\textbf{\#} & \textbf{Statement} & \textbf{Derived from} \\
+		\hline
+		
+		P35 & The registers \texttt{P4\_AIT401}, \texttt{P4\_AIT402}, \texttt{P4\_FIT401}, and \texttt{P4\_LIT401} of PLC4 are considered measurements. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P36 & The register \texttt{P4\_P402} of PLC4 is considered an actuator. Its status is constantly ON. & Preliminary Analysis\newline Graphical Analysis\newline Business Process \\
+		\hline
+		
+		P37 & The registers \texttt{P4\_P401}, \texttt{P4\_P403}, and \texttt{P4\_P404} of PLC4 are considered spare actuators. & Preliminary Analysis\newline Graphical Analysis\newline Invariant Analysis \\
+		\hline
+		
+		P38 & The register \texttt{P4\_LIT401} of PLC4 represents the level sensor of the tank controlled by PLC4. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P39 & \texttt{P3\_MV302} and \texttt{P4\_P402} are the actuators responsible for the level behavour of the water contanined in the tank controlled by PLC4. & Graphical Analysis\newline Invariant Analysis\newline Business Process \\
+		\hline
+		
+		P40 & The level of the tank identified by the register \texttt{P4\_LIT401} increases when both \texttt{P3\_MV302} and \texttt{P4\_P402} are in the ON state. It decreases when \texttt{P3\_MV302} is in the OFF state. & Graphical Analysis\newline Invariant Analysis\newline Business Process \\
+		\hline
+		
+		P41 & The trend of the tank level controlled by PLC4 transition from ascending to descending when the level reaches approximately 925 and 1000. It changes from descending when the level reaches approximately 785 and 880. & Business Process \\
+		\hline
+		
+		P42 & Absolute setpoints are 785, 880, 925 and 1000 & Business Process \\
+		\hline
+		
+		P43 & \texttt{P4\_FIT401} serves as a flow or pressure sensor to the \texttt{P4\_LIT401} register. It is related to the \texttt{P4\_P402} pump. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		P44 & \texttt{P4\_P401} does not exhibit a cyclic trend. & Graphical Analysis \\
+		\hline
+		
+		P45 & The register \texttt{P4\_P402} exhibits a cyclic decreasing trend, which is closely linked to the trend observed in the \texttt{P4\_LIT401} register. & Graphical Analysis\\
+		\hline
+		
+		P46 & Both \texttt{P4\_AIT401} and \texttt{P4\_AIT402} serves as sensors for measuring certain properties of the water. & Preliminary Analysis\newline Graphical Analysis \\
+		\hline
+		
+		P47 & The registers \texttt{P3\_MV301}, \texttt{P3\_MV303}, and \texttt{P3\_MV304} do not have an impact on the water level dynamics on the tank controlled by PLC4. & Graphical Analysis\newline Business Process \\
+		\hline
+		
+		\caption{Properties of the PLC3-4 subsystem}
+		\label{table:6_P3P4_summarize_properties}
+	\end{longtable}
+}
 
 \vfill
 \nolinenumbers

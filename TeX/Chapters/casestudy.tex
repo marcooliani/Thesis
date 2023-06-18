@@ -13,7 +13,7 @@ In contrast to the virtualized testbed discussed in Section \ref{subsec:3_testbe
 
 \subsection{Physical Process} 
 \label{subsec:5_swat_physical_architecture}
-The physical process of the SWaT consists of six stages, denoted P1 through P6. These stages are \cite{swat_tecnical_pdf}\cite{swat_tippenhauer}:
+The physical process of the SWaT consists of six stages, denoted P1 through P6 \cite{swat_tecnical_pdf}\cite{swat_tippenhauer}. These stages are:
 
 \begin{enumerate}
 	\item[P1.] \textbf{taking in raw water:} feeds unfiltered water into the system
@@ -30,7 +30,7 @@ The physical process of the SWaT consists of six stages, denoted P1 through P6. 
 	
 \end{enumerate}
 
-\noindent Figure \ref{fig:5_swat_architecture_1} shows a graphical representation of the architecture and the six stages of the SWaT system.
+\noindent Figure \ref{fig:5_swat_architecture_1} \cite{swat_home} shows a graphical representation of the architecture and the six stages of the SWaT system.
 
 \begin{figure}[ht]
 	\centering
@@ -40,22 +40,23 @@ The physical process of the SWaT consists of six stages, denoted P1 through P6. 
 \end{figure}
 
 \bigskip
-The SWaT system incorporates an array of sensors that play a crucial role in monitoring the system's operations and ensuring their safe. These sensors are responsible for continuously collecting data and providing valuable insights into the functioning of the system. These sensors are:
+The SWaT system incorporates an array of sensors that play a crucial role in monitoring the system's operations and ensuring their safety. These sensors are responsible for continuously collecting data and providing interesting insights into the functioning of the system \cite{swat_tecnical_pdf}. These sensors are:
 
 \begin{itemize}
-	\item Level Indication Transmitter (measured in mm)
-	\item Flow Indication Transmitter (m3/hr)
-	\item Analyser Indicator Transmitter
+	\item Level Indication Transmitter (measured in mm);
+	\item Flow Indication Transmitter (m3/hr);
+	\item Analyser Indicator Transmitter;
 	\begin{itemize}
-		\item[o] Conductivity (µS/cm)
-		\item[o] pH
-		\item[o] Oxidation Reduction Potential (mV)
+		\item[o] Conductivity (µS/cm);
+		\item[o] pH;
+		\item[o] Oxidation Reduction Potential (mV);
 	\end{itemize}
-	\item Differential Pressure Indicator Transmitter (kPa)
-	\item Pressure Indicator Transmitter (kPa)
+	\item Differential Pressure Indicator Transmitter (kPa);
+	\item Pressure Indicator Transmitter (kPa);
 \end{itemize}
-The sensors and actuators associated with each PLC are shown in Figure \ref{fig:5_swat_sensors_plc}. \newline
-Sensors and actuators are mapped to tags by the communication protocol used (see \ref{subsec:5_swat_network_architecture}): a tag can be addressed via string descriptor defined by the system designer (e.g. MV101, to indicate motorized valve number 1 at stage 1) or by referring directly to the analog/digital pins of the PLC I/O unit \cite{swat_tippenhauer}.
+
+Sensors and actuators associated with each PLC are shown in Figure \ref{fig:5_swat_sensors_plc} \cite{swat_tecnical_pdf}.
+Sensors and actuators are mapped into tags by the communication protocol used (see \ref{subsec:5_swat_network_architecture}): a tag can be addressed via string descriptor defined by the system designer (e.g. MV101, to indicate motorized valve number 1 at stage 1) or by referring directly to the analog/digital pins of the PLC I/O unit \cite{swat_tippenhauer}.
 
 \begin{figure}[ht]
 	\centering
@@ -77,7 +78,9 @@ Five layers are present starting from the highest to the lowest:
 	\item \textbf{Layer 1} -- Plant Control Network (PLCs) (Star Network);
 	\item \textbf{Layer 0} -- Process (Actuator/Sensors and Input/output modules) (Ring Network).
 \end{itemize}
-PLCs at Layer 1 communicate with their respective sensors and actuators at Layer 0 through a conventional ring network topology based on EtherNet/IP, to ensure that the system can tolerate the loss of a single link without any adverse impact on data or control functionality.\newline
+
+PLCs at Layer 1 communicate with their respective sensors and actuators at Layer 0 through a conventional ring network topology based on EtherNet/IP, to ensure that the system can tolerate the loss of a single link without any adverse impact on data or control functionality.
+
 PLCs between the different process stages at Layer 1 communicate with each other through a star network topology using the CIP protocol on EtherNet/IP, previously discussed in Section \ref{subsubsec:2_cip}.
 
 \bigskip
@@ -89,17 +92,13 @@ Regarding zoning, the SWaT system is divided into three zones, each containing o
 	\item \textbf{Plant Network:} includes Layer 3;
 \end{itemize}
 
-\noindent Figure \ref{fig:5_swat_network_arch} provides a clearer visualization of the zoning and layer division within the network architecture of the SWaT system. This diagram highlights the distinct zones and their corresponding layers, offering a comprehensive overview of the system's network structure.
+Figure \ref{fig:5_swat_network_arch} \cite{swat_home} provides a clearer visualization of the zoning and layer division within the network architecture of the SWaT system. This diagram highlights the distinct zones and their corresponding layers, offering a comprehensive overview of the system's network structure.
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[scale=0.60]{chap5/testbed-4.png}
-	\caption{SWaT network architecture}
-	\label{fig:5_swat_network_arch}
-\end{figure}
-
+\bigskip
 A specific IP address is associated with each device: in Table \ref{table:5_swat_ip_addresses} we report the addresses for the PLCs, historian, and Touch Panel in the \textit{Plant Control Network} (PCN) zone:
 
+\bigskip
+{\small
 \begin{longtable}[c]{p{0.30\textwidth} p{0.45\textwidth}}
 	\hline
 	\textbf{IP Address} & \textbf{Device} \\ [0.5ex] 
@@ -126,6 +125,14 @@ A specific IP address is associated with each device: in Table \ref{table:5_swat
 	\caption{main IP addresses of the six PLCs and SCADA in SWaT}
 	\label{table:5_swat_ip_addresses}
 \end{longtable}
+}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.60]{chap5/testbed-4.png}
+	\caption{SWaT network architecture and zoning}
+	\label{fig:5_swat_network_arch}
+\end{figure}
 
 \section{Datasets}
 \label{sec:5_swat_datasets}
@@ -172,11 +179,14 @@ At the beginning of data gathering the tanks are empty and the system must be in
 	\caption{SWaT stabilization}
 	\label{fig:5_swat_stabilization}
 \end{figure}
-In total, the dataset consists of thousand and thousand of samples related to 51 attributes.
+In total, the dataset consists of thousands of lines collecting 51 attributes denoting the state of the system.
 
 \paragraph{Network Traffic}
 \label{par:5_2015_net_dataset}
 The network traffic was collected using an appliance from a well-known network hardware manufacturer and was made available only in CSV format and not PCAP format. Table \ref{table:5_swat_network_traffic_data} shows some of the main data captured:
+
+\vfill
+\pagebreak
 
 {\small
 \begin{longtable}[c]{p{0.45\textwidth} p{0.45\textwidth}}
@@ -215,13 +225,18 @@ The network traffic was collected using an appliance from a well-known network h
 	\caption{SWaT network traffic data}
 	\label{table:5_swat_network_traffic_data}
 \end{longtable} }
-Unfortunately, the data provided are partial as it only includes readings from sensors and does not include information on actuator status.\newline \newline
-Do not mislead by the word \textit{Modbus} in the captured data fields: this is most likely a feature of the sniffing appliance, which may have encapsulated EtherNet/IP-CIP protocol packets in Modbus frames, as described by T. A. Snide in \cite{cip_in_modbus}.\newline
-To provide evidence that the protocol being used is CIP over EtherNet/IP, we can examine the "Source / Destination port" field in the captured data. The presence of TCP port 44818 as the destination port aligns with the TCP port used for transporting \textbf{explicit messages} in the EtherNet/IP protocol, as explained in Section \ref{subsubsec:enip}. Additionally, the "Application name", "Modbus Function Code" and "Modbus Function Description" fields further support this conclusion. The "Application name" explicitly states "CIP\_read\_tag\_service," while the "Modbus Function Code" field contains a decimal value of 76, which does not correspond to any known Modbus Function Calls. When converted to hexadecimal, this value is \texttt{4C}, matching the CIP protocol read tag request code as indicated in the "Modbus Function Description" field.
+
+It is important to note that the presence of the string \textit{Modbus} within the name of the captured data fields might be misleading, as it may give the impression that the communication is taking place via the Modbus protocol rather than the CIP over EtherNet/IP protocol. However, in reality, the latter is the actual protocol being used. The indication of Modbus within the network traffic dataset could be a result of the appliance used for network data sniffing, which might have encapsulated CIP over EtherNet/IP protocol packets within Modbus frames. This technique is described by T. A. Snide in \cite{cip_in_modbus}.
+
+To confirm that the communication protocol used is CIP over EtherNet/IP, we can examine the "Service / Destination Port" field. The destination port displayed is TCP port 44818, which corresponds to the TCP port commonly used for transporting \textbf{explicit messages} in the EtherNet/IP protocol (as explained in Section \ref{subsubsec:enip}).
+Further evidence supporting the use of CIP protocol is observed in the \textit{Modbus Function Code} field, consistently displaying a value of 76. In the Modbus protocol, there is no corresponding function associated with that code (as described in Section \ref{par:2_modbus_func_codes}). However, when converting the value 76 from decimal to hexadecimal, it translates to \textbf{4C}, which corresponds to the \textbf{Read Tag Request service in the CIP protocol}. This correlation is further supported by the presence of the \textit{Application Name} and \textit{Modbus Function Description} fields, explicitly indicating the protocol name and service within them.
 
 \bigskip
-In summary, the datasets for subsequent years were not selected due to certain limitations. In the case of the year 2017, the physical system data had a wide granularity, resulting in significant information loss. Additionally, in some cases, the datasets were considered "spurious" as there was no clear differentiation between data obtained during normal SWaT operations and data associated with attacks.\newline
-Regarding network traffic data, there were instances where the data was either missing or fragmented into large PCAP files weighing several gigabytes (more than 6 GB each!), despite containing only a few minutes' worth of data. This made it impractical to manage such files given the available resources.\newline
+Datasets for years beyond 2015 were not considered due to significant limitations that impede their usability. For instance, the 2017 dataset exhibits a high level of granularity in the physical system data, combined with short temporal periods for data gathering. As a result, valuable information is lost, and the network traffic data cannot be effectively utilized. On the other hand, post-2017 datasets suffer from the issue of being "spurious." This means that no distinction is made between the data collected during normal operations of the SWaT system and the data associated with system attacks, as was done in the 2015 dataset. Furthermore, the 2018 dataset lacks network traffic data altogether.
+
+Regarding network traffic related to the year 2017, the only ones that seemingly remain unaffected by attacks, the data is divided into large PCAP files weighing more than 6 GB each. Despite their size, these files only contain a few minutes of data, which is insufficient to cover even one complete system cycle. This renders the use of these files impractical, considering the available resources.
+
+\bigskip
 Despite their large quantity, the CSV files associated with network traffic for the year 2015 are comparatively smaller in size, just slightly over 100 MB each. These files cover a more extensive time period, which facilitates easier management and analysis. Prioritizing the physical process dataset as crucial, I have selected the year 2015 as a case study, even though the network data may be incomplete.
 
 \vfill
