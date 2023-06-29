@@ -2,14 +2,19 @@
 \label{background}
 
 \linenumbers
-\lettrine[lines=2]{I}{ndustrial control systems} (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}. ICSs are often found in critical infrastructure facilities such as power plants, oil and gas refineries, and chemical plant
+\lettrine[lines=2]{I}{ndustrial} control systems (ICSs) are information systems used to control industrial processes such as manufacturing, product handling, production, and distribution \cite{ics_definition}. ICSs are often found in critical infrastructure facilities such as power plants, oil and gas refineries, and chemical plant
+
 \bigskip
 ICSs are different from traditional IT systems in several key ways. Firstly, ICSs are designed to control physical processes, whereas IT systems are designed to process and store data. This means that ICSs have different requirements for availability, reliability, and performance. Secondly, ICSs are typically deployed in environments that are harsh and have limited resources, such as extreme temperatures and limited power. Thirdly, the protocols hardware and software used in ICSs are often proprietary. 
 
 \bigskip
-ICSs are becoming increasingly connected to the internet and other networks, which has led to increased concerns about their security. Industrial systems were not originally designed with security in mind, and many of them have known vulnerabilities that could be exploited by attackers. Additionally, the use of legacy systems and equipment can make it difficult to implement security measures. As a result, ICSs are increasingly seen as a potential target for cyber attacks, which could have serious consequences for the safe and reliable operation of critical infrastructure: some notorious examples of cyber attacks are \textit{(i)} the \textbf{STUXnet} worm \cite{stuxnet}, which purpose was to sabotage the nuclear centrifuges of the enrichment plant at the Natanz nuclear facility in Iran; \textit{(ii)} \textbf{Industroyer} \cite{industroyer}, also referred as \textit{Crashoverride}, responsible for the attack on the Ukrainian power grid on December 17, 2016; \textit{(iii)} the attack on February, 2021 to a water treatment plant in Oldsmar, Florida \cite{attacco_florida}, where the level of sodium hydroxide was intentionally increased to a level approximately 100 times higher than normal. \newline \newline
-The increasing connectivity of ICSs and the associated security risks have led to a growing interest in the field of ICS security. Researchers and practitioners are working to develop new security technologies, standards, and best practices to protect ICSs from cyber attacks. This includes efforts to improve the security of ICS networks and devices, as well as the development of new monitoring and detection techniques to identify and respond to cyber attacks.\newline \newline
-Table \ref{table:2_it_ot_difference} summarizes the differences between traditional IT and ICSs \cite{tesi_phd_norvegese}:
+ICSs are becoming increasingly connected to the internet and other networks, which has led to increased concerns about their security. Industrial systems were not originally designed with security in mind, and many of them have known vulnerabilities that could be exploited by attackers. Additionally, the use of legacy systems and equipment can make it difficult to implement security measures. As a result, ICSs are increasingly seen as a potential target for cyber attacks, which could have serious consequences for the safe and reliable operation of critical infrastructure: some notorious examples of cyber attacks are \textit{(i)} the \textbf{STUXnet} worm \cite{stuxnet}, which purpose was to sabotage the nuclear centrifuges of the enrichment plant at the Natanz nuclear facility in Iran; \textit{(ii)} \textbf{Industroyer} \cite{industroyer}, also referred as \textit{Crashoverride}, responsible for the attack on the Ukrainian power grid on December 17, 2016; \textit{(iii)} the attack on February, 2021 to a water treatment plant in Oldsmar, Florida \cite{attacco_florida}, where the level of sodium hydroxide was intentionally increased to a level approximately 100 times higher than normal. 
+
+\bigskip
+The increasing connectivity of ICSs and the associated security risks have led to a growing interest in the field of ICS security. Researchers and practitioners are working to develop new security technologies, standards, and best practices to protect ICSs from cyber attacks. This includes efforts to improve the security of ICS networks and devices, as well as the development of new monitoring and detection techniques to identify and respond to cyber attacks.
+
+\bigskip
+\noindent Table \ref{table:2_it_ot_difference} summarizes the differences between traditional IT and ICSs \cite{tesi_phd_norvegese}:
 
 \bigskip
 \begin{longtable}[c]{p{0.45\textwidth}  p{0.25\textwidth}  p{0.25\textwidth}}
@@ -38,7 +43,9 @@ Table \ref{table:2_it_ot_difference} summarizes the differences between traditio
 
 \section{Industrial Control Systems Architecture}
 \label{sec:2_ics_components}
-In the past, there has been a clear division between \textit{Information Technology} (IT) and \textit{Operational Technology} (OT), both at the technical and organizational levels. Each domain has maintained its own distinct technology stacks, protocols, and standards. However, with the emergence of Industry 4.0 and the rapid expansion of industrial automation, which heavily relies on IT tools for monitoring and controlling critical infrastructures, the boundary between IT and OT has started to blur. This trend has paved the way for greater integration between these two domains, thus improving productivity and process quality.\newline \newline
+In the past, there has been a clear division between \textit{Information Technology} (IT) and \textit{Operational Technology} (OT), both at the technical and organizational levels. Each domain has maintained its own distinct technology stacks, protocols, and standards. However, with the emergence of Industry 4.0 and the rapid expansion of industrial automation, which heavily relies on IT tools for monitoring and controlling critical infrastructures, the boundary between IT and OT has started to blur. This trend has paved the way for greater integration between these two domains, thus improving productivity and process quality.
+
+\bigskip
 General ICS architecture consists in \textbf{six levels} each representing a functionality: this architecture comprising the OT and IT parts is represented in Figure \ref{fig:2_SCADA_schema} \cite{purdue_model}\cite{tesi_phd_norvegese}, according to the \textit{Purdue Enterprise Reference Architecture} (PERA), or simply \textbf{Purdue Model}:
 
 \begin{figure}[ht]
@@ -70,7 +77,8 @@ As previously discussed, the gap between IT and OT is steadily narrowing. Nowada
 \section{Operational Technology Networks}
 \label{subsec:2_ot_network}
 
-\textit{Operational Technology} primarily encompasses the \textbf{tangible aspects} of Industrial Control Systems and directly interfaces with the physical processes of the monitored systems. Its main purpose is to \textbf{manage and control the procedures} involved in creating and correcting physical value in various equipment.\newline
+\textit{Operational Technology} primarily encompasses the \textbf{tangible aspects} of Industrial Control Systems and directly interfaces with the physical processes of the monitored systems. Its main purpose is to \textbf{manage and control the procedures} involved in creating and correcting physical value in various equipment.
+
 This section will focus on the key aspects and components of Operational Technology network, with specific reference to the first four levels of the Purdue model previously seen.
 
 %\bigskip
@@ -83,14 +91,15 @@ This section will focus on the key aspects and components of Operational Technol
 \subsection{Field I/O Devices Layer}
 \label{subsec:2_ot_field_io_devs}
 
-This level concerns all aspects related to the physical environment and the physical elements that are part of it, which have the ability to actively influence the environment.\newline 
-These physical elements are represented by \textbf{Field Devices}, i.e., \textbf{sensors} and \textbf{actuators} used to collect data from the process and control it: sensors are the elements responsible for reading specific values related to the physical environment (e.g., the level of a liquid), while actuators change its behavior and characteristics (e.g., opening or closing a valve to make the liquid flow).\newline
-Examples of field devices include temperature sensors, pressure sensors, valves and pumps.
+This level concerns all aspects related to the physical environment and the physical elements that are part of it, which have the ability to actively influence the environment.
+ 
+These physical elements are represented by \textbf{Field Devices}, i.e., \textbf{sensors} and \textbf{actuators} used to collect data from the process and control it: sensors are the elements responsible for reading specific values related to the physical environment (e.g., the level of a liquid), while actuators change its behavior and characteristics (e.g., opening or closing a valve to make the liquid flow). Examples of field devices include temperature sensors, pressure sensors, valves and pumps.
 
 \subsection{Controller Network Layer}
 \label{subsec:2_ot_controller_network}
 \textit{Controller Network} layer includes devices that handle data from and
-to the \textit{Field I/O Devices} layer. This kind of device is capable of gathering data from sensors, updating its internal state, and activating actuators (for example opening or close a pump that controls the level of a tank), making decisions based on a customized program, known as its control logic.\newline
+to the \textit{Field I/O Devices} layer. This kind of device is capable of gathering data from sensors, updating its internal state, and activating actuators (for example opening or close a pump that controls the level of a tank), making decisions based on a customized program, known as its control logic.
+
 Commonly found within this layer are \textit{Programmable Logic Controllers} (PLCs) and \textit{Remote Terminal Units} (RTUs): in the upcoming sections, we will examine these elements in detail.
 
 \subsubsection{Programmable Logic Controllers}
@@ -98,7 +107,8 @@ Commonly found within this layer are \textit{Programmable Logic Controllers} (PL
 A \textit{Programmable Logic Controller} (PLC) is a \textbf{small and specialized industrial computer} having the capability of controlling complex industrial and manifacturing processes \cite{plc_definition}.
 
 \bigskip
-Compared to relay systems and personal computers, PLCs are optimized for control tasks and industrial environments: they are rugged and designed to withdraw harsh conditions such as dust, vibrations, humidity and temperature: they have more reliability than personal computers, which are more prone to crash, and they are more compact a require less maintenance than a relay system.\newline
+Compared to relay systems and personal computers, PLCs are optimized for control tasks and industrial environments: they are rugged and designed to withdraw harsh conditions such as dust, vibrations, humidity and temperature: they have more reliability than personal computers, which are more prone to crash, and they are more compact a require less maintenance than a relay system.
+
 Furthermore, I/O interfaces are already on the controller, so PLCs are easier to expand with additional I/O modules (if in a rack format) to manage more inputs and ouputs, without reconfiguring hardware as in relay systems when a reconfiguration occours. 
 
 \bigskip
@@ -117,10 +127,15 @@ The basic hardware architecture of a PLC consists of these elements \cite{plc_bo
 \begin{itemize}
 	\item \textbf{Processor unit (CPU)}: contains the microprocessor. This unit interpretes the input signals from I/O modules, executes the control program stored in the Memory Unit and sends the output signals to the I/O Modules.
 	The processor unit also sends data to the Communication interface, for the communication with additional devices.
+	
 	\item \textbf{Power supply unit:} converts AC voltage to low DC voltage.
+	
 	\item \textbf{Programming device:} is used to store the required program into the memory unit.
+	
 	\item \textbf{Memory Unit:} consists in RAM memory and ROM memory. RAM memory is used for storing data from inputs, ROM memory for storing operating system, firmware and user program to be executed by the CPU.
+	
 	\item \textbf{I/O modules:} provide interface between sensors and final control elements (actuators).
+	
 	\item \textbf{Communications interface:} used to send and receive data on a network from/to other PLCs.
 \end{itemize}
 
@@ -143,7 +158,9 @@ The user program needs to be uploaded on the PLC via the programming device and 
 
 \begin{enumerate}
 	\item reading inputs from the process images table
+	
 	\item execution of the control code and computing the physical process evolution
+	
 	\item writing output to the process image table to have an effect on the physical process. At the end of the cycle, the process image table is refreshed by the CPU
 \end{enumerate}
 
@@ -179,9 +196,12 @@ Indeed, a variety of different communication protocols used in ICSs are designed
 
 \bigskip
 Countermeasures to enhance security in PLC systems may include \cite{plc_security}:
+
 \begin{itemize}
 	\item protocol modifications implementing \textbf{data integrity}, \textbf{authentication} and \textbf{protection} against \textit{Replay Attacks}
+	
 	\item use of \textit{Intrusion Detection and Prevention Systems} (IDP) 
+	
 	\item creation of \textit{Demilitarized Zones} (DMZ) on the network
 \end{itemize}
 
@@ -205,18 +225,24 @@ The Area Control layer encompasses hardware and software systems useful for supe
 \label{subsubsec:2_scada}
 
 \textit{Supervisory Control And Data Acquisition} (\textbf{SCADA}) is a system of software and hardware elements that allows industrial organizations to \cite{scada_definition}:
+
 \begin{itemize}
 	\item Control industrial processes locally or at remote locations;
+	
 	\item Monitor, gather, and process real-time data;
+
 	\item Directly interact with devices such as sensors, valves, pumps, motors, and more through human-machine interface (HMI) software;
+
 	\item Record and aggregate events to send to historian server.
 \end{itemize}
 The SCADA software processes, distributes, and displays the data, helping operators and other employees analyze the data and make important decisions.
 
 \subsubsection{Human-Machine Interface}
 \label{subsubsec:2_hmi}
-The \textit{Human-Machine Interface} (HMI) is the hardware and software interface that operators use to monitor the processes and interact with the ICS. A HMI shows the operator and authorized users information about system status and history; it also allows them to configure parameters on the ICS such as set points and, send commands and make control decisions \cite{hmi_definition}.\newline
+The \textit{Human-Machine Interface} (HMI) is the hardware and software interface that operators use to monitor the processes and interact with the ICS. A HMI shows the operator and authorized users information about system status and history; it also allows them to configure parameters on the ICS such as set points and, send commands and make control decisions \cite{hmi_definition}.
+
 The HMI can be in the form of a physical panel, with buttons and indicator lights, or PC software as shown in Figure \ref{fig:2_hmi}.
+
 \begin{figure}[ht]
 	\centering
 	\includegraphics[scale=0.45]{chap2/hmi_swat.jpg}
@@ -230,7 +256,9 @@ Within this zone, there are specialized OT devices that are utilized to manage p
 
 \begin{itemize}
 	\item \textit{Manufacturing Operations Management} (MOM) systems, which are responsible for overseeing production operations.
+
 	\item \textit{Manufacturing Execution Systems} (MES), which collect real-time data to optimize production processes.
+
 	\item \textit{Data Historians}, which store process data and, in modern solutions, analyze it within its contextual framework.
 \end{itemize}
 
@@ -240,12 +268,14 @@ This zone comprises security systems like firewalls, proxies, \textit{Intrusion 
 
 \subsection{Industrial Protocols}
 \label{subsec:2_ot_communication_networks}
-\textit{Industrial Protocols} are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Industrial Protocols can include wired and wireless networks, such as Ethernet/IP, Modbus, DNP3, Profinet and others.\newline
+\textit{Industrial Protocols} are the networks that are used to connect the different components of the ICS and allow them to communicate with each other. Industrial Protocols can include wired and wireless networks, such as Ethernet/IP, Modbus, DNP3, Profinet and others.
+
 As mentioned at the beginning of this Chapter, industrial systems differ from classical IT systems in the purpose for which they are designed: controlling physical processes the former, processing and storing data the latter. For this reason, ICSs require different communication protocols than traditional IT systems for real time communications and data transfer.
 
 \bigskip
 A wide variety of industrial protocols exists: this is because originally each vendor developed and used its own proprietary protocol. However, these protocols were often incompatible with each other, resulting in devices from different vendors being unable to communicate with each other.
-\\To solve this problem, standards were defined with a view to allowing these otherwise incompatible device to intercommunicates.\newline
+\\To solve this problem, standards were defined with a view to allowing these otherwise incompatible device to intercommunicates.
+
 Among all the various protocols, some have risen to prominence as widely accepted standards. These \textit{de facto} protocols are commonly utilized in industrial systems due to their proven reliability and effectiveness. In the following sections, we will provide a brief overview of some of the most prevalent and widely used protocols in the industry.
 \vfill
 
@@ -258,7 +288,9 @@ Modbus is the most widely used communication protocol among industrial systems b
 
 \begin{itemize}
 	\item simplicity of implementation and debugging
+	
 	\item it moves raw bits and words, letting the individual vendor to represent the data as it prefers
+	
 	\item it is, nowadays, an \textbf{open} and \textbf{\textit{royalty-free}} protocol: there is no need to sustain licensing costs for implementation and use by industrial device vendors
 \end{itemize}
 
@@ -290,8 +322,11 @@ Modbus provides four object types, which map the data accessed by master and sla
 
 \begin{itemize}
 	\item \textit{Coil}: binary type, read/write accessible by both masters and slaves
+
 	\item \textit{Discrete Input}: binary type, accessible in read-only mode by masters and in read/write mode by slaves
+
 	\item \textit{Analog Input}: 16 bits in size (word), are accessible in read-only mode by masters and in read/write mode by slaves
+
 	\item \textit{Holding Register}:  16 bits in size (word), accessible in read/write mode by both masters and slaves. Holding Registers are the most commonly used registers for output and as general memory registers.
 \end{itemize}
 
@@ -361,7 +396,8 @@ EtherNet/IP uses the major Ethernet standards, such as IEEE 802.3 and the TCP/IP
 
 \paragraph{Physical and Data Link layer}
 
-The use of the IEEE 802.3 standard allows EtherNet/IP to flexibly adopt different network topologies (star, linear, ring, etc.) over different connections (copper, fibre optic, wireless, etc.), as well as the possibility to choose the speed of network devices. \\
+The use of the IEEE 802.3 standard allows EtherNet/IP to flexibly adopt different network topologies (star, linear, ring, etc.) over different connections (copper, fibre optic, wireless, etc.), as well as the possibility to choose the speed of network devices. 
+
 IEEE 802.3 in addition defines at Data Link layer the \textit{Carrier Sense Multiple Access - Collision Detection} (CSMA/CD) protocol, which controls access to the communication channel and prevents collisions.
 
 \paragraph{Transport layer} 

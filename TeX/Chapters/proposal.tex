@@ -5,7 +5,7 @@
 \lettrine[lines=2]{I}{n} Chapter \ref{state_of_art}, we presented the state of the art of \textit{process comprehension} of an Industrial Control System (ICS) with a focus on the methodology proposed by Ceccato et al. \cite{ceccato}[Section \ref{sec:3_ceccato_metodology}], explaining what it consists of, its practical application on a testbed, and most importantly highlighting its limitations and critical issues (see Section \ref{subsec:3_ceccato_limitations}).
 
 \bigskip
-In this chapter we will present \textbf{a proposal to improve the methodology} seen in the previous chapter, addressing most of the critical issues (or at least trying to do so) described in Section \ref{subsec:3_ceccato_limitations} by almost completely rewriting the original framework, enhancing its functionalities and inserting new ones where possible, while preserving its general structure and approach. Indeed, the system analysis will encompass the same \textbf{four phases} as the original methodology (Data Pre-processing, Graphs and Statistical Analysis, Business Process Mining and Analysis, and Invariant Inference and Analysis). In addition to these phases, a \textbf{fifth phase} dedicated exclusively to \textbf{network traffic analysis} will be introduced. Each phase of the original methodology will undergo thorough revision to enhance the understanding of the industrial system being analyzed and its behavior, aiming to provide a more complete and coherent process comprehension. This revision aims to enrich the analysis process, making it more robust and transparent.
+In this chapter we will present \textbf{a proposal to improve the methodology} seen in the previous chapter, addressing most of the critical issues (or at least trying to do so) described in Section \ref{subsec:3_ceccato_limitations} by almost completely rewriting the original framework, enhancing its functionalities and inserting new ones where possible, while preserving its general structure and approach. Indeed, the system analysis will encompass the same \textbf{four phases} as the original methodology (Data Pre-processing, Graphs and Statistical Analysis, Invariant Inference and Analysis, and Business Process Mining and Analysis). In addition to these phases, a \textbf{fifth phase} dedicated exclusively to \textbf{network traffic analysis} will be introduced. Each phase of the original methodology will undergo thorough revision to enhance the understanding of the industrial system being analyzed and its behavior, aiming to provide a more complete and coherent process comprehension. This revision aims to enrich the analysis process, making it more robust and transparent.
 
 \bigskip
 Please note that our proposals do not include improvements to the data gathering phase. This decision is solely because the new framework will not be tested on the same case study used by Ceccato et al. (Section \ref{subsec:3_testbed}), but rather on a different case study known as the ITrust SWaT system \cite{swat_home}. iTrust has already provided some datasets that contain the execution trace of the physical system and the network traffic scan for this case study. In contrast to the case study conducted by Ceccato et al., the iTrust SWaT system is not simulated but rather a \textbf{real-world system}. This distinction is important as it introduces additional complexities and considerations when analyzing and interpreting the data. 
@@ -33,28 +33,33 @@ In our version of the framework we decided to follow a few design choices:
 In the following, we discuss these three features in more detail.
 
 \begin{description}
-	\item[Single Programming Language] The implementation of Ceccato et al.'s tool involved the use of different programming languages for each of the phases, ranging from Python to Java, and even including Bash scripting.\newline
+	\item[Single Programming Language] The implementation of Ceccato et al.'s tool involved the use of different programming languages for each of the phases, ranging from Python to Java, and even including Bash scripting.
+	
 	However, we believe that this heterogeneity introduces challenges in terms of user-friendliness and intuitiveness. It becomes more difficult for users to navigate and operate the tool effectively. Furthermore, the utilization of multiple technologies complicates code maintenance and the addition of new features, especially when managed by a single person who may have expertise in only one language while being less familiar with others.
 	
 	\bigskip
 	Considering these factors, we have made the decision to adopt a single programming language for the framework to ensure homogeneity, simplify usability, and facilitate code maintenance for future users. Python has been chosen as the language of choice due to its simplicity, readability, versatility, and powerfulness. Additionally, Python benefits from a vast ecosystem of libraries and packages that cater to various requirements, making it a suitable choice for our framework.
 	
-	\item[System Independence] One of the significant limitations we identified in Ceccato et al.'s tool, as highlighted in Section \ref{subsec:3_ceccato_limitations}, is its \textbf{strong dependence on the specific testbed} being used. This means that the tool lacks the flexibility to configure parameters for analyzing different industrial systems.\newline
+	\item[System Independence] One of the significant limitations we identified in Ceccato et al.'s tool, as highlighted in Section \ref{subsec:3_ceccato_limitations}, is its \textbf{strong dependence on the specific testbed} being used. This means that the tool lacks the flexibility to configure parameters for analyzing different industrial systems.
+	
 	To address this limitation and achieve system independence, we have made a crucial improvement in our framework. We have introduced a comprehensive configuration file called \textit{config.ini} that allows users to customize all the necessary parameters for analyzing the targeted system. This general configuration file eliminates any references to hardcoded variables or values found in the Ceccato et al.'s tool, providing users with the flexibility to tailor the analysis according to their specific requirements.
 	
 	\item[Flexibility and Ease on Use] The lack of flexibility and ease of use in a tool can be a significant disadvantage, as it hampers its effectiveness and makes it difficult for users to achieve their desired outcomes. Ceccato et al.'s tool was affected by these limitations, as it required users to run scripts from the command line without sufficient options or parameters for customizing the analysis. Consequently, the tool fell short in terms of user-friendliness and failed to provide the necessary flexibility to accommodate specific user requirements.
 	
 	\bigskip
-	To settle these issues, we enhanced the command-line interface in the proposed framework by adding new options and parameters. These new features provide the user with greater flexibility, enabling to specify parameters and options that allow for more in-depth analysis and focused results analyzing data more effectively and efficiently. With these enhancements, the framework has become more user-friendly, reducing the learning curve and making it more accessible to a wider range of users. \newline
+	To settle these issues, we enhanced the command-line interface in the proposed framework by adding new options and parameters. These new features provide the user with greater flexibility, enabling to specify parameters and options that allow for more in-depth analysis and focused results analyzing data more effectively and efficiently. With these enhancements, the framework has become more user-friendly, reducing the learning curve and making it more accessible to a wider range of users. 
+	
 	This, in turn, makes the framework more valuable and useful, increasing its adoption and effectiveness across a range of industrial control systems and applications. \newline
 	Moreover, with new options and parameters users can now access a range of customizable options and parameters, making the tool more intuitive and user-friendly. 
 \end{description}
 
-\noindent Overall, the enhancements made to the framework represent a significant step forward in making it more effective, efficient, and user-friendly.
+Overall, the enhancements made to the framework represent a significant step forward in making it more effective, efficient, and user-friendly.
+
+\vfill
 
 \subsection{Framework Structure}
 \label{subsec:4_framework_struct}
-The proposed framework follows a similar structure to the original tool, with a division into five main directories representing different phases of the analysis: \textbf{data pre-processing}, \textbf{graphs and statistical analysis}, \textbf{process mining}, and \textbf{invariant analysis}. A new phase is added compared to the original, concerning the \textbf{analysis of the network traffic}. These directories contain the corresponding Python scripts responsible for performing the analysis, along with any necessary subdirectories and input/output files to ensure the proper functioning of the framework.
+The proposed framework follows a similar structure to the original tool, with a division into five main directories representing different phases of the analysis: \textbf{data pre-processing}, \textbf{graphs and statistical analysis}, \textbf{invariant analysis}, and \textbf{process mining}. A new phase is added compared to the original, concerning the \textbf{analysis of the network traffic}. These directories contain the corresponding Python scripts responsible for performing the analysis, along with any necessary subdirectories and input/output files to ensure the proper functioning of the framework.
 
 \begin{lstlisting}[language=bash, numbers=none, caption=Novel Framework structure and Python scripts, label=lst:4_tree_command]
 	.
@@ -79,7 +84,8 @@ The proposed framework follows a similar structure to the original tool, with a 
 	    └── runChartSubPlots.py
 \end{lstlisting}
 
-The \textit{config.ini} file is located in the root directory of the framework. This file holds significant importance as it grants the framework independence from the industrial control system being analyzed. Within this file, users have the opportunity to configure various general parameters and options. These include specifying file paths for reading or writing files, as well as options related to specific analysis phases.\newline
+The \textit{config.ini} file is located in the root directory of the framework. This file holds significant importance as it grants the framework independence from the industrial control system being analyzed. Within this file, users have the opportunity to configure various general parameters and options. These include specifying file paths for reading or writing files, as well as options related to specific analysis phases.
+
 The file is organized into sections, with each section dedicated to a specific aspect of the configuration. These sections contain user-customizable parameters that are later referenced within the Python scripts comprising the framework. Sections of \textit{config.ini} are:
 
 \begin{itemize}
@@ -154,12 +160,14 @@ Despite its moderate complexity, this testbed provides an ideal platform for pre
 
 \subsection{Phase 0: Network Analysis}
 \label{subsec:4_network_analysis}
-The objective of the network analysis presented in this section is to offer users valuable information regarding the communication process within an industrial control system and a broader perspective on network communications, delving into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics. This analysis aims to provide users with an overview of the communication between PLCs at level 1 (see Figure \ref{fig:2_SCADA_schema}), as well as the communication between PLCs and devices at higher levels such as HMIs and Historian servers (see Section \ref{sec:2_ics_components} for ICSs architecture). This also allows us to have a better understanding of the system architecture and network topology. The analysis focuses on industrial protocols used and the information exchanged.\newline
+The objective of the network analysis presented in this section is to offer users valuable information regarding the communication process within an industrial control system and a broader perspective on network communications, delving into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics. This analysis aims to provide users with an overview of the communication between PLCs at level 1 (see Figure \ref{fig:2_SCADA_schema}), as well as the communication between PLCs and devices at higher levels such as HMIs and Historian servers (see Section \ref{sec:2_ics_components} for ICSs architecture). This also allows us to have a better understanding of the system architecture and network topology. The analysis focuses on industrial protocols used and the information exchanged.
+
 By reconstructing the network communication structure using data obtained from the network traffic sniffing process, users can gain a comprehensive understanding of the behavior of the underlying industrial system. This knowledge can then be utilized to \textbf{plan a strategy} for analyzing the physical processes within the system.
 
 \subsubsection{Extracting Data from PCAP Files}
 \label{subsubsec:4_extract_pcap}
-The initial step involves extracting the desired information from the PCAP files that contain the captured network traffic. This includes details such as the source IP address, destination IP address, protocol used, and the type of request made (e.g., Read/Write, Request/Response). The extracted data is then converted into a more convenient CSV format. This extracted data serves as the foundation for the subsequent phase.\newline
+The initial step involves extracting the desired information from the PCAP files that contain the captured network traffic. This includes details such as the source IP address, destination IP address, protocol used, and the type of request made (e.g., Read/Write, Request/Response). The extracted data is then converted into a more convenient CSV format. This extracted data serves as the foundation for the subsequent phase.
+
 In the latter part of this phase, the extracted data is utilized to generate the network schema. The network schema provides a visual representation of the connections and relationships within the network, showcasing the communication patterns between different components. This schema helps in understanding the overall structure and behavior of the industrial control system.
 
 \bigskip
@@ -183,12 +191,15 @@ In addition, by utilizing the \texttt{protocols} and \\ \texttt{ws\_<protocol>\_
 \bigskip
 After obtaining the extracted data, it is possible to proceed with the second part of the network analysis.
 
+\vfill
+
 \subsubsection{Network Information}
 \label{subsubsec:4_draw_network}
 During this stage, the exported CSV data is processed to derive valuable information regarding network communications and the structure of the network itself. The objective is to identify and establish relationships between IP addresses present on the network, thereby determining the sources and destinations of communications. Furthermore, the analysis detects the protocols used for each communication and quantifies the various types of requests made.
 
 \bigskip
-This information is then transformed into a \textbf{graph representation of the network} (or subnetwork, if specified). In this graph, devices are represented as nodes labeled with their IP addresses, while edges represent the incoming and outgoing communications of these devices, along with the corresponding information.\newline
+This information is then transformed into a \textbf{graph representation of the network} (or subnetwork, if specified). In this graph, devices are represented as nodes labeled with their IP addresses, while edges represent the incoming and outgoing communications of these devices, along with the corresponding information.
+
 To ensure comprehensibility, the analysis also provides users with \textbf{textual information} containing the same details as the graph representation. This text-based information serves as an alternative for cases where the graph may become complex to interpret, particularly when numerous edges connect nodes and result in a high volume of network requests.\newline
 This textual information is saved to another CSV file, enabling offline reference or potential future utilization. By having this file available, users can access the network analysis results in a structured format for further analysis or documentation purposes.
 
@@ -208,7 +219,8 @@ The Python script \texttt{networkAnalysis.py} in the \texttt{\$(project\_dir)/ne
 The parameters related to IP addresses, including source and destination, are optional. It is possible to specify either one of them individually. For instance, if the user specifies only the source IP address, the script will display the network nodes with which it communicates on the outgoing side, along with the corresponding generated traffic. Similarly, if only the destination IP address is specified, the script will showcase the network nodes communicating with it on the incoming side, along with the relevant traffic data.
 
 \bigskip
-During the analysis, the script identifies and displays the IP addresses present in the network as output for the user's reference. This allows the user to select specific IP addresses from the command line for a more focused analysis, such as choosing a subnet of interest. Additionally, the script detects and tracks distinct communications between pairs of PLCs, keeping a record of the number of these communications.\newline
+During the analysis, the script identifies and displays the IP addresses present in the network as output for the user's reference. This allows the user to select specific IP addresses from the command line for a more focused analysis, such as choosing a subnet of interest. Additionally, the script detects and tracks distinct communications between pairs of PLCs, keeping a record of the number of these communications.
+
 The result of the analysis is a graph representation of the network (or subnetwork) to be analyzed. An example of such a graph can be seen in Figure \ref{fig:4_network_graph_example}. 
 
 \begin{figure}[ht]
@@ -238,19 +250,26 @@ As previously mentioned, the textual data is stored in a CSV dataset located in 
 \textit{Data Pre-processing phase} is probably the most delicate and significant one: depending on how large the industrial system to be analyzed is, the data collected, and how it is enriched using the additional attributes, the subsequent system analysis will provide more or less accurate outcomes.
 
 \bigskip
-The Ceccato et al.'s tool has several limitations, particularly at this stage. It does not allow for the isolation of a subsystem, either in terms of time or the number of PLCs to be analyzed. The system is considered as a whole without the ability to focus on specific subsystems. Additionally, many of the additional attributes had to be manually added, and for the ones entered automatically, there is no way to specify the register type to associate them with.\newline
+The Ceccato et al.'s tool has several limitations, particularly at this stage. It does not allow for the isolation of a subsystem, either in terms of time or the number of PLCs to be analyzed. The system is considered as a whole without the ability to focus on specific subsystems. Additionally, many of the additional attributes had to be manually added, and for the ones entered automatically, there is no way to specify the register type to associate them with.
+
 The combination of these limitations, along with the presence of hardcoded references to attributes and registers in the tool's code, makes the analysis of the system more challenging. Furthermore, it compromises the accuracy and reliability of the obtained results in terms of both quantity and quality.
 
 \bigskip
-In the proposed framework, these issues have been addressed by incorporating new features.\newline 
-\textit{Firstly}, the framework allows for the \textbf{selection of a subsystem from the command line} based on both temporal criteria and the specific PLCs to be included. This enables more focused and targeted analysis.\newline
-\textit{Secondly}, we have \textbf{revamped the process of enriching} the resulting dataset by eliminating manual entry of additional attributes. Instead, users now have the flexibility to determine the type of additional attribute to associate with a specific register.\newline
-\textit{Thirdly}, after the pre-processing stage, a \textbf{preliminary analysis} can be conducted on the resulting dataset. This analysis aims to identify the registers that are associated with actuators, measurements, and hardcoded setpoints or constants. It provides insights into the dataset and helps in refining the enrichment step. The parameters for this analysis can be configured in the \textit{config.ini} file, allowing for customization and fine-tuning of the process.\newline \newline 
+In the proposed framework, these issues have been addressed by incorporating new features.
+ 
+\textit{Firstly}, the framework allows for the \textbf{selection of a subsystem from the command line} based on both temporal criteria and the specific PLCs to be included. This enables more focused and targeted analysis.
+
+\textit{Secondly}, we have \textbf{revamped the process of enriching} the resulting dataset by eliminating manual entry of additional attributes. Instead, users now have the flexibility to determine the type of additional attribute to associate with a specific register.
+
+\textit{Thirdly}, after the pre-processing stage, a \textbf{preliminary analysis} can be conducted on the resulting dataset. This analysis aims to identify the registers that are associated with actuators, measurements, and hardcoded setpoints or constants. It provides insights into the dataset and helps in refining the enrichment step. The parameters for this analysis can be configured in the \textit{config.ini} file, allowing for customization and fine-tuning of the process.
+
+\bigskip 
 In the upcoming sections, we will delve into a more comprehensive examination of the achievements made in this phase.
 
 \subsubsection{Subsystem Selection}
 \label{subsubsec:4_select_subsystem}
-In Ceccato et al.'s tool, the datasets for each individual PLC in CSV format were required to be placed in a specific directory that was hardcoded in the script. The script would then merge and enrich these datasets to generate a single output dataset representing the complete process trace of the industrial system. However, the script did not provide options to select specific PLCs for analysis or define a temporal range for analysis. This lack of flexibility made the analysis more complex, especially when dealing with \textit{transient states} (i.e., general states in which the industrial system is still initializing before actually reaching full operation) or when focusing on specific parts of the industrial system during certain periods of interest. The fixed dataset structure also may increase the number of variables that could be analyzed.\newline
+In Ceccato et al.'s tool, the datasets for each individual PLC in CSV format were required to be placed in a specific directory that was hardcoded in the script. The script would then merge and enrich these datasets to generate a single output dataset representing the complete process trace of the industrial system. However, the script did not provide options to select specific PLCs for analysis or define a temporal range for analysis. This lack of flexibility made the analysis more complex, especially when dealing with \textit{transient states} (i.e., general states in which the industrial system is still initializing before actually reaching full operation) or when focusing on specific parts of the industrial system during certain periods of interest. The fixed dataset structure also may increase the number of variables that could be analyzed.
+
 Furthermore, the tool in question did \textit{not} allow for specifying an output CSV file to save the resulting dataset. Each dataset creation and enrichment operation would overwrite the previous file, making it inconvenient for comparisons between different execution traces unless the files were manually renamed.
 
 \bigskip
@@ -291,7 +310,8 @@ At the same time, the user has the option to specify these settings via the comm
 
 \subsubsection{Dataset Enrichment}
 \label{subsubsec:4_dataset_enrichment}
-After a step in which a function is applied to each PLC-related dataset to eliminate its unused registers within the system\footnote{This becomes particularly relevant when conducting a Modbus register scan, where ranges of registers are examined. In this process, it is assumed that any unused registers hold a constant value of zero.}, the \textbf{dataset enrichment operation} is performed.\newline
+After a step in which a function is applied to each PLC-related dataset to eliminate its unused registers within the system\footnote{This becomes particularly relevant when conducting a Modbus register scan, where ranges of registers are examined. In this process, it is assumed that any unused registers hold a constant value of zero.}, the \textbf{dataset enrichment operation} is performed.
+
 This operation brings about several distinctions compared to the previous version. Firstly, it is performed on each individual dataset instead of the resulting dataset. Additionally, there are a greater number of attributes, which are automatically calculated and added to the dataset by the \texttt{mergeDatasets.py} script. Importantly, the configuration file \textit{config.ini} under the \texttt{[DATASET]} section allows users to determine which registers should be assigned to these attributes.\newline
 In Listing \ref{lst:4_enrich_params} we can see the list of additional attributes and how they should be associated with the registers of the dataset:
 
@@ -315,7 +335,8 @@ In Listing \ref{lst:4_enrich_params} we can see the list of additional attribute
 \begin{description}
 	\item[\texttt{timestap\_col}] denotes the name of the column in the dataset that holds the timestamp data. This parameter is significant not only in the current phase but also in the Process Mining phase. In the Ceccato et al.'s work, this parameter was hardcoded and lacked configurability, leading to errors if the analyzed system changed.
 	
-	\item[\texttt{max\_prefix}, \texttt{min\_prefix}, \texttt{max\_min\_cols\_list}] refer to any relative maximum or minimum values (\textit{relative setpoints}) of one or more measures and that can be found and inserted as new columns within the dataset. The first two parameters indicate the prefix to be used in the column names affected by this additional attribute, while the third specifies of which type of registers we want to know the maximum and/or minimum value reached (several options can be specified using the logical operator \texttt{|} - or).\newline 
+	\item[\texttt{max\_prefix}, \texttt{min\_prefix}, \texttt{max\_min\_cols\_list}] refer to any relative maximum or minimum values (\textit{relative setpoints}) of one or more measures and that can be found and inserted as new columns within the dataset. The first two parameters indicate the prefix to be used in the column names affected by this additional attribute, while the third specifies of which type of registers we want to know the maximum and/or minimum value reached (several options can be specified using the logical operator \texttt{|} - or).
+	 
 	If, for example, we want to know the maximum value of the registers associated with the tanks, indicated in the iTrust SWaT system by the prefix \texttt{LIT}, we only need to specify the necessary parameter in the \textit{config.ini} file, so \texttt{max\_min\_cols\_list = lit}.\newline
 	The result will be to have in the dataset thus enriched a new column named \texttt{max\_LIT101}.
 	
@@ -328,17 +349,30 @@ Initially, the parameters for registers to be associated with each additional at
 
 \paragraph{Slope Calculation}
 \label{par:4_slope_calculation}
-The \textit{slope} is an attribute that represents the \textbf{trend} of the measurement being considered. It is particularly useful, in our context, during the inference and invariant analysis phase to gather information about the trend under specific conditions. The slope can generally be classified as \textbf{increasing} (slope > 0), \textbf{decreasing} (slope < 0), or \textbf{stable} (slope = 0).\newline
+The \textit{slope} is an attribute that represents the \textbf{trend} of the measurement being considered. It is particularly useful, in our context, during the inference and invariant analysis phase to gather information about the trend under specific conditions. The slope can generally be classified as \textbf{increasing} (slope > 0), \textbf{decreasing} (slope < 0), or \textbf{stable} (slope = 0).
+
 Normally, the slope is calculated through a simple mathematical formula: given an interval \textit{a}, \textit{b} relative to the measurement \textit{l}, the slope is given by the difference of these two values divided by the amount of time \textit{t} that the measurement takes to reach \textit{b} from \textit{a}:
 
 \[slope = \frac{l(b) -l(a)}{t(b) - t(a)}\]
 
-In the proposed framework, similar to the Ceccato et al.'s tool, this time interval (the granularity) can be adjusted to be either long or short. The choice of granularity depends on the desired accuracy of the slope calculation. A lower granularity will provide a slope that closely reflects the actual measurement trend, while a higher granularity will result in flatter slope data. Each time interval within which the measurement is divided corresponds to a slope value. These slopes are calculated and added as additional attributes in the dataset. Later on, these slope values are used to determine the trend of the measurement in specific situations or conditions.
+In the proposed framework, similar to the Ceccato et al.'s tool, this time interval (the granularity) can be adjusted to be either long or short.
 
 \bigskip
-Calculating the slope directly from the raw measurement data can be a suitable approach for systems where the measurements are \textit{not} heavily influenced by \textbf{perturbations}. Perturbations, such as liquid oscillations in a tank during filling and emptying phases, can lead to fluctuating readings of the level. In such cases, maintaining a low granularity can provide a more accurate calculation of the overall trend that closely aligns with the actual measurement trend. This situation occurs, for instance, in the testbed utilized by Ceccato et al. \newline \newline 
-However, if perturbations significantly affect the measurement readings, calculating the slope on individual time intervals may result in an inaccurate trend definition, irrespective of the chosen granularity. In such cases, the fluctuating nature of the measurements due to perturbations can introduce errors in the slope calculation, making it less reliable as an indicator of the actual trend.\newline \newline
-Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the \texttt{LIT101} tank of our testbed; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of \texttt{LIT101} exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.
+The choice of granularity depends on the desired accuracy of the slope calculation. A lower granularity will provide a slope that closely reflects the actual measurement trend, while a higher granularity will result in flatter slope data. Each time interval within which the measurement is divided corresponds to a slope value. These slopes are calculated and added as additional attributes in the dataset. Later on, these slope values are used to determine the trend of the measurement in specific situations or conditions.
+
+\bigskip
+Calculating the slope directly from the raw measurement data can be a suitable approach for systems where the measurements are \textit{not} heavily influenced by \textbf{perturbations}. Perturbations, such as liquid oscillations in a tank during filling and emptying phases, can lead to fluctuating readings of the level. In such cases, maintaining a low granularity can provide a more accurate calculation of the overall trend that closely aligns with the actual measurement trend. This situation occurs, for instance, in the testbed utilized by Ceccato et al.
+
+\bigskip 
+However, if perturbations significantly affect the measurement readings, calculating the slope on individual time intervals may result in an inaccurate trend definition, irrespective of the chosen granularity. In such cases, the fluctuating nature of the measurements due to perturbations can introduce errors in the slope calculation, making it less reliable as an indicator of the actual trend.
+
+\bigskip
+Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement, in blue, refers to the \texttt{LIT101} tank of our testbed; in red, the slope calculation related to the measurement with three different granularities: 30 (Figure \ref{subfig:4_slope_g30_nodecomp}), 60 (Figure \ref{subfig:4_slope_g60_nodecomp}) and 120 seconds (Figure \ref{subfig:4_slope_g120_nodecomp}). 
+
+It is noticeable that as the granularity increases, the slope values flatten. Moreover, in the time interval between seconds 1800 and 4200, the level of \texttt{LIT101} exhibits a predominantly increasing trend, yet the calculated slope values fluctuate between positive and negative. Consequently, during the invariant analysis, the overall increasing trend may not be detected, resulting in a loss of information.
+
+\vfill
+\pagebreak
 
 \begin{figure}[H]
 	\centering
@@ -363,15 +397,24 @@ Figure \ref{fig:4_slope_comparison} demonstrates this assertion: the measurement
 	\label{fig:4_slope_comparison}
 \end{figure}
 
-\noindent Ceccato et al.'s tool did not take into account the possibility of having strongly perturbed data, which presented a challenge that we needed to address in the development of the proposed framework.
+Ceccato et al.'s tool did not take into account the possibility of having strongly perturbed data, which presented a challenge that we needed to address in the development of the proposed framework.
 
 \bigskip
-The solution to this problem involves applying techniques to reduce the "noise" in the data, aiming to achieve a more linear trend in the measurement curve. By minimizing the effects of perturbations, we can calculate slopes more accurately.\newline
-There are various methods available for smoothing out noise in the data. In our framework, we focused on two commonly used approaches found in the literature: \textbf{polynomial regression} and \textbf{seasonal decomposition}. In addition to these two methods, we also explored the use of a \textbf{line simplification algorithm}.\newline \newline
-\textit{Polynomial regression} \cite{polynomial_regression} is a technique that allows us to create a filter to reduce the impact of noise on the data. By fitting a polynomial function to the measurements, we can obtain a smoother curve that captures the underlying trend while minimizing the effects of perturbations.\newline
-\textit{Seasonal decomposition} \cite{seasonal_decomposition}, specifically the part related to trending, is another method we explored. It involves decomposing the time series into different components, such as trend, seasonality, and residual. By isolating the trend component, we can obtain a cleaner representation of the underlying pattern in the data.\newline
-\textit{Line simplification algorithms} \cite{line_simplification_algo} aim to reduce the complexity of a polyline or curve by approximating it with a simplified version composed of fewer points. By selectively removing redundant or less significant points, line simplification algorithms help reduce storage space and computational requirements while preserving the overall shape and characteristics of the original line.\newline
-Regarding polynomial regression, we evaluated the use of the \textbf{Savitzky-Golay filter} \cite{savgol} as a smoothing technique. For seasonal decomposition, we explored the \textbf{Seasonal-Trend decomposition using LOESS} (STL) method \cite{stl_decomp}. For the line simplification algorithm, we specifically considered the \textbf{Ramer-Douglas-Peucker} (RDP) algorithm \cite{ramer-douglas-peucker}.\newline \newline
+The solution to this problem involves applying techniques to reduce the "noise" in the data, aiming to achieve a more linear trend in the measurement curve. By minimizing the effects of perturbations, we can calculate slopes more accurately.
+
+There are various methods available for smoothing out noise in the data. In our framework, we focused on two commonly used approaches found in the literature: \textbf{polynomial regression} and \textbf{seasonal decomposition}. In addition to these two methods, we also explored the use of a \textbf{line simplification algorithm}.
+
+\bigskip
+\textit{Polynomial regression} \cite{polynomial_regression} is a technique that allows us to create a filter to reduce the impact of noise on the data. By fitting a polynomial function to the measurements, we can obtain a smoother curve that captures the underlying trend while minimizing the effects of perturbations.
+
+\textit{Seasonal decomposition} \cite{seasonal_decomposition}, specifically the part related to trending, is another method we explored. It involves decomposing the time series into different components, such as trend, seasonality, and residual. By isolating the trend component, we can obtain a cleaner representation of the underlying pattern in the data.
+
+\textit{Line simplification algorithms} \cite{line_simplification_algo} aim to reduce the complexity of a polyline or curve by approximating it with a simplified version composed of fewer points. By selectively removing redundant or less significant points, line simplification algorithms help reduce storage space and computational requirements while preserving the overall shape and characteristics of the original line.
+
+\bigskip
+Regarding polynomial regression, we evaluated the use of the \textbf{Savitzky-Golay filter} \cite{savgol} as a smoothing technique. For seasonal decomposition, we explored the \textbf{Seasonal-Trend decomposition using LOESS} (STL) method \cite{stl_decomp}. For the line simplification algorithm, we specifically considered the \textbf{Ramer-Douglas-Peucker} (RDP) algorithm \cite{ramer-douglas-peucker}.
+
+\bigskip
 %For lacking of space we are unable to provide a detailed description of the polynomial regression and seasonal decomposition techniques in this context. We recommend referring to the bibliographical notes or relevant literature for a more comprehensive understanding of these methods. 
 Figure \ref{fig:4_smoothing_comparison} shows a quick graphical comparison of these techniques compared with the original data. The solution adopted is the \textit{STL decomposition} method, which effectively reduces noise compared to the Savitzky-Golay filter. However, it should be noted that this method may introduce some delay in certain parts of the data, as is typically observed in similar algorithms. Despite its apparent effectiveness, the RDP algorithm fails to accurately approximate sections where the measurement level remains relatively stable. Consequently, it yields incorrect slope estimations, causing a loss of valuable information about the system.
 
@@ -404,6 +447,7 @@ Figure \ref{fig:4_smoothing_comparison} shows a quick graphical comparison of th
 	\caption{Savitzky-Golay filter (blue line), STL decomposition (green) and RDP algorithm (orange) comparison}
 	\label{fig:4_smoothing_comparison}
 \end{figure}
+
 By applying the STL decomposition, we observe a notable enhancement in slope calculation even when using a low granularity. Figure \ref{fig:4_STL_decomp_results} demonstrates that, with the same granularity as shown in Figure \ref{subfig:4_slope_g30_nodecomp}, the slope values, albeit exhibiting fluctuations, consistently align with the underlying trend of the data curve. The introduced lag resulting from the decomposition's periodicity is responsible for the observed delay.
 
 \begin{figure}[ht]
@@ -413,7 +457,7 @@ By applying the STL decomposition, we observe a notable enhancement in slope cal
 	\label{fig:4_STL_decomp_results}
 \end{figure}
 
-\noindent The periodicity, which defines the sampling time window for decomposition and the level of noise smoothing, can be configured using the \texttt{trend\_period} directive in the \textit{config.ini} file.\newline
+The periodicity, which defines the sampling time window for decomposition and the level of noise smoothing, can be configured using the \texttt{trend\_period} directive in the \textit{config.ini} file.\newline
 During the slope calculation, the analysis will be performed on the data from the additional measurement trend attributes specified in the \texttt{trend\_cols\_list} directive of the configuration file, rather than on the original unfiltered data.
 
 \bigskip
@@ -438,9 +482,13 @@ By default, the enriched dataset will be saved in CSV format in the \texttt{\$(p
 \subsubsection{Preliminary Analysis of the Obtained Subsystem}
 \label{subsubsec:4_brief_analysis}
 
-After merging the datasets, the user has the option to perform an \textbf{optional analysis} of the resulting dataset to extract preliminary data. This analysis aims to gather basic information about the (sub)system and potentially refine the enrichment process. If the user chooses to proceed with the analysis, the \texttt{mergeDatasets.py} script invokes another Python script located in the \texttt{\$(project-dir)/pre-processing} directory called \texttt{system\_info.py}.\newline
-Relying on an analysis based on a combination of Daikon and Pandas this script performs a quick analysis of the dataset allowing to \textbf{estimate}, albeit approximately, the \textbf{type of registers} (sensors, actuators, ...), also identifying possible maximum and minimum values of measurements and hardcoded setpoints. Furthermore, leveraging the use of the additional attribute \texttt{prev\_}, the \texttt{system\_info.py} script is capable of deriving measurement values corresponding to state changes of individual actuators. This allows for the identification of specific measurements associated with the activation or deactivation of certain actuators within the system.\newline
-As the last information we have duration of actuator states for each cycle of the system: this information can be useful for making assumptions and conjectures about the behavior of an actuator in a specific state or, by observing the duration values of each cycle, highlighting anomalies in the system. \newline \newline
+After merging the datasets, the user has the option to perform an \textbf{optional analysis} of the resulting dataset to extract preliminary data. This analysis aims to gather basic information about the (sub)system and potentially refine the enrichment process. If the user chooses to proceed with the analysis, the \texttt{mergeDatasets.py} script invokes another Python script located in the \texttt{\$(project-dir)/pre-processing} directory called \texttt{system\_info.py}.
+
+Relying on an analysis based on a combination of Daikon and Pandas this script performs a quick analysis of the dataset allowing to \textbf{estimate}, albeit approximately, the \textbf{type of registers} (sensors, actuators, ...), also identifying possible maximum and minimum values of measurements and hardcoded setpoints. Furthermore, leveraging the use of the additional attribute \texttt{prev\_}, the \texttt{system\_info.py} script is capable of deriving measurement values corresponding to state changes of individual actuators. This allows for the identification of specific measurements associated with the activation or deactivation of certain actuators within the system.
+
+As the last information we have duration of actuator states for each cycle of the system: this information can be useful for making assumptions and conjectures about the behavior of an actuator in a specific state or, by observing the duration values of each cycle, highlighting anomalies in the system.
+
+\bigskip
 Listing \ref{lst:4_brief_infos} shows an example of the output this brief analysis related to our testbed (for brevity, only one measurement is reported in the analysis of actuator state changes):
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Example of preliminary system analysis},label=lst:4_brief_infos]
@@ -620,14 +668,17 @@ The script accepts the following command-line parameters:
 	
 	\item \textbf{-e} or \textbf{{-}{-}excluderegisters}: excludes one or more specific registers from the default visualization. This option is useful to avoid displaying hardcoded setpoints or spare registers.
 \end{itemize}
+
 This script, like the previous ones, is designed to provide the maximum flexibility and ease of use for the user, combined with greater power and effectiveness in deriving useful information about the analyzed system.
 
-\paragraph{Statistical Analysis} After careful consideration, we made the decision not to include the statistical analysis aspect of the Ceccato et al.'s tool in the framework. We found that there was no practical use for it. Instead, we integrated the relevant statistical information into the preliminary analysis conducted after the pre-processing phase. Additionally, we deemed the histogram to have limited utility and considered it outdated in comparison to the new graph analysis approach we implemented. \newline
+\paragraph{Statistical Analysis} After careful consideration, we made the decision not to include the statistical analysis aspect of the Ceccato et al.'s tool in the framework. We found that there was no practical use for it. Instead, we integrated the relevant statistical information into the preliminary analysis conducted after the pre-processing phase. Additionally, we deemed the histogram to have limited utility and considered it outdated in comparison to the new graph analysis approach we implemented. 
+
 Although we decided not to include the statistical analysis aspect in the framework, the Python script \texttt{histPlots\_Stats.py} from the original tool remains in the directory. This script is essentially unchanged from the version developed by Ceccato et al. and can be used in the future if the need arises. 
 
 \subsection{Phase 3: Invariant Inference and Analysis}
 \label{subsec:4_improve_invariants}
-The phase of invariant inference and analysis has undergone a redesign and improvement to offer the user a more comprehensive and easier approach to identify invariants. This has been achieved through the application of new criteria to analyze and reorganize the Daikon analysis results. The outcome of this is a more compact presentation of information that highlights the possible relationships among invariants.\newline
+The phase of invariant inference and analysis has undergone a redesign and improvement to offer the user a more comprehensive and easier approach to identify invariants. This has been achieved through the application of new criteria to analyze and reorganize the Daikon analysis results. The outcome of this is a more compact presentation of information that highlights the possible relationships among invariants.
+
 The new design not only enables the identification of undiscovered aspects of the system behavior but also confirms the hypotheses made during the earlier stages of analysis. This step is now semi-automated, unlike before, and allows for the analysis of invariants on individual actuator states and their combinations.
 
 \subsubsection{Revised Daikon Output}
@@ -758,8 +809,10 @@ In general, the output has been reduced in the number of effective rows (19 vers
 \subsubsection{Types of Analysis}
 \label{subsub:4_types_analysis}
 
-In contrast to Ceccato et al.'s solution, which involves manual individual analyses, our proposal is to introduce \textbf{two types of semi-automated analysis}.\newline 
-The first type focuses on analyzing \textbf{all states for each individual actuator}. This automated analysis aims to provide comprehensive insights into the behavior of each actuator in relation to a specific measurement selected by the user.\newline
+In contrast to Ceccato et al.'s solution, which involves manual individual analyses, our proposal is to introduce \textbf{two types of semi-automated analysis}.
+
+The first type focuses on analyzing \textbf{all states for each individual actuator}. This automated analysis aims to provide comprehensive insights into the behavior of each actuator in relation to a specific measurement selected by the user.
+
 The second type of analysis considers the current system configuration and examines the \textbf{actual states of the actuators}. This analysis takes into account the interplay and combined effects of multiple actuators on the selected measurement. By incorporating the real-time states of the actuators, this semi-automated analysis offers a more accurate assessment of the system behavior.
 
 \bigskip
@@ -778,14 +831,17 @@ The script accepts the following command-line arguments:
 	\item \textbf{-l} or \textbf{{-}{-}lowermargin}: defines a percentage margin on the minimum value of the measurement;
 \end{itemize}
 
-\noindent The selection of one or both types of analysis is possible. Additionally, the last two parameters can be used to set a condition on the value of the measurement. This condition is designed to bypass the transient periods that occur during actuator state changes and the actual trend changes at the maximum and minimum values of the measurement.\newline
+The selection of one or both types of analysis is possible. Additionally, the last two parameters can be used to set a condition on the value of the measurement. This condition is designed to bypass the transient periods that occur during actuator state changes and the actual trend changes at the maximum and minimum values of the measurement.
+
 This approach proves particularly beneficial for the first type of analysis, as it enables more accurate data on the trends of the measurement. By excluding the transient periods, the analysis can focus on the stable and meaningful trends, providing improved insights into the behavior of the system.
 
 \paragraph{Analysis on single actuator states}
 \label{par:4_single_actuator_states_analysis}
-Analysis on the states of individual actuators is the simplest: after the user is prompted to input the measurement, chosen from a list of likely available measurements, the script recognizes the likely actuators and the relative states of each, using the same mixed Daikon/Pandas technique adopted in the preliminary analysis during the pre-processing phase.\newline
-For each actuator and each state it assumes, a single Daikon analysis is performed, eventually placing the condition on the maximum and minimum level of the measurement.\newline 
-The result of these analyses are saved in the form of text files in a directory having the name corresponding to the analyzed actuator and contained in the default parent directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}: each file generated by the analysis is identified by the name of the actuator, the state and the condition, if any, on the measurement (see Figure \ref{fig:4_daikon_simpleanalysis_dirfiles}).
+Analysis on the states of individual actuators is the simplest: after the user is prompted to input the measurement, chosen from a list of likely available measurements, the script recognizes the likely actuators and the relative states of each, using the same mixed Daikon/Pandas technique adopted in the preliminary analysis during the pre-processing phase.
+
+For each actuator and each state it assumes, a single Daikon analysis is performed, eventually placing the condition on the maximum and minimum level of the measurement.
+ 
+The result of these analyses are saved in the form of text files in a directory having the name corresponding to the analyzed actuator and contained in the default parent directory\\ \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}: each file generated by the analysis is identified by the name of the actuator, the state and the condition, if any, on the measurement (see Figure \ref{fig:4_daikon_simpleanalysis_dirfiles}).
 
 \begin{figure}[ht]
 	\centering
@@ -804,7 +860,8 @@ The result of these analyses are saved in the form of text files in a directory 
 	\label{fig:4_daikon_simpleanalysis_dirfiles}
 \end{figure}
 
-Listing \ref{lst:4_daikon_new_output_plc1} provides an illustrative example of the analysis results. In this case, we focus on the actuator \texttt{MV101} in state 2.\newline 
+Listing \ref{lst:4_daikon_new_output_plc1} provides an illustrative example of the analysis results. In this case, we focus on the actuator \texttt{MV101} in state 2.
+ 
 The condition-generated invariants provide the most interesting insights. For example, at line 21, we observe that when \texttt{MV101} is set to 2, the slope of \texttt{LIT101} is 1, indicating an increasing trend. This leads us to speculate that \texttt{MV101} represents the actuator's ON state and is responsible for filling the tank (\texttt{LIT101}).
 
 \paragraph{Analysis of the Current System Configuration}
@@ -818,9 +875,11 @@ The analysis of the current system configuration based on the actual states of t
 	\label{fig:4_daikon_systemstates_files}
 \end{figure}
 
-\noindent For this analysis, the script automatically identifies the configurations of the actuators that represent different system states (e.g., \texttt{MV101 == 2, P101 == 1}). Daikon analysis is then performed for each of these configurations. The user is prompted to select the measurement attribute and, if desired, specific actuators for studying their configurations. If no actuators are selected, all previously detected actuators will be considered.\newline
-The analysis results are saved in text format within a designated directory, located alongside the previous analysis outputs. The filenames of these result files follow a specific naming convention based on the analysis rule applied (see Figure \ref{fig:4_daikon_systemstates_files}).\newline \newline
-An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_system_config_analysis}:
+\noindent For this analysis, the script automatically identifies the configurations of the actuators that represent different system states (e.g., \texttt{MV101 == 2, P101 == 1}). Daikon analysis is then performed for each of these configurations. The user is prompted to select the measurement attribute and, if desired, specific actuators for studying their configurations. If no actuators are selected, all previously detected actuators will be considered.
+
+The analysis results are saved in text format within a designated directory, located alongside the previous analysis outputs. The filenames of these result files follow a specific naming convention based on the analysis rule applied (see Figure \ref{fig:4_daikon_systemstates_files}).
+
+\noindent An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_system_config_analysis}:
 
 \begin{lstlisting}[language=bash,numbers=left,caption={Daikon outcomes for the system configuration \texttt{MV101 == 2, P101 == 1} on \texttt{LIT101}},label=lst:4_current_system_config_analysis]
 	===========================
@@ -856,22 +915,28 @@ An example of the obtained outcomes can be seen in Listing \ref{lst:4_current_sy
 
 \paragraph{Refining the Analysis}
 \label{par:4_refining_analysis}
-In certain situations, the outcomes provided by the semi-automated analyses may not meet the user's expectations. For instance, the clarity of the slope value may be insufficient, or the user may wish to delve deeper into a specific aspect of the system to uncover additional invariants that were not previously identified. In such cases, the user has the option to conduct a more targeted and specific invariant analysis using the Python script \texttt{runDaikon.py}, which enables precise investigations of the system.\newline
+In certain situations, the outcomes provided by the semi-automated analyses may not meet the user's expectations. For instance, the clarity of the slope value may be insufficient, or the user may wish to delve deeper into a specific aspect of the system to uncover additional invariants that were not previously identified. In such cases, the user has the option to conduct a more targeted and specific invariant analysis using the Python script \texttt{runDaikon.py}, which enables precise investigations of the system.
+
 The script, located in the default directory \texttt{\$(project\_dir)/daikon}, can be executed with three command-line parameters:
 
 \begin{itemize}
 	\item \textbf{-f} or \textbf{{-}{-}filename}: specifies the CSV format \textit{enriched} dataset to read data from. Even in this case, the dataset must be located within the directory containing the enriched datasets;
+	
 	\item \textbf{-c} or \textbf{{-}{-}condition}: specifies the condition for the analysis, which will be automatically overwritten in the \textit{.spinfo} file. It is possible to specify more than one condition, but it is strongly recommended to use the logical operator \texttt{\&\&} to avoid undesired behaviors in Daikon outcomes;
+	
 	\item \textbf{-r} or \textbf{{-}{-}register}: specifies the directory where to save the text file with the outcomes.
 \end{itemize}
-During the execution of this analysis, a single output file is generated, containing the discovered invariants. The user can specify the directory where this file should be saved using the \texttt{-r} command-line option. By default, the file is stored in the directory \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}. The output file serves as a record of the identified invariants and can be examined at a later time. 
+
+During the execution of this analysis, a single output file is generated, containing the discovered invariants. The user can specify the directory where this file should be saved using the \texttt{-r} command-line option. By default, the file is stored in the directory\\ \texttt{\$(project\_dir)/daikon/Daikon\_Invariants/results}. The output file serves as a record of the identified invariants and can be examined at a later time. 
 
 \bigskip
 In conclusion, the integration of these two analysis types, along with the ability to conduct more refined analysis in the future and the enhanced output format of Daikon, significantly enhances the completeness, clarity, and effectiveness of this stage compared to the Ceccato et al.'s framework.
 
 \subsection{Phase 4: Businness Process Analysis}
 \label{subsec:4_improve_bpa}
-We have made significant revisions to the Business Process Analysis we are presenting. Instead of relying on the previous Java solution and proprietary process mining software Disco, we have adopted a \textbf{new integrated solution} created in Python from scratch. The new solution utilizes the Graphviz libraries to generate the corresponding activity diagram.\newline \newline
+We have made significant revisions to the Business Process Analysis we are presenting. Instead of relying on the previous Java solution and proprietary process mining software Disco, we have adopted a \textbf{new integrated solution} created in Python from scratch. The new solution utilizes the Graphviz libraries to generate the corresponding activity diagram.
+
+\bigskip
 In this updated Business Process, greater emphasis is placed on process mining related to the physical system. Our goal is to extract as much information as possible from the dataset, enabling us to promptly visualize the system's behavior and its various states. This approach allows us to validate the conjectures and hypotheses formulated in the previous phases, and potentially uncover hidden patterns that were previously undisclosed.\newline
 On the other hand, the aspect related to network communications was reconsidered to enable operation with multiple protocols, expanding beyond the limitations of Modbus.\newline \newline %Unfortunately, despite our intentions, we were unable to implement this modification due to reasons that will be elaborated on later.
 Now, let's examine the key aspects of this new phase in greater detail.
@@ -894,7 +959,9 @@ This script accepts the following parameters from the command line:
 	\item \textbf{-g} or \textbf{{-}{-}graph:} shows the resulting activity diagram.
 \end{itemize}
 
-The script processes the dataset in a sequential manner, analyzing each actuator state change. It calculates the duration in seconds of the system state, as well as the trend and slope of the specified measurement(s). Additionally, the script stores the next system state and the measurement values corresponding to the state change points, allowing for the identification of relative setpoints. These results are gradually collected and stored in a dictionary, where the keys represent the system states based on the actuator configurations, and the values represent the measured values mentioned above. The dictionary is then saved as a JSON file, which can be accessed by the user in the \texttt{\$(project\_dir)/process-mining/data} directory. The name of the file can be specified in the configuration file \textit{config.ini}.\newline \newline
+The script processes the dataset in a sequential manner, analyzing each actuator state change. It calculates the duration in seconds of the system state, as well as the trend and slope of the specified measurement(s). Additionally, the script stores the next system state and the measurement values corresponding to the state change points, allowing for the identification of relative setpoints. These results are gradually collected and stored in a dictionary, where the keys represent the system states based on the actuator configurations, and the values represent the measured values mentioned above. The dictionary is then saved as a JSON file, which can be accessed by the user in the \texttt{\$(project\_dir)/process-mining/data} directory. The name of the file can be specified in the configuration file \textit{config.ini}.
+
+\bigskip
 An example of the JSON file obtained in this step is shown in Listing \ref{lst:4_proc_mining_json}: the JSON file showcases the structure of the data obtained during the process.
 
 \begin{lstlisting}[language=java,numbers=none,caption={Example of the data contained in the produced JSON file} ,label=lst:4_proc_mining_json]
@@ -954,9 +1021,11 @@ An example of the JSON file obtained in this step is shown in Listing \ref{lst:4
 	}
 \end{lstlisting}
 
-The collected data is now utilized to generate the \textbf{system activity diagram}. This diagram represents an \textit{oriented} graph where the nodes correspond to the system states determined by the actuator configurations. In addition to the state information, the nodes also display the trend (ascending, descending, or stable) and the slope of the reference measurement.\newline
-The edges in the diagram depict the values of the measurements at the time of the state change. These measurement values represent the setpoints for each measurement. Setpoints are calculated on the average of the values measured for that specific state. Additionally, the diagram incorporates on the edges the average duration of each system state.\newline
-Each data point on the arcs is accompanied by a \textit{standard deviation value}. This value provides information about the occurrence of a specific state within the system's cycle, indicating whether it appears multiple times with varying values and time durations. A low standard deviation suggests that the state is likely to occur only once within each cycle. Conversely, a high standard deviation indicates that the state may occur multiple times within the cycle.
+The collected data is now utilized to generate the \textbf{system activity diagram}. This diagram represents an \textit{oriented} graph where the nodes correspond to the \textbf{system states} determined by the actuator configurations. In addition to the state information, the nodes also display the \textbf{trend} (ascending, descending, or stable) and the slope of the reference measurement.
+
+The edges in the diagram depict the values of the measurements at the time of the state change. These measurement values represent the \textbf{absolute setpoints} for each measurement. Setpoints are calculated on the average of the values measured for that specific state. Additionally, the diagram incorporates on the edges the average duration of each system state.
+
+Each data point on the edges is accompanied by a \textit{standard deviation value}. This value provides information about the occurrence of a specific state within the system's cycle, indicating whether it appears multiple times with varying values and time durations. A low standard deviation suggests that the state is likely to occur only once within each cycle. Conversely, a high standard deviation indicates that the state may occur multiple times within the cycle.
 
 \bigskip
 An example of the activity diagram generated by the \texttt{processMining.py} script is presented in Figure \ref{fig:4_process_mining_graph}. This diagram illustrates the system's behavior by depicting transitions between different states. Nodes in the diagram represent specific system states, while arrows or edges indicate the flow between these states.
@@ -973,9 +1042,10 @@ An example of the activity diagram generated by the \texttt{processMining.py} sc
 \bigskip
 It is important to acknowledge that despite considering the tolerance set for trend and slope calculation, the accuracy of the related data may vary. For instance, there could be instances where multiple trends exist within the same node, or a trend may be stable instead of increasing or decreasing. These discrepancies arise due to \textbf{data perturbations}, which were discussed in Section \ref{par:4_slope_calculation}. Additionally, the noise reduction techniques seen in the same Section were not employed in this analysis. Therefore, it becomes the responsibility of the user to correctly interpret the outcomes of this step, taking into account the information presented in the process mining diagram and the findings from previous analyses. By considering these factors together, the user can make informed interpretations and draw accurate conclusions from the results.
 
-\subsubsection{Network Communications}
+\subsubsection{Network Data}
 \label{subsub:4_proc_mining_net}
-The incorporation of network communications into Business Process Analysis has been reconsidered to shift away from a \textit{single-protocol} solution based on Modbus. Instead, the focus is on adopting a solution that can handle \textbf{multiple protocols}, even at the same time.\newline
+The incorporation of network data into Business Process Analysis has been reconsidered to shift away from a \textit{single-protocol} solution based on Modbus. Instead, the focus is on adopting a solution that can handle \textbf{multiple protocols}, even at the same time.
+
 The main concept was to develop a new Python script that would extract and process data from PCAP files obtained through network traffic sniffing. The intention was to export this data to a CSV file, which would then be used as input for the process mining script, \texttt{processMining.py}, and integrated with the physical system data to derive commands to the actuators.
 
 %\bigskip
@@ -983,13 +1053,63 @@ The main concept was to develop a new Python script that would extract and proce
 
 \bigskip
 %Nevertheless, a thorough study was conducted on the available PCAP files to explore potential methodologies that could be implemented as future work. 
-The analysis of the network data revealed that different protocols exhibit distinct behaviors when commanding changes in actuator states. Consequently, the previous approach proposed by Ceccato et al. becomes \textbf{impractical} when attempting to detect system state changes through network commands sent to the actuators.\newline
-However, considering that system state changes have already been identified through the process mining of the physical process, and with the corresponding event timestamps available, we propose an alternative approach to Ceccato et al.'s method. Instead of seeking the correspondence between network events and physical process events at the same instant, we suggest reversing the perspective. By focusing on the correspondence between a given event occurring in the physical process at a specific moment and the corresponding event in the network data at the same moment, it should be possible to achieve a similar, if not superior, outcome compared to the previous solution.\newline
+The analysis of the network data revealed that different protocols exhibit distinct behaviors when commanding changes in actuator states. Consequently, the previous approach proposed by Ceccato et al. becomes \textbf{impractical} when attempting to detect system state changes through network commands sent to the actuators.
+
+However, considering that system state changes have already been identified through the process mining of the physical process, and with the corresponding event timestamps available, we propose an alternative approach to Ceccato et al.'s method. Instead of seeking the correspondence between network events and physical process events at the same instant, we suggest reversing the perspective. By focusing on the correspondence between a given event occurring in the physical process at a specific moment and the corresponding event in the network data at the same moment, it should be possible to achieve a similar, if not superior, outcome compared to the previous solution.
 %This \textit{inverse approach} aims to leverage the existing knowledge of system state changes obtained through the mining of the physical process. By aligning these physical events with their corresponding events in the network data, a more effective analysis can be conducted.
 
 %\bigskip
 %Although the integration of network data within Business Process Analysis was not feasible, the progress made thus far has resulted in the development of a \textbf{novel form of network analysis}. This approach, unlike the work conducted by Ceccato et al., offers a broader perspective on network communications and delves into previously unexplored aspects of the system. These additional dimensions provide a deeper understanding of the system's behavior and characteristics.\newline
 %In the upcoming section, we will delve further into this new network analysis methodology, discussing its unique features and the insights it can offer. By expanding the scope of our analysis, we aim to uncover valuable information that was not extensively explored in previous studies conducted by Ceccato et al.
+
+\subsection{Summary}
+In Table \ref{table:4_proposed_framework_summarize}, we provide a \textit{phase-by-phase} summary of the enhancements achieved by the proposed framework compared to the limitations observed in Ceccato et al., as presented in Table \ref{table:3_ceccato_limitations_table}.
+
+\bigskip
+{\small
+	\begin{longtable}[c]{p{0.35\textwidth} p{0.57\textwidth}}
+		\hline
+		\textbf{Phase} & \textbf{Enhancements} \\ [0.5ex] 
+		\hline
+		General Improvements & - Independence from the analyzed system achieved through a general \textit{config.ini} configuration file.\newline
+		- Command line functionality improved for enhanced usability.\newline
+		- Utilization of a single programming language throughout the implementation. \\
+		\hline
+		Phase 0: Network Analysis & - Introduction of a novel phase, not found in Ceccato et al.\newline
+		- Reconstruction of the network topology and communication links between PLCs, as well as between PLCs and other devices such as HMI and Historian Server.\newline
+		- Identification of industrial protocols used in the system.\newline
+		- Provision of graphical and textual output representing the network topology and communication details.\\
+		\hline
+		Phase 1: Pre-processing & - Capability to choose a subsystem by specifying individual PLCs and the desired time range for analysis.\newline
+		- Enhanced and automated dataset enrichment that is optimized and customizable, enabling the allocation of additional fields to specific registers or groups of registers.\newline
+		- Mitigation of noise caused by data perturbations through the application of Seasonal and Trend decomposition using Loess (STL).\\
+		\hline
+		Phase 1: Preliminary Analysis & - Introduction of a novel feature, not included in Ceccato et al.\newline
+		- Automatic identification of potential actuators, measurements and hardcoded setpoints/spare actuators.\newline
+		- Analysis of state transitions of individual actuators in correlation with a specific measurement.\newline
+		- Time duration analysis of actuator states. \\
+		\hline
+		Phase 2: Graphical/Statistical Analysis & - Creating visual representations of PLC registers through the use of subplots instead of single plots.\newline
+		- Providing a comprehensive view of the system.\newline 
+		- It is possible to zoom in on a particular area of one of the charts and automatically the other ones will be zoomed in as well, thus not losing any information and no connection between registers.\newline
+		- Enabling the selection of speciﬁc registers for analysis.\\
+		\hline
+		Phase 3: Invariant Analysis & - Revised Daikon output through the utilization of transitive closures, resulting in more concise and readable results.\newline
+		- Enhancing the identification of invariants by making the output easier to interpret.\newline
+		- Semi-automated generation of invariants by leveraging identiﬁed actuators.\\
+		\hline
+		Phase 4: Business Process\newline Analysis & - Complete overhaul of the phase, developed from scratch without reliance on external tools.\newline
+		- Heightened focus on the physical process aspect of the system.\newline
+		- Recognition of actual states of the system, considering their trends in relation to a specific measure.\newline
+		- Detection of changes in slopes within the same trend.\newline
+		- Determination of absolute setpoints with respect to measurements.\newline
+		- Introduction of a new system activity diagram to depict system behavior. \\
+		\hline
+		
+		\caption{Summary table of proposed framework enhancements}
+		\label{table:4_proposed_framework_summarize}
+	\end{longtable}
+}
 
 \vfill
 \nolinenumbers

@@ -20,20 +20,24 @@ There is limited literature available concerning the gathering and analysis of i
 	
 	\item[\textit{Yuan et al.}] Yuan et al. \cite{yuan_et_al} propose a \textit{data-driven} approach to discovering cyber-physical systems process behavior from data directly: to achieve this goal, they have implemented a framework whose purpose is to identify physical systems and transition logic inference, and to seek to understand the mechanisms underlying these processes, making furthermore predictions concerning their state trajectories based on the discovered models.
 	
-	\item[\textit{Feng et al.}] Feng et al. \cite{feng_swat} developed a framework that can generate system \textit{invariant rules} based on machine learning and data mining techniques from ICS operational data log. These invariants are then selected by systems engineers to derive IDS systems from them.\newline
+	\item[\textit{Feng et al.}] Feng et al. \cite{feng_swat} developed a framework that can generate system \textit{invariant rules} based on machine learning and data mining techniques from ICS operational data log. These invariants are then selected by systems engineers to derive IDS systems from them.
+	
 	The experiment results on two different testbeds, the \textit{Water Distribution system} (WaDi) and the \textit{Secure Water Treatment system} (SWaT), both located at the iTrust - Center for Research in Cyber Security at the University of Singapore of Technology and Design \cite{itrust_site}, show that under the same false positive rate invariant-based IDSs have a higher efficiency in detecting anomalies than IDS systems based on a residual error-based model. 
 	
-	\item[\textit{Pal et al.}] Pal et al. \cite{pal_et_al} work is somewhat related to Feng et al.'s: this paper describes a data-driven approach to identifying invariants automatically using \textit{association rules mining} \cite{association_rules_mining} with the aim of generating invariants sometimes hidden from the design layout. The study has the same objective of Feng et al.'s and uses too the iTrust SwaT System as testbed.\newline
+	\item[\textit{Pal et al.}] Pal et al. \cite{pal_et_al} work is somewhat related to Feng et al.'s: this paper describes a data-driven approach to identifying invariants automatically using \textit{association rules mining} \cite{association_rules_mining} with the aim of generating invariants sometimes hidden from the design layout. The study has the same objective of Feng et al.'s and uses too the iTrust SwaT System as testbed.
+	
 	Currently this technique is limited to only pair wise sensors and actuators: for more accurate invariants generation, the technique adopted must be capable of deriving valid constrains across multiple sensors and actuators.
 	
 	\item[\textit{Winnicki et al.}] Winnicki et al. \cite{winnicki_et_al} instead propose a different approach to process comprehension based on the \textit{attacker's perspective} and not limited to mere \textit{Denial of Service} (DoS): their approach is to discover the dynamic behavior of the system, in a semi-automated and process-aware way, through \textit{probing}, that is, slightly perturbing the cyber physical system and observing how it reacts to changes and how it returns to its original state. The difficulty and challenge for the attacker is to perturb the system in such a way as to achieve an observable change, but at the same time avoid this change being seen as a system anomaly by the IDSs.
 	
 	\item[\textit{Green et al.}] Green et al. \cite{green_et_al} also adopt an approach based on the attacker's perspective: this approach consists of two practical examples in a \textit{Man in the Middle} (MitM) scenario to obtain, correlate, and understand all the types of information an attacker might need to plan an attack to alter the process while avoiding detection.
 	
-	The paper shows \textit{step-by-step} how to perform a ICS \textbf{reconnaissance}, a phase specifically designed to gather extensive intelligence on multiple fronts, including human factors, network and protocol information, details about the manufacturing process, industrial applications, and potential vulnerabilities. The primary goal is to accumulate a wealth of information to enhance understanding and awareness in these areas \cite{ot_reconnaissance}).\newline 
+	The paper shows \textit{step-by-step} how to perform a ICS \textbf{reconnaissance}, a phase specifically designed to gather extensive intelligence on multiple fronts, including human factors, network and protocol information, details about the manufacturing process, industrial applications, and potential vulnerabilities. The primary goal is to accumulate a wealth of information to enhance understanding and awareness in these areas \cite{ot_reconnaissance}).
+	 
 	Reconnaissance phase is fundamental to process comprehension and thus to the execution of MitM attacks.
 	
-	\item[\textit{Ceccato et al.}] Ceccato et al. \cite{ceccato} propose a methodology based on a \textit{black box dynamic analysis} of an ICS using a reverse engineering tool to derive from the scans performed on the memory registers of the exposed PLCs and the Modbus protocol network scans an approximate model of the physical process. This model is obtained by inferring statistical properties, business process and system invariants from data logs.\newline
+	\item[\textit{Ceccato et al.}] Ceccato et al. \cite{ceccato} propose a methodology based on a \textit{black box dynamic analysis} of an ICS using a reverse engineering tool to derive from the scans performed on the memory registers of the exposed PLCs and the Modbus protocol network scans an approximate model of the physical process. This model is obtained by inferring statistical properties, business process and system invariants from data logs.
+	
 	The proposed methodology was tested on a non-trivial case study, using a virtualized testbed inspired by an industrial water treatment plant.
 	
 	In the next section we will examine this latest work in more detail, which will be the basis for my work and thus the subsequent chapters of this thesis.
@@ -45,8 +49,10 @@ There is limited literature available concerning the gathering and analysis of i
 As previously mentioned, the paper introduces a methodology that relies on black box dynamic analysis of an Industrial Control System (ICS) and more particularly of its OT network. This methodology involves identifying potential Programmable Logic Controllers (PLCs) within the network and scanning the memory registers of these identified controllers. The purpose of this process is to obtain an approximate model of the controlled physical process.
 
 \bigskip
-The primary goal of this black box analysis is to establish a correlation between the different memory registers of the targeted PLCs and fundamental concepts of an OT network such as sensor values (i.e., measurements), actuator commands, setpoints (i.e., range of values of a physical variable), network communications, among others.\newline 
-To accomplish this, the various types of memory registers are analyzed, and attempts are made to determine the nature of the data they might contain.\newline
+The primary goal of this black box analysis is to establish a correlation between the different memory registers of the targeted PLCs and fundamental concepts of an OT network such as sensor values (i.e., measurements), actuator commands, setpoints (i.e., range of values of a physical variable), network communications, among others.
+
+To accomplish this, the various types of memory registers are analyzed, and attempts are made to determine the nature of the data they might contain.
+
 The second goal is to establish a relationship between the dynamic evolution of these fundamental concepts.
 
 \bigskip
@@ -154,7 +160,9 @@ The tool furthermore offers the possibility, in parallel to the memory registers
 
 \paragraph{Data Pre-processing}
 \label{par:3_preproc} 
-The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all unused registers, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data, such as the \textbf{previous value} of all registers and the the \textbf{measurement slope}, that is, the trend of the water level in the system tanks along the system cycles\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually inserted.}. See \ref{par:3_preproc_limitation} for more detail.\newline \newline
+The data collected by scanning the memory registers of the PLCs are then reprocessed by a Python script and converted in order to create a distinct raw dataset in \textit{Comma Separated Value} format (CSV) for each PLC, containing the memory register values associated with the corresponding controller registers. These datasets are reprocessed again through the Python modules for \textbf{pandas} \cite{pandas} and \textbf{NumPy} \cite{numpy} by another script to first perform a \textbf{data cleanup}, removing all unused registers, \textbf{merged} into a single dataset, and finally \textbf{enriched} with additional data, such as the \textbf{previous value} of all registers and the the \textbf{measurement slope}, that is, the trend of the water level in the system tanks along the system cycles\footnote{Not all additional data are calculated and entered automatically by the tool: some are manually inserted.}. See \ref{par:3_preproc_limitation} for more detail.
+
+\bigskip
 This process leads to the creation of two copies of the full dataset: one enriched with the additional data, but not timestamped, which will be used for the invariant analysis; the other unenriched, but timestamped, which will be used for business process mining.
 
 \subsection{Graphs and Statistical Analysis}
@@ -251,8 +259,11 @@ Some examples of invariants derived from the enriched dataset may be:
 
 \subsection{Businness Process Mining and Analysis}
 \label{subsec:ceccato_businessprocess}
-\textit{Process mining} is the analysis of operational processes based on the event log \cite{process_mining_def}: the aim of this analysis is to \textbf{extract useful informations} from the event data to \textbf{reconstruct and understand the behavior} of the business process and how it was actually performed.\newline\newline
-In the considered system, process mining begins by analyzing the event logs derived from scanning the memory registers of the PLCs and monitoring the network communications associated with the Modbus protocol, as detailed in Subsection \ref{subsec:3_scan_preproc}. These event logs serve as the \textit{execution trace} of the system. A Java program is utilized to extract and consolidate information from these event logs, resulting in a CSV format file that captures the relevant data.\newline
+\textit{Process mining} is the analysis of operational processes based on the event log \cite{process_mining_def}: the aim of this analysis is to \textbf{extract useful informations} from the event data to \textbf{reconstruct and understand the behavior} of the business process and how it was actually performed.
+
+\bigskip
+In the considered system, process mining begins by analyzing the event logs derived from scanning the memory registers of the PLCs and monitoring the network communications associated with the Modbus protocol, as detailed in Subsection \ref{subsec:3_scan_preproc}. These event logs serve as the \textit{execution trace} of the system. A Java program is utilized to extract and consolidate information from these event logs, resulting in a CSV format file that captures the relevant data.
+
 This file is fed to \textbf{Disco} \cite{disco}, a commercial process mining tool, which generates an \textit{activity diagram} similar to UML Activity Diagram and whose nodes represent the activities while the edges represent the relations between these activities. In Figure \ref{fig:disco_example} we can see an example of this diagram referred to PLC2 of the testbed: nodes represent the trend of register associated with measurement, actuator state changes, and communications between PLCs involving these state changes, while edges represent transitions with their associated time duration and frequency.
 
 \begin{figure}[ht]
@@ -414,7 +425,8 @@ The limitations of this approach, however, all lie in the tool mentioned above a
 There are several critical aspects associated with the application of this approach: the primary one concerns the fact that the proposed tool seems to be built specifically for the testbed used and that it is not applicable to other contexts, even to the same type of industrial control system (water treatment systems, in this case). 
 
 \bigskip
-What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the data gathering process: we will discuss this last aspect in more detail later.\newline
+What severely limits the analysis performed with the tool implemented by Ceccato et al. is the use of \textit{ad hoc} solutions and \textit{a posteriori} interventions done manually on the datasets after the data gathering process: we will discuss this last aspect in more detail later.
+
 Moreover, there is the presence of many \textit{hardcoded} variables and conditions within the scripts: this makes the system unconfigurable and unable to properly perform the various stages of the analysis as errors can occur due to incorrect data and mismatches with the system under analysis.\newline
 Having considered, furthermore, only the Modbus protocol for network communications between the PLCs is another major limiting factor and does not help the methodology to be adaptable to different systems communicating with different protocols (sometimes even multiple ones on the same system). 
 
@@ -426,15 +438,18 @@ Let us now look at the limitations and critical aspects of each phase.
 The testbed environment used by Ceccato et. al is entirely simulated, from the physical system to the control system. The PLCs were built with \textbf{OpenPLC} \cite{openplc} in a Docker environment \cite{docker}, while the physics part was built through \textbf{Simulink} \cite{simulink}.
 
 \bigskip
-OpenPLC is an open source cross-platform software that simulates the hardware and software functionality of a physical PLC and also offers a complete editor for PLC program development with support for all standard languages: \textit{Ladder Logic} (LD), \textit{Function Block Diagram} (FBD), \textit{Instruction List} (IL), \textit{Structured Text} (ST), and \textit{Sequential Function Chart} (SFC).\newline
+OpenPLC is an open source cross-platform software that simulates the hardware and software functionality of a physical PLC and also offers a complete editor for PLC program development with support for all standard languages: \textit{Ladder Logic} (LD), \textit{Function Block Diagram} (FBD), \textit{Instruction List} (IL), \textit{Structured Text} (ST), and \textit{Sequential Function Chart} (SFC).
+
 It is for sure an excellent choice for creating a zero-cost industrial or home automation and \textit{Internet of Things} (IoT) system that is easy to manage via a dedicated, comprehensive and functional web interface. In spite of these undoubted merits, however, there are (at the moment) \textbf{very few supported protocols}: the main one and also referred to in the official documentation is \textbf{Modbus}, while the other protocol is DNP3.
 
 \begin{description}
 	\item[\emph{\underline{First limitation}}] The biggest problem with the testbed, however, is not with the controller part, but with the \textbf{physical part}: first of all, it must be said that although this is something purely demonstrative even though it is fully functional, the implemented Simulink model is really \textbf{oversimplified} compared to other testbeds. In fact, in the entire system there are only three actuators, two of which are connected to the same tank and controlled by the same PLC, and sensors related only to the water level in the system's tanks: in a real system there are many more \textit{field devices}, which can monitor and control other aspects of the system beyond the mere contents of the tanks. Consider, for example, measuring and controlling the chemicals in the water, the pressure of the liquid in the filter unit, or more simply the amount of water flow at a given point or time.\newline
 	All these must be considered and represent a number of additional variables that makes analysis and consequently reverse engineering of the system more difficult.
 	
-	\item[\emph{\underline{Second limitation}}] The second critical aspect concerns the \textbf{simulation of the physics of the liquid} inside the tanks: Simulink does not consider the fact that inside a tank that is filling (emptying) the liquid in it undergoes \textbf{fluctuations} which cause the level sensor not to see the water level constantly increasing (decreasing) or at most being stable at each point of detection. Figure \ref{fig:testbed_physics} exemplifies more clearly with an example the concept just expressed: these oscillations cause a \textbf{perturbation} in the data.\newline
-	This issue leads to the difficulty, on a real physical system, of \textbf{correctly calculating the trend of a measurement} by using the slope attribute: if this was obtained with a too low granularity, the trend will be oscillating between increasing and decreasing even when in reality this would be in general increasing (decreasing) or stable; on the other hand, if the slope was obtained with a too high granularity there is a loss of information and the trend may be "flattened" with respect to reality.\newline
+	\item[\emph{\underline{Second limitation}}] The second critical aspect concerns the \textbf{simulation of the physics of the liquid} inside the tanks: Simulink does not consider the fact that inside a tank that is filling (emptying) the liquid in it undergoes \textbf{fluctuations} which cause the level sensor not to see the water level constantly increasing (decreasing) or at most being stable at each point of detection. Figure \ref{fig:testbed_physics} exemplifies more clearly with an example the concept just expressed: these oscillations cause a \textbf{perturbation} in the data.
+	
+	This issue leads to the difficulty, on a real physical system, of \textbf{correctly calculating the trend of a measurement} by using the slope attribute: if this was obtained with a too low granularity, the trend will be oscillating between increasing and decreasing even when in reality this would be in general increasing (decreasing) or stable; on the other hand, if the slope was obtained with a too high granularity there is a loss of information and the trend may be "flattened" with respect to reality.
+	
 	In the present case, the slope in the Simulink model was calculated statically with a (very) low granularity, 5 and 6 seconds according to the Properties 7 and 9 described in the original paper: an averagely careful reader will have already guessed that this granularity is inapplicable to the real system in Figure \ref{subfig:real_physics}. As we will later see, we need to \textbf{operate on the data perturbations} to be able to obtain a suitable granularity and a correct calculation of the slope and consequently of the measurement trend.
 \end{description}
 \vfill
@@ -500,7 +515,8 @@ Describing the behavior of graphical analysis in Section \ref{subsec:3_graph_ana
 \end{figure}
 
 \begin{description}
-	\item[\emph{\underline{First limitation}}] While displaying charts for individual registers still provides useful information about the system such as the distinction between actuators and measurements and the general trend of the latter, single display does not allow one to catch, or at least makes it difficult, the relationship that exists between actuators and measurements, where it exists, because a view of the system as a whole is missing.\newline
+	\item[\emph{\underline{First limitation}}] While displaying charts for individual registers still provides useful information about the system such as the distinction between actuators and measurements and the general trend of the latter, single display does not allow one to catch, or at least makes it difficult, the relationship that exists between actuators and measurements, where it exists, because a view of the system as a whole is missing.
+	
 	In this way, the risk is to make conjectures about the behavior of the system that may prove to be at least imprecises, if not inaccurates.
 
 	\item[\emph{\underline{Second limitation}}] On the other hand, regarding the statistical analysis, two observations need to be made: the first is that for the given system, I personally was unable to appreciate the usefulness of the generated histogram in Figure \ref{subfig:hist_plot_ceccato}, as it does not provide any particular new information that has not already been obtained from the graphical analysis (except maybe something marginal); the second observation pertains to the presentation of statistical information obtained from the histogram plot. In certain cases, the histogram plot itself can overshadow the displayed statistical information. These statistics are actually shown on the terminal from which the script is executed. However, to an inattentive or unfamiliar user, these statistics may be mistaken for debugging output or warnings, as they coincide with the display of the histogram plot window, which takes the focus (see Figure \ref{fig:3_hist_plot_fail}).\newline
@@ -517,14 +533,16 @@ Describing the behavior of graphical analysis in Section \ref{subsec:3_graph_ana
 
 \paragraph{Business Process Mining and Analysis}
 \label{par:3_processmining_limitations}
-Concerning the data mining, this is a purely ad \textit{hoc solution}, designed to work under special conditions: first, the timestamped dataset of the physical process and the one obtained after the packet sniffing operation of Modbus traffic on the network need to be synchronized and have the same granularity, in this case one event per second.\newline
+Concerning the data mining, this is a purely ad \textit{hoc solution}, designed to work under special conditions: first, the timestamped dataset of the physical process and the one obtained after the packet sniffing operation of Modbus traffic on the network need to be synchronized and have the same granularity, in this case one event per second.
+
 It is relatively easy, therefore, to find correspondences between Modbus commands sent over the network and events occurring on the physical system, such as state changes in actuations, due in part to the fact that the number of communications over the network is really small (see Section \ref{subsec:3_testbed}).
 
 \begin{description}
 	\item[\emph{\underline{First limitation}}] In a real system, network communications are much more numerous and involve many more devices even in the same second: finding the exact correspondence with what is happening in the cyber physical system becomes much more difficult.\newline
 	Since this is, as mentioned, an \textit{ad hoc} solution, only the Modbus protocol is being considered: as widely used as this industrial protocol is, other protocols that are widely used \cite{protocols_market_shares} such as EtherNet/IP (see Section \ref{subsubsec:enip}) or Profinet should be considered in order to extend the analysis to other industrial systems that use a different communication network.
 	
-	\item[\emph{\underline{Second limitation}}] The other limiting aspect of the business process mining phase is the \textbf{process mining software} used to generate the activity diagram. As mentioned in Section \ref{subsec:ceccato_businessprocess}, the process mining software used by Ceccato et al. is \textbf{Disco}: this is commercial software, with an academic license lasting only 30 days (although free of charge), released for Windows and MacOS operating systems only, which makes its use under Linux systems impossible except by using emulation environments such as Wine.\newline
+	\item[\emph{\underline{Second limitation}}] The other limiting aspect of the business process mining phase is the \textbf{process mining software} used to generate the activity diagram. As mentioned in Section \ref{subsec:ceccato_businessprocess}, the process mining software used by Ceccato et al. is \textbf{Disco}: this is commercial software, with an academic license lasting only 30 days (although free of charge), released for Windows and MacOS operating systems only, which makes its use under Linux systems impossible except by using emulation environments such as Wine.
+	
 	For what is my personal vision and training as a computer scientist, it would have been preferable to use a \textit{cross-platform}, \textit{freely licensed open source} software alternative to Disco: one such software could have been \textbf{ProM Tools} \cite{prom_tools}, a framework for process mining very similar to Disco in functionality, but fitting the criteria just described, or use Python libraries such as \textbf{PM4PY} \cite{pm4py}, which offer ready-to-use algorithms suitable for various process mining needs.
 \end{description}
 \vfill
@@ -547,6 +565,7 @@ The limitation in this case is principally Daikon: this software is designed to 
 \end{description}
 Table \ref{table:3_ceccato_limitations_table} provides a summary of the limitations discussed regarding the Ceccato et al. framework:
 
+\bigskip
 {\small
 \begin{longtable}[c]{p{0.35\textwidth} p{0.57\textwidth}}
 	\hline
