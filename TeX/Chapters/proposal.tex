@@ -1067,38 +1067,38 @@ In Table \ref{table:4_proposed_framework_summarize}, we provide a \textit{phase-
 
 \bigskip
 {\small
-	\begin{longtable}[c]{p{0.35\textwidth} p{0.57\textwidth}}
+	\begin{longtable}[c]{p{0.25\textwidth} p{0.67\textwidth}}
 		\hline
 		\textbf{Phase} & \textbf{Enhancements} \\ [0.5ex] 
 		\hline
-		General Improvements & - Independence from the analyzed system achieved through a general \textit{config.ini} configuration file.\newline
+		General \newline Improvements & - Independence from the analyzed system achieved through a general \textit{config.ini} configuration file.\newline
 		- Command line functionality improved for enhanced usability.\newline
 		- Utilization of a single programming language throughout the implementation. \\
 		\hline
-		Phase 0: Network Analysis & - Introduction of a novel phase, not found in Ceccato et al.\newline
+		Network Analysis & - Introduction of a novel phase, not found in Ceccato et al.\newline
 		- Reconstruction of the network topology and communication links between PLCs, as well as between PLCs and other devices such as HMI and Historian Server.\newline
 		- Identification of industrial protocols used in the system.\newline
 		- Provision of graphical and textual output representing the network topology and communication details.\\
 		\hline
-		Phase 1: Pre-processing & - Capability to choose a subsystem by specifying individual PLCs and the desired time range for analysis.\newline
+		Pre-processing & - Capability to choose a subsystem by specifying individual PLCs and the desired time range for analysis.\newline
 		- Enhanced and automated dataset enrichment that is optimized and customizable, enabling the allocation of additional fields to specific registers or groups of registers.\newline
 		- Mitigation of noise caused by data perturbations through the application of Seasonal and Trend decomposition using Loess (STL).\\
 		\hline
-		Phase 1: Preliminary Analysis & - Introduction of a novel feature, not included in Ceccato et al.\newline
+		Preliminary \newline Analysis & - Introduction of a novel feature, not included in Ceccato et al.\newline
 		- Automatic identification of potential actuators, measurements and hardcoded setpoints/spare actuators.\newline
 		- Analysis of state transitions of individual actuators in correlation with a specific measurement.\newline
 		- Time duration analysis of actuator states. \\
 		\hline
-		Phase 2: Graphical/Statistical Analysis & - Creating visual representations of PLC registers through the use of subplots instead of single plots.\newline
+		Graphical / \newline Statistical \newline Analysis & - Creating visual representations of PLC registers through the use of subplots instead of single plots.\newline
 		- Providing a comprehensive view of the system.\newline 
 		- It is possible to zoom in on a particular area of one of the charts and automatically the other ones will be zoomed in as well, thus not losing any information and no connection between registers.\newline
 		- Enabling the selection of speciﬁc registers for analysis.\\
 		\hline
-		Phase 3: Invariant Analysis & - Revised Daikon output through the utilization of transitive closures, resulting in more concise and readable results.\newline
+		Invariant Analysis & - Revised Daikon output through the utilization of transitive closures, resulting in more concise and readable results.\newline
 		- Enhancing the identification of invariants by making the output easier to interpret.\newline
 		- Semi-automated generation of invariants by leveraging identiﬁed actuators.\\
 		\hline
-		Phase 4: Business Process\newline Analysis & - Complete overhaul of the phase, developed from scratch without reliance on external tools.\newline
+		Business Process\newline Analysis & - Complete overhaul of the phase, developed from scratch without reliance on external tools.\newline
 		- Heightened focus on the physical process aspect of the system.\newline
 		- Recognition of actual states of the system, considering their trends in relation to a specific measure.\newline
 		- Detection of changes in slopes within the same trend.\newline

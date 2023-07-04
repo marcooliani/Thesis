@@ -7,8 +7,19 @@
 
 \begin{titlepage}
 	\begin{abstract}
-		This thesis focuses on enhancing the \textit{process comprehension} of an Industrial Control System (ICS) by employing a dynamic black-box analysis approach to analyze the system's physical process. The proposed analysis methodology involves multiple steps and utilizes a custom tool capable of extracting valuable insights about the behavior of the industrial system from both physical process logs and network traffic logs. The tool and methodology will be validated through a case study based on a real-world scenario.\newline
-		The ultimate goal of this analysis is to gain a deep understanding of the industrial system under examination, with the aim of uncovering as much knowledge as possible. By comprehensively studying the system's behavior and characteristics, potential attackers can develop targeted and covert attack strategies.
+		%This thesis focuses on enhancing the \textit{process comprehension} of an Industrial Control System (ICS) by employing a dynamic black-box analysis approach to analyze the system's physical process to \textit{reverse engineering} it. The proposed analysis methodology involves multiple steps and utilizes a custom tool capable of extracting valuable insights about the behavior of the industrial system from both physical process logs and network traffic logs. The tool and methodology will be validated through a case study based on a real-world scenario.
+		
+		%\bigskip
+		%The ultimate goal of this analysis is to gain a deep understanding of the industrial system under examination, with the aim of uncovering as much knowledge as possible. By comprehensively studying the system's behavior and characteristics, potential attackers can develop targeted and covert attack strategies.
+		
+		The advent of Industry 4.0 has brought significant transformations to Industrial Control Systems (ICS), which monitor, coordinate, control, and integrate physical and engineered systems through computing and communication cores. The convergence of \textit{Information Technology} (IT) and \textit{Operational Technology} (OT) in ICS has improved operational efficiency but also exposed systems to cybersecurity vulnerabilities. Cyber-physical attacks targeting ICS aim to manipulate or disrupt their normal operation, posing risks to integrity and functionality.
+		
+		\textit{Process comprehension} plays a crucial role in executing successful cyber-physical attacks. Attackers must understand the operational domain, system architecture, industrial protocols, operational processes, process dependencies, attack surface, and attack goals. Techniques like probing, Man-in-the-Middle interception, and reverse engineering aid in gaining insights into system behavior without direct physical intervention.
+		
+		This thesis analyzes Ceccato et al.'s reverse engineering-based methodology for ICS analysis \cite{ceccato}, identifying limitations in its application to real-world scenarios. The framework's flexibility, network analysis, pre-processing, graphical analysis, invariant analysis, and business process analysis are improved to address these limitations and new functionalities are added. The enhanced framework is tested on a complex case study, the iTrust SWaT system, a scaled-down water treatment plant.
+		
+		By understanding the process comprehension of ICS from an attacker's perspective and enhancing analysis methodologies, this research aims to contribute to the development of robust security measures in the context of Industry 4.0.
+		
 	\end{abstract}
 	\vfill
 \end{titlepage}
