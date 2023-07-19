@@ -1,0 +1,148 @@
+\chapter*{Appendix A - Framework Scripts Handbook}
+\addcontentsline{toc}{chapter}{Appendix A - Framework Scripts Handbook} 
+
+\section*{Network Analysis}
+\subsection*{networkAnalysis.py}
+\begin{lstlisting}[numbers=none]
+	usage: networkAnalysis.py [-h] [-f FILE | -D DIRECTORY] [-s SRCADDR] [-d DSTADDR]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILE, --file FILE  
+		CSV file with network data
+	-D DIRECTORY, --directory DIRECTORY
+		CSV files with network data
+	-s SRCADDR, --srcaddr SRCADDR
+		Source IP address
+	-d DSTADDR, --dstaddr DSTADDR
+		Destination IP address
+\end{lstlisting}
+
+\subsection*{export\_pcap\_data.py}
+\begin{lstlisting}[numbers=none]
+	usage: export_pcap_data.py [-h] [-f FILE | -m MERGEFILES [MERGEFILES ...] | -d MERGEDIR | -s SINGLEDIR] [-t TIMERANGE TIMERANGE]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILE, --file FILE  
+		single pcap file to include (with path
+	-m MERGEFILES [MERGEFILES ...], --mergefiles MERGEFILES [MERGEFILES ...]
+		multiple pcap files to include (w/o path)
+	-d MERGEDIR, --mergedir MERGEDIR
+		directory containing pcap files to merge
+	-s SINGLEDIR, --singledir SINGLEDIR
+		directory containing pcap files for single analysis
+	-t TIMERANGE TIMERANGE, --timerange TIMERANGE TIMERANGE
+		time range selection (format YYYY-MM-DD HH:MM:SS
+\end{lstlisting}
+
+\section*{Pre-processing and Preliminary Analysis}
+\subsection*{mergeDatasets.py}
+\begin{lstlisting}[numbers=none]
+	usage: mergeDatasets.py [-h] [-g GRANULARITY] [-s SKIPROWS] [-n NROWS] [-d DIRECTORY] [-o OUTPUT] [-p PLCS [PLCS ...]]
+
+	options:
+	-h, --help	
+		show this help message and exit
+	-g GRANULARITY, --granularity GRANULARITY	
+		choose granularity in seconds (for slopes)
+	-s SKIPROWS, --skiprows SKIPROWS	
+		skip seconds from start
+	-n NROWS, --nrows NROWS		
+		number of seconds to consider
+	-d DIRECTORY, --directory DIRECTORY		
+		directory containing CSV files
+	-o OUTPUT, --output OUTPUT		
+		output file
+	-p PLCS [PLCS ...], --plcs PLCS [PLCS ...]	
+		PLCs to include (w/o path)
+\end{lstlisting}
+
+\subsection*{system\_info.py}
+\begin{lstlisting}[numbers=none]
+	usage: system_info.py [-h] [-f FILENAME] [-a ACTUATORS [ACTUATORS ...]] [-s SENSORS [SENSORS ...]]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILENAME, --filename FILENAME
+		name of the input dataset file (CSV format)
+	-a ACTUATORS [ACTUATORS ...], --actuators ACTUATORS [ACTUATORS ...]
+		actuators list
+	-s SENSORS [SENSORS ...], --sensors SENSORS [SENSORS ...]
+		sensors list
+\end{lstlisting}
+
+\section*{Graphical and Statistical Analysis}
+\subsection*{runChartSubPlots.py}
+\begin{lstlisting}[numbers=none]
+	usage: runChartSubPlots.py [-h] [-f FILENAME] [-r REGISTERS [REGISTERS ...]] [-e EXCLUDEREGISTERS [EXCLUDEREGISTERS ...]] [-a ADDREGISTERS [ADDREGISTERS ...]]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILENAME, --filename FILENAME
+		CSV file to analyze
+	-r REGISTERS [REGISTERS ...], --registers REGISTERS [REGISTERS ...]
+		registers to include
+	-e EXCLUDEREGISTERS [EXCLUDEREGISTERS ...], --excluderegisters EXCLUDEREGISTERS [EXCLUDEREGISTERS ...]
+		registers to exclude
+	-a ADDREGISTERS [ADDREGISTERS ...], --addregisters ADDREGISTERS [ADDREGISTERS ...]
+		registers to add
+\end{lstlisting}
+
+\section*{Invariant Inference and Analysis}
+\subsection*{daikonAnalysis.py}
+\begin{lstlisting}[numbers=none]
+	usage: daikonAnalysis.py [-h] -f FILENAME [-s SIMPLEANALYSIS] [-c CUSTOMANALYSIS] [-u UPPERMARGIN] [-l LOWERMARGIN]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILENAME, --filename FILENAME
+		name of the input dataset file (CSV format) w/o path
+	-s SIMPLEANALYSIS, --simpleanalysis SIMPLEANALYSIS
+		simple Daikon analysis on single actuators
+	-c CUSTOMANALYSIS, --customanalysis CUSTOMANALYSIS
+		Daikon analysis based on actuators state changes
+	-u UPPERMARGIN, --uppermargin UPPERMARGIN
+		Upper safety margin (percent)
+	-l LOWERMARGIN, --lowermargin LOWERMARGIN
+		Lower safety margin (percent)
+\end{lstlisting}
+\subsection*{runDaikon.py}
+\begin{lstlisting}[numbers=none]
+	usage: runDaikon.py [-h] [-f FILENAME] [-r REGISTER] [-c CONDITIONS [CONDITIONS ...]]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILENAME, --filename FILENAME
+		name of the input dataset file (CSV format) w/o path
+	-r REGISTER, --register REGISTER
+		sensor to make results directory
+	-c CONDITIONS [CONDITIONS ...], --conditions CONDITIONS [CONDITIONS ...]
+		Daikon invariant conditions
+\end{lstlisting}
+
+\section*{Business Process Mining and Analysis}
+\subsection*{processMining.py}
+\begin{lstlisting}[numbers=none]
+	usage: processMining.py [-h] [-f FILENAME] [-a ACTUATORS [ACTUATORS ...]] [-s SENSORS [SENSORS ...]] [-t TOLERANCE] [-g GRAPH]
+	
+	options:
+	-h, --help            
+		show this help message and exit
+	-f FILENAME, --filename FILENAME
+		name of the input physical dataset file (CSV format)
+	-a ACTUATORS [ACTUATORS ...], --actuators ACTUATORS [ACTUATORS ...]
+		actuators list
+	-s SENSORS [SENSORS ...], --sensors SENSORS [SENSORS ...]
+		sensors list
+	-t TOLERANCE, --tolerance TOLERANCE
+		tolerance
+	-g GRAPH, --graph GRAPH
+		generate state graph
+\end{lstlisting}
