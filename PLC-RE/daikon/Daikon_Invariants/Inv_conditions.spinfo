@@ -1,2 +1,2 @@
 PPT_NAME aprogram.point:::POINT
-P1_MV101 == 1 && P1_P101 == 1 && P1_LIT101 >= 805 && P1_LIT101 <= 816
+P3_MV302 == 2 && P4_P402 == 2 && P4_LIT401 < 910 && P4_LIT401 > 800

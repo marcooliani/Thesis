@@ -63,6 +63,7 @@ class RunChartsSubPlots:
         plt.grid()
 
         self.ax[index].legend(loc='lower left')
+        # self.ax[index].legend(loc='lower left', fontsize=15)
 
 
 def main():
